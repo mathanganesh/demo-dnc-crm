@@ -1,0 +1,124 @@
+/* Simple CSS Grid Watermark System */
+
+.watermark-grid {
+    position: fixed;
+    top: -40vh;
+    left: -40vw;
+    width: 180vw;
+    height: 180vh;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 30px;
+    transform: rotate(-30deg);
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+    opacity: var(--watermark-opacity, 0.20);
+}
+
+.watermark-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: #666666;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    padding: 2px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Print specific styles */
+@media print {
+    .watermark-grid {
+        display: grid !important;
+        visibility: visible !important;
+        opacity: var(--watermark-print-opacity, 0.25) !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+
+    .watermark-item {
+        color: #333 !important;
+    }
+}
+
+/* Corner watermarks */
+.watermark-corner {
+    position: fixed;
+    font-size: 12px;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 9997;
+    color: #888;
+    font-family: monospace;
+}
+
+.watermark-corner.bottom-left {
+    bottom: 5px;
+    left: 5px;
+}
+
+.watermark-corner.bottom-right {
+    bottom: 5px;
+    right: 5px;
+}
+
+/* Print Header and Footer Watermarks */
+.watermark-print-header {
+    position: fixed;
+    top: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    font-family: monospace;
+    color: #666;
+    opacity: 0.8;
+    display: none;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+.watermark-print-footer {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    font-family: monospace;
+    color: #666;
+    opacity: 0.8;
+    display: none;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+@media print {
+    .watermark-print-header,
+    .watermark-print-footer {
+        display: block !important;
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+}
+
+/* Security styles */
+.watermark-security {
+    position: fixed !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}

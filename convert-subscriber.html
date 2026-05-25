@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert Lead to Subscriber - ARN-02783 - Staging ROSCA Org</title>
+<link rel="stylesheet" href="./assets/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+  .lead-summary-pill { background:#f0f4ff; border:1px solid #c7d7fd; border-radius:8px; padding:10px 16px; font-size:13px; display:inline-flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .lead-summary-pill .pill-label { color:#4b5563; font-weight:600; }
+  .lead-summary-pill code { color:#2563eb; }
+  .conversion-steps { display:flex; gap:0; margin-bottom:24px; }
+  .step { flex:1; text-align:center; padding:14px 10px; background:#f8f9fa; border:1px solid #dee2e6; font-size:13px; font-weight:600; color:#6b7280; position:relative; }
+  .step:not(:last-child)::after { content:'›'; position:absolute; right:-1px; top:50%; transform:translateY(-50%); background:#f8f9fa; z-index:1; font-size:18px; color:#9ca3af; padding:0 2px; }
+  .step.active { background:#2d6df6; color:#fff; border-color:#2d6df6; }
+  .step.done   { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+  .step .step-num { font-size:18px; font-weight:700; display:block; }
+</style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="#">
+        <img src="./assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-invoice-dollar"></i><span class="nav-main-link-name">Collections</span></a></li>
+        <li class="nav-main-heading">CRM</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="leads-list.html"><i class="nav-main-link-icon fa fa-address-card"></i><span class="nav-main-link-name">Leads</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="reports.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">CRM Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-import"></i><span class="nav-main-link-name">Import Leads</span></a></li>
+        <li class="nav-main-heading">Accounting</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-container">
+
+    <!-- Page Title -->
+    <div class="bg-primary-dark">
+      <div class="content content-full">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
+          <h3 class="flex-sm-fill my-2 text-white">
+            <i class="fa fa-user-check"></i>
+            <span class="ml-2 mr-2">Convert Lead → Subscriber</span>
+            <small class="d-block d-sm-inline-block mt-2 mt-sm-0 font-size-base font-w400 text-light">ARN-02783 — Ramesh</small>
+          </h3>
+          <div class="mt-2 mt-sm-0">
+            <a href="lead-detail.html" class="btn btn-sm btn-alt-secondary"><i class="fa fa-arrow-left mr-1"></i> Back to Lead</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Conversion Steps indicator -->
+      <div class="conversion-steps mb-4">
+        <div class="step active"><span class="step-num">1</span>Subscriber Details</div>
+        <div class="step"><span class="step-num">2</span>Create Subscriber</div>
+        <div class="step"><span class="step-num">3</span>Enroll in Group</div>
+        <div class="step"><span class="step-num">4</span>Lead Marked Converted</div>
+      </div>
+
+      <!-- Info alert -->
+      <div class="alert alert-info d-flex align-items-start" role="alert">
+        <i class="fa fa-info-circle mt-1 mr-3" style="font-size:18px;"></i>
+        <div>
+          <strong>How conversion works:</strong>
+          This form creates a new <strong>Subscriber record</strong> in rosca-digital, pre-filled from the lead's details.
+          Once saved, the lead will be marked as <strong>Converted</strong> and linked to the new subscriber.
+          You can then enroll the subscriber into a chit group immediately.
+        </div>
+      </div>
+
+      <!-- Lead summary -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-address-card mr-1 text-muted"></i> Source Lead Summary</h3>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="d-flex flex-wrap" style="gap:10px;">
+            <div class="lead-summary-pill"><span class="pill-label">Lead No</span><code>ARN-02783</code></div>
+            <div class="lead-summary-pill"><span class="pill-label">Name</span><strong>Ramesh</strong></div>
+            <div class="lead-summary-pill"><span class="pill-label">Mobile</span><code>9443 243 225</code></div>
+            <div class="lead-summary-pill"><span class="pill-label">Branch</span>Ariyalur (ARN)</div>
+            <div class="lead-summary-pill"><span class="pill-label">Flag</span><span style="color:#16a34a;font-weight:700;">● Green</span></div>
+            <div class="lead-summary-pill"><span class="pill-label">Interactions</span>3 logged</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscriber Form -->
+      <form>
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-user mr-1 text-primary"></i> Step 1 — Subscriber Information</h3>
+            <div class="block-options">
+              <span class="text-muted" style="font-size:12px;"><i class="fa fa-magic mr-1"></i>Pre-filled from lead · edit if needed</span>
+            </div>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="form-row">
+              <div class="form-group col-sm-6">
+                <label>Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" value="Ramesh">
+              </div>
+              <div class="form-group col-sm-3">
+                <label>Mobile (Primary) <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" value="9443243225">
+              </div>
+              <div class="form-group col-sm-3">
+                <label>Mobile (Alternate)</label>
+                <input type="text" class="form-control" placeholder="Optional">
+              </div>
+              <div class="form-group col-sm-4">
+                <label>Email Address</label>
+                <input type="email" class="form-control" placeholder="Optional">
+              </div>
+              <div class="form-group col-sm-4">
+                <label>Subscriber Type <span class="text-danger">*</span></label>
+                <select class="form-control">
+                  <option selected>Individual</option>
+                  <option>Business</option>
+                  <option>Shared</option>
+                </select>
+              </div>
+              <div class="form-group col-sm-4">
+                <label>Branch <span class="text-danger">*</span></label>
+                <select class="form-control">
+                  <option selected>Ariyalur (ARN)</option>
+                  <option>Tiruvannamalai (TVN)</option>
+                  <option>Bengaluru Central (BCE)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KYC -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-id-card mr-1 text-primary"></i> KYC Details</h3>
+            <div class="block-options">
+              <span class="badge badge-secondary">Optional — can be completed after enrollment</span>
+            </div>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="form-row">
+              <div class="form-group col-sm-4">
+                <label>PAN Number</label>
+                <input type="text" class="form-control" placeholder="e.g. ABCDE1234F">
+              </div>
+              <div class="form-group col-sm-4">
+                <label>Aadhaar Number</label>
+                <input type="text" class="form-control" placeholder="12-digit Aadhaar">
+              </div>
+              <div class="form-group col-sm-4">
+                <label>GST Number</label>
+                <input type="text" class="form-control" placeholder="For business type (optional)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Introducing Employee -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-handshake mr-1 text-primary"></i> Enrollment Reference</h3>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="form-row">
+              <div class="form-group col-sm-6">
+                <label>Introducing Employee <span class="text-danger">*</span></label>
+                <select class="form-control">
+                  <option selected>Dineshkumar M (BCE/ABH)</option>
+                  <option>Rajkumar S (ARN)</option>
+                  <option>Priya R (TVN)</option>
+                </select>
+                <small class="form-text text-muted">The employee who nurtured this lead and is introducing the subscriber.</small>
+              </div>
+              <div class="form-group col-sm-6">
+                <label>Conversion Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" value="2026-05-25">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-content block-content-full">
+            <div class="d-flex align-items-center" style="gap:10px;">
+              <button type="submit" class="btn btn-success">
+                <i class="fa fa-user-check mr-1"></i> Create Subscriber &amp; Mark Lead Converted
+              </button>
+              <a href="lead-detail.html" class="btn btn-secondary">Cancel</a>
+            </div>
+            <small class="text-muted d-block mt-2">
+              <i class="fa fa-info-circle mr-1"></i>
+              After saving, you'll be redirected to the new subscriber's profile where you can immediately enroll them in a chit group.
+            </small>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+</div>
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM — Lead Management | DNC CHITS</title>
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+/* ── Flag badges ── */
+.flag-green  { background:#d1fae5; color:#065f46; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-block; white-space:nowrap; }
+.flag-yellow { background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-block; white-space:nowrap; }
+.flag-red    { background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-block; white-space:nowrap; }
+.flag-conv   { background:#ede9fe; color:#5b21b6; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-block; white-space:nowrap; }
+.flag-dead   { background:#f3f4f6; color:#6b7280; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-block; white-space:nowrap; }
+
+/* ── KPI strip ── */
+.kpi-strip { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.kpi-card  { flex:1; min-width:120px; background:#fff; border-radius:6px; border:1px solid #e5e7eb; padding:12px 16px; border-left:4px solid; }
+.kpi-card.blue   { border-left-color:#3b82f6; }
+.kpi-card.green  { border-left-color:#22c55e; }
+.kpi-card.yellow { border-left-color:#f59e0b; }
+.kpi-card.red    { border-left-color:#ef4444; }
+.kpi-card.purple { border-left-color:#8b5cf6; }
+.kpi-num   { font-size:26px; font-weight:700; line-height:1; }
+.kpi-lbl   { font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:.5px; margin-top:3px; font-weight:700; }
+
+/* ── Interaction timeline ── */
+.timeline { position:relative; padding-left:28px; }
+.timeline::before { content:''; position:absolute; left:9px; top:0; bottom:0; width:2px; background:#e5e7eb; }
+.tl-item  { position:relative; margin-bottom:22px; }
+.tl-dot   { position:absolute; left:-23px; top:5px; width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 2px currentColor; }
+.tl-dot.g { color:#22c55e; background:#22c55e; }
+.tl-dot.y { color:#f59e0b; background:#f59e0b; }
+.tl-dot.r { color:#ef4444; background:#ef4444; }
+.tl-head  { font-size:13px; font-weight:700; color:#1e293b; }
+.tl-meta  { font-size:11.5px; color:#6b7280; margin-top:1px; }
+.tl-body  { font-size:13px; color:#374151; margin-top:6px; background:#f8f9fa; border-left:3px solid #e5e7eb; padding:8px 12px; border-radius:0 5px 5px 0; }
+.tl-fu    { font-size:12px; margin-top:6px; padding:5px 10px; border-radius:5px; display:inline-block; }
+.tl-fu.pending { background:#e0f2fe; color:#0369a1; }
+.tl-fu.done    { background:#dcfce7; color:#166534; }
+
+/* ── Conversion steps ── */
+.steps { display:flex; margin-bottom:20px; }
+.step  { flex:1; text-align:center; padding:10px; font-size:12px; font-weight:700; color:#6b7280; background:#f3f4f6; border:1px solid #e5e7eb; position:relative; }
+.step:not(:last-child)::after { content:'›'; position:absolute; right:-4px; top:50%; transform:translateY(-50%); z-index:1; font-size:16px; color:#9ca3af; background:#f3f4f6; padding:0 2px; }
+.step.active { background:#1f5ef5; color:#fff; border-color:#1f5ef5; }
+.step .sn { font-size:16px; font-weight:900; display:block; }
+
+/* ── Flag selector ── */
+.flg-opt { border:2px solid #e5e7eb; border-radius:7px; padding:12px; text-align:center; cursor:pointer; transition:border-color .12s, background .12s; }
+.flg-opt:hover { border-color:#93c5fd; }
+.flg-opt.sel-g { border-color:#22c55e; background:#f0fdf4; }
+.flg-opt.sel-y { border-color:#f59e0b; background:#fffbeb; }
+.flg-opt.sel-r { border-color:#ef4444; background:#fef2f2; }
+.flg-dot { width:20px; height:20px; border-radius:50%; margin:0 auto 6px; }
+
+/* ── Flag toggle btns in modal ── */
+.flg-btn { border:2px solid #e5e7eb; border-radius:5px; padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer; background:#fff; }
+.flg-btn.act-g { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
+.flg-btn.act-y { border-color:#f59e0b; background:#fffbeb; color:#b45309; }
+.flg-btn.act-r { border-color:#ef4444; background:#fef2f2; color:#b91c1c; }
+
+/* ── Funnel bars ── */
+.f-row { display:flex; align-items:center; margin-bottom:9px; }
+.f-lbl { width:90px; font-size:12px; font-weight:600; }
+.f-wrap { flex:1; background:#f3f4f6; border-radius:4px; height:20px; overflow:hidden; }
+.f-bar  { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:11px; font-weight:700; color:#fff; }
+.f-cnt  { width:40px; text-align:right; font-size:13px; font-weight:700; margin-left:8px; }
+
+/* ── Calendar ── */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-dow  { text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; color:#6b7280; padding:6px 0; letter-spacing:.4px; }
+.cal-cell { min-height:78px; border:1px solid #e5e7eb; border-radius:6px; padding:6px 8px; cursor:pointer; transition:border-color .12s, background .12s; position:relative; background:#fff; }
+.cal-cell:hover        { border-color:#93c5fd; background:#f0f9ff; }
+.cal-cell.cal-empty    { background:#f9fafb; border-color:#f3f4f6; cursor:default; min-height:78px; }
+.cal-cell.cal-today    { border-color:#3b82f6; background:#eff6ff; }
+.cal-cell.cal-today .cal-dn { color:#2563eb; font-weight:800; }
+.cal-cell.cal-overdue  { border-color:#fca5a5; background:#fff7f7; }
+.cal-cell.cal-selected { border-color:#6366f1; background:#eef2ff; box-shadow:0 0 0 2px #c7d2fe; }
+.cal-cell.cal-past     { background:#fafafa; }
+.cal-cell.cal-past .cal-dn { color:#d1d5db; }
+.cal-dn   { font-size:13px; font-weight:700; color:#374151; line-height:1; margin-bottom:4px; }
+.cal-badges { display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; }
+.cal-b    { font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; display:inline-block; white-space:nowrap; }
+.cal-b.g  { background:#d1fae5; color:#065f46; }
+.cal-b.y  { background:#fef3c7; color:#92400e; }
+.cal-b.r  { background:#fee2e2; color:#991b1b; }
+.cal-b.ov { background:#ef4444; color:#fff; }
+.cal-total{ position:absolute; top:5px; right:6px; font-size:10px; font-weight:800; background:#e0e7ff; color:#3730a3; border-radius:10px; padding:1px 6px; }
+.cal-today .cal-total { background:#3b82f6; color:#fff; }
+.cal-selected .cal-total { background:#6366f1; color:#fff; }
+.cal-detail-row { border-left:3px solid; border-radius:0 6px 6px 0; padding:8px 12px; background:#f8f9fa; margin-bottom:6px; display:flex; align-items:center; gap:12px; }
+.cal-detail-row.g { border-color:#22c55e; }
+.cal-detail-row.y { border-color:#f59e0b; }
+.cal-detail-row.r { border-color:#ef4444; }
+
+/* ── Misc ── */
+.lead-no { font-family:monospace; font-weight:700; color:#2563eb; cursor:pointer; }
+.lead-no:hover { text-decoration:underline; }
+.overdue { color:#dc2626 !important; font-weight:700; }
+.soon    { color:#d97706 !important; }
+.empty-state { text-align:center; padding:50px 20px; color:#9ca3af; }
+.empty-state i { font-size:40px; margin-bottom:12px; display:block; }
+.view { display:none; }
+.view.active { display:block; }
+.nav-main-link.disabled { opacity:.4; pointer-events:none; }
+</style>
+</head>
+
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
+<nav id="sidebar" aria-label="Main Navigation">
+  <div class="content-header bg-light">
+    <a class="font-w600 text-dual" href="#">
+      <img src="./assets/rosca-digital-sm.png" alt="DNC" height="40px" class="mr-2" style="margin-left:-10px;">
+      <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+    </a>
+  </div>
+  <div class="content-side content-side-full">
+    <ul class="nav-main">
+
+      <li class="nav-main-heading">Main</li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-file-invoice-dollar"></i><span class="nav-main-link-name">Collections</span></a>
+      </li>
+
+      <li class="nav-main-heading">CRM</li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-list" href="#" onclick="showView('list'); return false;">
+          <i class="nav-main-link-icon fa fa-address-card"></i><span class="nav-main-link-name">Lead List</span>
+        </a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-new" href="#" onclick="showView('new'); return false;">
+          <i class="nav-main-link-icon fa fa-plus-circle"></i><span class="nav-main-link-name">New Lead</span>
+        </a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-reports" href="#" onclick="showView('reports'); return false;">
+          <i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">CRM Reports</span>
+        </a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-import" href="#" onclick="showView('import'); return false;">
+          <i class="nav-main-link-icon fa fa-file-import"></i><span class="nav-main-link-name">Import Leads</span>
+        </a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-calendar" href="#" onclick="showView('calendar'); return false;">
+          <i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Follow-up Calendar</span>
+        </a>
+      </li>
+
+      <li class="nav-main-heading">Other</li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-tasks"></i><span class="nav-main-link-name">Tasks</span></a>
+      </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a>
+      </li>
+
+    </ul>
+  </div>
+</nav>
+
+<!-- ════════════════════ HEADER ════════════════════ -->
+<header id="page-header" class="bg-primary-light">
+  <div class="content-header">
+    <div class="d-flex align-items-center">
+      <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+      <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+      <span class="font-size-sm text-muted ml-2"><i class="fa fa-database mr-1"></i>Data stored in browser (localStorage) — prototype mode</span>
+    </div>
+    <div class="d-flex align-items-center">
+      <button class="btn btn-sm btn-alt-success mr-1" onclick="loadSampleData()" title="Load 10 sample leads with today-relative follow-up dates">
+        <i class="fa fa-magic mr-1"></i>Load Sample Data
+      </button>
+      <button class="btn btn-sm btn-danger mr-2" onclick="resetData()" title="Reset all data to original seed leads">
+        <i class="fa fa-redo mr-1"></i>Reset Data
+      </button>
+      <div class="dropdown d-inline-block ml-1">
+        <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+          <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════ MAIN ════════════════════ -->
+<main id="main-container">
+
+<!-- ─────────────── VIEW: LEAD LIST ─────────────── -->
+<div id="view-list" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white">
+          <i class="fa fa-address-card"></i>
+          <span class="ml-2 mr-2">Lead Management</span>
+          <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Track and convert prospects into subscribers</small>
+        </h3>
+        <div class="mt-2 mt-sm-0">
+          <button class="btn btn-sm btn-primary" onclick="showView('new')"><i class="fa fa-plus mr-1"></i> New Lead</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <!-- KPI Strip -->
+    <div class="kpi-strip" id="kpi-strip"></div>
+
+    <!-- Alert -->
+    <div id="overdue-alert" class="alert alert-warning d-none">
+      <i class="fa fa-bell mr-2"></i><span id="overdue-text"></span>
+    </div>
+
+    <!-- Filter block -->
+    <div class="block block-rounded block-bordered">
+      <div class="block-header border-bottom">
+        <h3 class="block-title"><i class="fa fa-filter mr-1"></i> Filters</h3>
+      </div>
+      <div class="block-content">
+        <div class="form-row align-items-end">
+          <div class="form-group col-sm-2 mb-2">
+            <label class="mb-1" style="font-size:12px;">Branch</label>
+            <select class="form-control form-control-sm" id="f-branch">
+              <option value="">All Branches</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-2 mb-2">
+            <label class="mb-1" style="font-size:12px;">Status</label>
+            <select class="form-control form-control-sm" id="f-status">
+              <option value="">All Statuses</option>
+              <option value="new">New</option>
+              <option value="in_progress">In Progress</option>
+              <option value="converted">Converted</option>
+              <option value="dead">Dead</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-2 mb-2">
+            <label class="mb-1" style="font-size:12px;">Flag</label>
+            <select class="form-control form-control-sm" id="f-flag">
+              <option value="">All Flags</option>
+              <option value="green">Green</option>
+              <option value="yellow">Yellow</option>
+              <option value="red">Red</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-3 mb-2">
+            <label class="mb-1" style="font-size:12px;">Search</label>
+            <input type="text" class="form-control form-control-sm" id="f-search" placeholder="Name or mobile…">
+          </div>
+          <div class="form-group col-sm mb-2 d-flex" style="gap:6px;">
+            <button class="btn btn-sm btn-primary" onclick="renderList()"><i class="fa fa-search mr-1"></i>Search</button>
+            <button class="btn btn-sm btn-secondary" onclick="clearFilters()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="block block-rounded block-bordered">
+      <div class="block-header border-bottom">
+        <h3 class="block-title" id="list-title"><i class="fa fa-list mr-1"></i> All Leads</h3>
+      </div>
+      <div class="block-content block-content-full p-0">
+        <table class="table table-bordered table-striped table-vcenter mb-0" id="leads-table">
+          <thead>
+            <tr class="bg-body-light">
+              <th style="width:40px;" class="text-center">#</th>
+              <th>Lead No</th>
+              <th>Input Date</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Branch</th>
+              <th>Assigned To</th>
+              <th>Flag</th>
+              <th>Status</th>
+              <th>Next Follow-up</th>
+              <th style="width:140px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+        <div id="list-empty" class="empty-state d-none">
+          <i class="fa fa-search-minus"></i>
+          No leads match the current filters.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── VIEW: NEW / EDIT LEAD ─────────────── -->
+<div id="view-new" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white" id="form-title">
+          <i class="fa fa-plus"></i>
+          <span class="ml-2 mr-2">Add New Lead</span>
+          <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Fill in the prospect's details and save</small>
+        </h3>
+        <div class="mt-2 mt-sm-0">
+          <button class="btn btn-sm btn-alt-secondary" onclick="showView('list')"><i class="fa fa-arrow-left mr-1"></i> Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <form id="lead-form" onsubmit="saveLead(event)">
+      <input type="hidden" id="edit-id">
+
+      <!-- Contact info -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom"><h3 class="block-title"><i class="fa fa-user mr-1 text-primary"></i> Contact Information</h3></div>
+        <div class="block-content block-content-full">
+          <div class="form-row">
+            <div class="form-group col-sm-5">
+              <label>Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="f-name" placeholder="e.g. Ramesh Kumar" required>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Mobile (Primary) <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="f-mobile" placeholder="10-digit number" maxlength="10" required>
+            </div>
+            <div class="form-group col-sm-2">
+              <label>Mobile (Alternate)</label>
+              <input type="text" class="form-control" id="f-mobile2" placeholder="Optional" maxlength="10">
+            </div>
+            <div class="form-group col-sm-2">
+              <label>Email</label>
+              <input type="email" class="form-control" id="f-email" placeholder="Optional">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branch & Assignment -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom"><h3 class="block-title"><i class="fa fa-sitemap mr-1 text-primary"></i> Branch &amp; Assignment</h3></div>
+        <div class="block-content block-content-full">
+          <div class="form-row">
+            <div class="form-group col-sm-3">
+              <label>Branch</label>
+              <select class="form-control" id="f-branch-sel">
+                <option value="">— Select Branch —</option>
+                <option value="ARN">Ariyalur (ARN)</option>
+                <option value="TVN">Tiruvannamalai (TVN)</option>
+                <option value="BCE">Bengaluru Central (BCE)</option>
+                <option value="ABH">Abhiram (ABH)</option>
+                <option value="HOF">Head Office (HOF)</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Assign To (Employee)</label>
+              <select class="form-control" id="f-employee">
+                <option value="">— Select Employee —</option>
+                <option>Dineshkumar M</option>
+                <option>Rajkumar S</option>
+                <option>Priya R</option>
+                <option>Mathan Raj</option>
+                <option>Suresh V</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Lead Source</label>
+              <select class="form-control" id="f-source">
+                <option value="walkin">Walk-in / Referral</option>
+                <option value="field">Field Marketing Event</option>
+                <option value="online">Online / Social Media</option>
+                <option value="import">CSV Import</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-1">
+              <label>Input Date</label>
+              <input type="date" class="form-control" id="f-date">
+            </div>
+            <div class="form-group col-sm-2">
+              <label>First Follow-up</label>
+              <input type="date" class="form-control" id="f-followup">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Business & Income Details -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-briefcase mr-1 text-primary"></i> Business &amp; Income Details</h3>
+          <div class="block-options"><span class="badge badge-secondary">Optional — can be updated anytime</span></div>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="form-row">
+            <div class="form-group col-sm-3">
+              <label>Income Source</label>
+              <select class="form-control" id="f-income-source">
+                <option value="">— Select —</option>
+                <option>Salary / Job</option>
+                <option>Own Business</option>
+                <option>Agriculture</option>
+                <option>Pension</option>
+                <option>Rental Income</option>
+                <option>Others</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Monthly Income (Approx.)</label>
+              <select class="form-control" id="f-monthly-income">
+                <option value="">— Select Range —</option>
+                <option>Below ₹10,000</option>
+                <option>₹10,000 – ₹25,000</option>
+                <option>₹25,000 – ₹50,000</option>
+                <option>₹50,000 – ₹1 Lakh</option>
+                <option>Above ₹1 Lakh</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Business Name</label>
+              <input type="text" class="form-control" id="f-business-name" placeholder="If applicable">
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Business / Visit Place</label>
+              <input type="text" class="form-control" id="f-business-place" placeholder="Location or area">
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Proposed Chit Value</label>
+              <select class="form-control" id="f-chit-value">
+                <option value="">— Select —</option>
+                <option>₹25,000</option>
+                <option>₹50,000</option>
+                <option>₹1,00,000</option>
+                <option>₹2,00,000</option>
+                <option>₹5,00,000</option>
+                <option>₹10,00,000</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-3">
+              <label>Reference Name</label>
+              <input type="text" class="form-control" id="f-ref-name" placeholder="Who referred this lead?">
+            </div>
+            <div class="form-group col-sm-6">
+              <label>Initial Notes / Remarks</label>
+              <input type="text" class="form-control" id="f-notes" placeholder="First impression, context, or any observation">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flag -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom"><h3 class="block-title"><i class="fa fa-flag mr-1 text-primary"></i> Initial Assessment Flag</h3></div>
+        <div class="block-content block-content-full">
+          <p class="text-muted mb-3">Rate this prospect's conversion potential based on first impression.</p>
+          <div class="row">
+            <div class="col-sm-4 mb-2">
+              <div class="flg-opt sel-g" id="flg-green" onclick="selectFlag('green')">
+                <div class="flg-dot" style="background:#22c55e;"></div>
+                <div class="font-w700" style="color:#15803d;">Green — High Potential</div>
+                <small class="text-muted">Capable &amp; clearly interested</small>
+              </div>
+            </div>
+            <div class="col-sm-4 mb-2">
+              <div class="flg-opt" id="flg-yellow" onclick="selectFlag('yellow')">
+                <div class="flg-dot" style="background:#f59e0b;"></div>
+                <div class="font-w700" style="color:#b45309;">Yellow — Uncertain</div>
+                <small class="text-muted">Needs follow-ups, not committed</small>
+              </div>
+            </div>
+            <div class="col-sm-4 mb-2">
+              <div class="flg-opt" id="flg-red" onclick="selectFlag('red')">
+                <div class="flg-dot" style="background:#ef4444;"></div>
+                <div class="font-w700" style="color:#b91c1c;">Red — Low Priority</div>
+                <small class="text-muted">Not ready or unlikely to convert soon</small>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="f-flag-val" value="green">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-content block-content-full">
+          <button type="submit" class="btn btn-primary mr-2"><i class="fa fa-save mr-1"></i> <span id="form-btn-label">Save Lead</span></button>
+          <button type="button" class="btn btn-secondary" onclick="showView('list')">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─────────────── VIEW: LEAD DETAIL ─────────────── -->
+<div id="view-detail" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white" id="detail-title">
+          <i class="fa fa-address-card"></i>
+          <span class="ml-2 mr-2">Lead Detail</span>
+        </h3>
+        <div class="mt-2 mt-sm-0 d-flex" style="gap:8px;">
+          <button class="btn btn-sm btn-alt-secondary" onclick="showView('list')"><i class="fa fa-arrow-left mr-1"></i> Back</button>
+          <button class="btn btn-sm btn-alt-warning" onclick="openLogModal()"><i class="fa fa-phone mr-1"></i> Log Interaction</button>
+          <button class="btn btn-sm btn-alt-primary" id="btn-edit-lead" onclick="editCurrentLead()"><i class="fa fa-edit mr-1"></i> Edit</button>
+          <button class="btn btn-sm btn-success" id="btn-convert" onclick="openConvertModal()"><i class="fa fa-user-check mr-1"></i> Convert</button>
+          <button class="btn btn-sm btn-alt-danger" id="btn-dead" onclick="markDead()"><i class="fa fa-times mr-1"></i> Mark Dead</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-4">
+        <!-- Lead info card -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom"><h3 class="block-title">Lead Details</h3></div>
+          <div class="block-content block-content-full" id="detail-info"></div>
+        </div>
+        <!-- Stats card -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom"><h3 class="block-title">Activity Summary</h3></div>
+          <div class="block-content block-content-full" id="detail-stats"></div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-history mr-1"></i> Interaction Timeline</h3>
+            <div class="block-options">
+              <button class="btn btn-sm btn-primary" onclick="openLogModal()"><i class="fa fa-plus mr-1"></i> Log Interaction</button>
+            </div>
+          </div>
+          <div class="block-content block-content-full" id="detail-timeline"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── VIEW: REPORTS ─────────────── -->
+<div id="view-reports" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <h3 class="my-2 text-white">
+        <i class="fa fa-chart-bar"></i>
+        <span class="ml-2 mr-2">CRM Reports &amp; Analytics</span>
+        <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Lead funnel, conversion rates, branch breakdown</small>
+      </h3>
+    </div>
+  </div>
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-5">
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom"><h3 class="block-title"><i class="fa fa-filter mr-1"></i> Lead Funnel</h3></div>
+          <div class="block-content block-content-full" id="rpt-funnel"></div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom"><h3 class="block-title"><i class="fa fa-store mr-1"></i> Branch-wise Breakdown</h3></div>
+          <div class="block-content block-content-full" id="rpt-branch"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Detailed report -->
+    <div class="block block-rounded block-bordered">
+      <div class="block-header border-bottom">
+        <h3 class="block-title"><i class="fa fa-table mr-1"></i> Detailed Lead Report</h3>
+      </div>
+      <div class="block-content block-content-full p-0">
+        <table class="table table-bordered table-striped table-vcenter table-sm mb-0" id="rpt-table">
+          <thead>
+            <tr class="bg-body-light">
+              <th>#</th><th>Lead No</th><th>Input Date</th><th>Name</th><th>Mobile</th>
+              <th>Status</th><th>Flag</th><th>Employee</th><th>Follow-up Date</th><th>Created By</th>
+            </tr>
+          </thead>
+          <tbody id="rpt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── VIEW: FOLLOW-UP CALENDAR ─────────────── -->
+<div id="view-calendar" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white">
+          <i class="fa fa-calendar-alt"></i>
+          <span class="ml-2 mr-2">Follow-up Calendar</span>
+          <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Scheduled follow-ups across all leads</small>
+        </h3>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- Filters + month nav -->
+    <div class="block block-rounded block-bordered mb-3">
+      <div class="block-content block-content-full py-2">
+        <div class="d-flex flex-wrap align-items-center" style="gap:10px;">
+
+          <!-- Month navigation -->
+          <button class="btn btn-sm btn-alt-secondary" onclick="calShiftMonth(-1)"><i class="fa fa-chevron-left"></i></button>
+          <span id="cal-month-label" style="font-size:16px; font-weight:700; min-width:160px; text-align:center;"></span>
+          <button class="btn btn-sm btn-alt-secondary" onclick="calShiftMonth(1)"><i class="fa fa-chevron-right"></i></button>
+          <button class="btn btn-sm btn-alt-primary" onclick="calGoToday()"><i class="fa fa-dot-circle mr-1"></i>Today</button>
+
+          <div class="ml-auto d-flex flex-wrap" style="gap:8px;">
+            <select class="form-control form-control-sm" id="cal-f-branch" onchange="renderCalendar()" style="min-width:160px;">
+              <option value="">All Branches</option>
+              <option value="ARN">Ariyalur (ARN)</option>
+              <option value="TVN">Tiruvannamalai (TVN)</option>
+              <option value="BCE">Bengaluru Central (BCE)</option>
+              <option value="ABH">Abhiram (ABH)</option>
+              <option value="HOF">Head Office (HOF)</option>
+            </select>
+            <select class="form-control form-control-sm" id="cal-f-employee" onchange="renderCalendar()" style="min-width:170px;">
+              <option value="">All Employees</option>
+              <option>Dineshkumar M</option>
+              <option>Rajkumar S</option>
+              <option>Priya R</option>
+              <option>Mathan Raj</option>
+              <option>Suresh V</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div id="cal-summary-strip" class="kpi-strip mb-3"></div>
+
+    <!-- Calendar grid -->
+    <div class="block block-rounded block-bordered">
+      <div class="block-content block-content-full">
+        <!-- Day-of-week headers -->
+        <div class="cal-grid mb-1">
+          <div class="cal-dow">Sun</div>
+          <div class="cal-dow">Mon</div>
+          <div class="cal-dow">Tue</div>
+          <div class="cal-dow">Wed</div>
+          <div class="cal-dow">Thu</div>
+          <div class="cal-dow">Fri</div>
+          <div class="cal-dow">Sat</div>
+        </div>
+        <!-- Day cells -->
+        <div class="cal-grid" id="cal-cells"></div>
+      </div>
+    </div>
+
+    <!-- Selected day detail panel -->
+    <div id="cal-detail-panel" style="display:none;" class="block block-rounded block-bordered mt-3">
+      <div class="block-header border-bottom">
+        <h3 class="block-title" id="cal-detail-title"><i class="fa fa-calendar-day mr-1 text-primary"></i> Follow-ups</h3>
+        <div class="block-options">
+          <button class="btn btn-sm btn-alt-secondary" onclick="calCloseDetail()"><i class="fa fa-times"></i></button>
+        </div>
+      </div>
+      <div class="block-content block-content-full" id="cal-detail-body"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="d-flex flex-wrap mt-2" style="gap:12px; font-size:12px; color:#6b7280;">
+      <span><span class="cal-b g">3</span> &nbsp;Green flag</span>
+      <span><span class="cal-b y">2</span> &nbsp;Yellow flag</span>
+      <span><span class="cal-b r">1</span> &nbsp;Red flag</span>
+      <span><span class="cal-b ov">!</span> &nbsp;Overdue (past &amp; pending)</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;background:#eff6ff;border:2px solid #3b82f6;border-radius:3px;display:inline-block;"></span> Today</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─────────────── VIEW: IMPORT LEADS ─────────────── -->
+<div id="view-import" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white">
+          <i class="fa fa-file-import"></i>
+          <span class="ml-2 mr-2">Import Leads from CSV</span>
+          <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Bulk upload leads from an external marketing tool or spreadsheet</small>
+        </h3>
+        <div class="mt-2 mt-sm-0">
+          <button class="btn btn-sm btn-alt-secondary" onclick="showView('list')"><i class="fa fa-arrow-left mr-1"></i> Back to Lead List</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- Step indicator -->
+    <div class="steps mb-4">
+      <div class="step active" id="imp-step-1"><span class="sn">1</span>Assignment</div>
+      <div class="step" id="imp-step-2"><span class="sn">2</span>Upload CSV</div>
+      <div class="step" id="imp-step-3"><span class="sn">3</span>Preview</div>
+      <div class="step" id="imp-step-4"><span class="sn">4</span>Import</div>
+    </div>
+
+    <!-- Step 1: Assignment -->
+    <div id="imp-panel-1">
+      <div class="alert alert-info d-flex align-items-start mb-4">
+        <i class="fa fa-info-circle mt-1 mr-3" style="font-size:17px;"></i>
+        <div>
+          <strong>Who will own these leads?</strong>
+          Select the branch and employee who will be responsible for following up on the imported leads.
+          Branch and employee are independent — a cluster head can assign to any employee across branches.
+          You can reassign individual leads after import.
+        </div>
+      </div>
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-sitemap mr-1 text-primary"></i> Step 1 — Default Assignment <span class="text-danger">*</span></h3>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="form-row">
+            <div class="form-group col-sm-4">
+              <label>Branch <span class="text-danger">*</span></label>
+              <select class="form-control" id="imp-branch">
+                <option value="">— Select Branch —</option>
+                <option value="ARN">Ariyalur (ARN)</option>
+                <option value="TVN">Tiruvannamalai (TVN)</option>
+                <option value="BCE">Bengaluru Central (BCE)</option>
+                <option value="ABH">Abhiram (ABH)</option>
+                <option value="HOF">Head Office (HOF)</option>
+              </select>
+              <small class="form-text text-muted">All imported leads will be tagged to this branch (can be edited per lead later).</small>
+            </div>
+            <div class="form-group col-sm-4">
+              <label>Responsible Employee <span class="text-danger">*</span></label>
+              <select class="form-control" id="imp-employee">
+                <option value="">— Select Employee —</option>
+                <option>Dineshkumar M</option>
+                <option>Rajkumar S</option>
+                <option>Priya R</option>
+                <option>Mathan Raj</option>
+                <option>Suresh V</option>
+              </select>
+              <small class="form-text text-muted">Does not need to belong to the selected branch.</small>
+            </div>
+            <div class="form-group col-sm-4">
+              <label>Default Lead Source</label>
+              <select class="form-control" id="imp-source">
+                <option value="import">CSV Import</option>
+                <option value="walkin">Walk-in / Referral</option>
+                <option value="field">Field Marketing Event</option>
+                <option value="online">Online / Social Media</option>
+              </select>
+              <small class="form-text text-muted">Applied to all rows unless CSV has a source column.</small>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="impStep1Next()"><i class="fa fa-arrow-right mr-1"></i> Next: Upload File</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Upload -->
+    <div id="imp-panel-2" style="display:none;">
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-upload mr-1 text-primary"></i> Step 2 — Upload CSV File</h3>
+        </div>
+        <div class="block-content block-content-full">
+
+          <!-- Drop zone -->
+          <div id="imp-dropzone" style="border:2px dashed #c7d2fe; border-radius:10px; background:#f5f7ff; padding:40px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s;"
+               onclick="document.getElementById('imp-file-input').click()"
+               ondragover="event.preventDefault(); this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';"
+               ondragleave="this.style.borderColor='#c7d2fe'; this.style.background='#f5f7ff';"
+               ondrop="impHandleDrop(event)">
+            <i class="fa fa-file-csv" style="font-size:36px; color:#6366f1; display:block; margin-bottom:10px;"></i>
+            <div class="font-w700" style="font-size:15px;">Drag &amp; drop your CSV here, or click to browse</div>
+            <small class="text-muted">Accepts .csv files. First row must be column headers.</small>
+          </div>
+          <input type="file" id="imp-file-input" accept=".csv" style="display:none;" onchange="impReadFile(this)">
+
+          <!-- OR paste -->
+          <div class="text-center my-3 text-muted font-w600" style="font-size:12px;">— OR PASTE CSV TEXT DIRECTLY —</div>
+          <textarea id="imp-paste" class="form-control" rows="6" placeholder="Paste your CSV content here (including header row)...&#10;Example:&#10;Name,Mobile,Business Name,Monthly Income,Remainder Date&#10;Ramesh Kumar,9443243225,Ramesh Textiles,₹25K–₹50K,2026-07-01"></textarea>
+
+          <!-- Column guide -->
+          <div class="mt-3">
+            <small class="text-muted font-w700">SUPPORTED COLUMN NAMES (auto-detected, case-insensitive):</small>
+            <div class="mt-2" style="display:flex; flex-wrap:wrap; gap:6px;">
+              <span class="badge badge-primary">Name / Subscriber Name</span>
+              <span class="badge badge-primary">Mobile / Phone / Phone Number</span>
+              <span class="badge badge-secondary">Business Name</span>
+              <span class="badge badge-secondary">Business Place / Visit Place</span>
+              <span class="badge badge-secondary">Income Source</span>
+              <span class="badge badge-secondary">Monthly Income / Monthly Source</span>
+              <span class="badge badge-secondary">Proposed Chit Value / Chit Value</span>
+              <span class="badge badge-secondary">Reference Name / Ref Name</span>
+              <span class="badge badge-secondary">Flag / Lead Rating</span>
+              <span class="badge badge-secondary">Remainder Date / Follow Up Date</span>
+              <span class="badge badge-secondary">Remainder Note / Follow Up Note</span>
+              <span class="badge badge-secondary">Notes / Remarks</span>
+              <span class="badge badge-secondary">Email</span>
+            </div>
+            <small class="text-muted mt-1 d-block"><span class="badge badge-primary" style="font-size:10px;">Blue</span> = mandatory in CSV (at least one must map). <span class="badge badge-secondary" style="font-size:10px;">Grey</span> = optional.</small>
+          </div>
+
+          <div class="mt-4 d-flex" style="gap:10px;">
+            <button class="btn btn-secondary" onclick="impGoStep(1)"><i class="fa fa-arrow-left mr-1"></i> Back</button>
+            <button class="btn btn-primary" onclick="impParseAndPreview()"><i class="fa fa-table mr-1"></i> Preview Import</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Preview -->
+    <div id="imp-panel-3" style="display:none;">
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-eye mr-1 text-primary"></i> Step 3 — Preview &amp; Validate</h3>
+          <div class="block-options" id="imp-summary-badge"></div>
+        </div>
+        <div class="block-content block-content-full">
+          <div id="imp-preview-stats" class="mb-3"></div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover table-bordered" id="imp-preview-table">
+              <thead class="thead-light" id="imp-preview-head"></thead>
+              <tbody id="imp-preview-body"></tbody>
+            </table>
+          </div>
+          <div class="mt-3 d-flex" style="gap:10px;">
+            <button class="btn btn-secondary" onclick="impGoStep(2)"><i class="fa fa-arrow-left mr-1"></i> Back</button>
+            <button class="btn btn-success" id="imp-confirm-btn" onclick="impDoImport()"><i class="fa fa-check mr-1"></i> <span id="imp-confirm-label">Import Leads</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Done -->
+    <div id="imp-panel-4" style="display:none;">
+      <div class="block block-rounded block-bordered">
+        <div class="block-content block-content-full text-center py-5">
+          <i class="fa fa-check-circle" style="font-size:50px; color:#22c55e; display:block; margin-bottom:16px;"></i>
+          <h3 id="imp-done-title">Import Complete!</h3>
+          <p id="imp-done-body" class="text-muted"></p>
+          <div class="mt-3" style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-primary" onclick="showView('list')"><i class="fa fa-list mr-1"></i> View Lead List</button>
+            <button class="btn btn-secondary" onclick="impReset()"><i class="fa fa-file-import mr-1"></i> Import Another File</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main><!-- /main-container -->
+</div><!-- /page-container -->
+
+<!-- ════════════════════ MODALS ════════════════════ -->
+
+<!-- Log Interaction Modal -->
+<div class="modal fade" id="modal-interaction" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-phone mr-2 text-primary"></i>Log Interaction</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group col-sm-4">
+            <label>Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="i-date">
+          </div>
+          <div class="form-group col-sm-4">
+            <label>Time</label>
+            <input type="time" class="form-control" id="i-time">
+          </div>
+          <div class="form-group col-sm-4">
+            <label>Type <span class="text-danger">*</span></label>
+            <select class="form-control" id="i-type">
+              <option value="phone">📞 Phone Call</option>
+              <option value="inperson">🤝 In-Person Visit</option>
+              <option value="whatsapp">💬 WhatsApp</option>
+              <option value="email">📧 Email</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-12">
+            <label>Outcome / Notes <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="i-notes" rows="3" placeholder="What was discussed? What was the outcome?"></textarea>
+          </div>
+          <div class="form-group col-sm-12">
+            <label class="d-block mb-2">Update Flag</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="flg-btn act-g" id="ib-green" onclick="setIFlag('green')">🟢 Green</button>
+              <button type="button" class="flg-btn" id="ib-yellow" onclick="setIFlag('yellow')">🟡 Yellow</button>
+              <button type="button" class="flg-btn" id="ib-red" onclick="setIFlag('red')">🔴 Red</button>
+            </div>
+            <input type="hidden" id="i-flag" value="green">
+          </div>
+          <div class="form-group col-sm-12 mb-0">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="i-hasfollowup" checked onchange="toggleFollowup()">
+              <label class="custom-control-label font-w600" for="i-hasfollowup">Schedule a follow-up reminder</label>
+            </div>
+          </div>
+          <div id="followup-section" class="col-sm-12">
+            <div class="form-row mt-2">
+              <div class="form-group col-sm-4">
+                <label>Follow-up Date</label>
+                <input type="date" class="form-control" id="i-fudate">
+              </div>
+              <div class="form-group col-sm-8">
+                <label>Follow-up Note</label>
+                <input type="text" class="form-control" id="i-funote" placeholder="Reminder note for the follow-up">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveInteraction()"><i class="fa fa-save mr-1"></i> Save Interaction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Convert to Subscriber Modal -->
+<div class="modal fade" id="modal-convert" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-user-check mr-2 text-success"></i>Convert Lead → Subscriber</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="fa fa-info-circle mr-2"></i>
+          This will mark the lead as <strong>Converted</strong> and link it to a subscriber record in rosca-digital. The lead history is preserved.
+        </div>
+        <div id="convert-summary" class="mb-3"></div>
+        <div class="steps">
+          <div class="step active"><span class="sn">1</span>Confirm Details</div>
+          <div class="step"><span class="sn">2</span>Create Subscriber</div>
+          <div class="step"><span class="sn">3</span>Enroll in Group</div>
+          <div class="step"><span class="sn">4</span>Lead Converted</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-sm-6">
+            <label>Name (confirm)</label>
+            <input type="text" class="form-control" id="cv-name">
+          </div>
+          <div class="form-group col-sm-6">
+            <label>Mobile</label>
+            <input type="text" class="form-control" id="cv-mobile" readonly>
+          </div>
+          <div class="form-group col-sm-6">
+            <label>Subscriber Type</label>
+            <select class="form-control" id="cv-type">
+              <option>Individual</option>
+              <option>Business</option>
+              <option>Shared</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-6">
+            <label>Introducing Employee</label>
+            <select class="form-control" id="cv-emp">
+              <option>Dineshkumar M</option>
+              <option>Rajkumar S</option>
+              <option>Priya R</option>
+              <option>Mathan Raj</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-6">
+            <label>PAN Number (optional)</label>
+            <input type="text" class="form-control" placeholder="ABCDE1234F">
+          </div>
+          <div class="form-group col-sm-6">
+            <label>Aadhaar Number (optional)</label>
+            <input type="text" class="form-control" placeholder="12-digit">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-success" onclick="confirmConvert()"><i class="fa fa-user-check mr-1"></i> Confirm Conversion</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:none;min-width:260px;">
+  <div class="alert mb-0 shadow" id="toast-inner" style="border-radius:8px;"></div>
+</div>
+
+<!-- ════════════════════ JAVASCRIPT ════════════════════ -->
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+<script>
+/* ─── Seed data (from CSV + enriched) ─── */
+const SEED_LEADS = [
+  { id:'ARN-02783', name:'Ramesh', mobile:'9443243225', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'green', input_date:'2025-09-08', follow_up_date:'2026-06-17', follow_up_note:'Call back after salary credit', notes:'Met at field event, interested in ₹50K group', created_by:'Mathan Raj', created_at:'2025-09-08', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Discussed chit scheme options. Interested in ₹50,000 group starting July. Very responsive on call.', flag_after:'green', follow_up_date:'2026-06-17', follow_up_note:'Call back after salary credit', fu_done:false },
+    { id:2, type:'inperson', date:'2026-04-28', time:'11:00', by:'TVN-Dineshkumar M', outcome:'Met at Ariyalur branch. Reviewed scheme documents. Brought wife along. No objections raised.', flag_after:'green', follow_up_date:'2026-05-13', follow_up_note:'Confirm interest', fu_done:true },
+    { id:3, type:'phone', date:'2025-09-08', time:'10:00', by:'ARN-Dineshkumar Munusamy', outcome:'First contact after field event. Expressed interest in chit funds as savings. Agreed to visit branch.', flag_after:'green', follow_up_date:'2026-04-28', follow_up_note:'Schedule in-person meeting', fu_done:true }
+  ]},
+  { id:'ARN-03074', name:'Ammayee Educational Trust', mobile:'9443438453', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'yellow', input_date:'2025-11-04', follow_up_date:'2026-06-18', follow_up_note:'Confirm trustee meeting', notes:'Trust interested in group investment', created_by:'Mathan Raj', created_at:'2025-11-04', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:38', by:'TVN-Dineshkumar M', outcome:'Spoke to trustee. Interest is there but committee approval pending. Will call after board meets.', flag_after:'yellow', follow_up_date:'2026-06-18', follow_up_note:'Confirm trustee meeting', fu_done:false }
+  ]},
+  { id:'ARN-03267', name:'Balaji Jewellery', mobile:'9443880113', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'walkin', status:'in_progress', flag:'green', input_date:'2025-12-02', follow_up_date:'2026-06-18', follow_up_note:'Final scheme decision', notes:'Jewellery shop owner, stable income', created_by:'Mathan Raj', created_at:'2025-12-02', interactions:[
+    { id:1, type:'inperson', date:'2026-05-13', time:'09:40', by:'TVN-Dineshkumar M', outcome:'Visited shop. Owner interested in ₹1L group. Has good cash flow from business.', flag_after:'green', follow_up_date:'2026-06-18', follow_up_note:'Final scheme decision', fu_done:false }
+  ]},
+  { id:'ARN-03271', name:'Arunai Jewellery', mobile:'9442312870', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'walkin', status:'in_progress', flag:'red', input_date:'2025-12-02', follow_up_date:'2026-06-16', follow_up_note:'Check if situation improved', notes:'Interested but financial situation unclear', created_by:'Mathan Raj', created_at:'2025-12-02', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Owner says cash tied up in stock. Not ready to commit monthly installments right now.', flag_after:'red', follow_up_date:'2026-06-16', follow_up_note:'Check if situation improved', fu_done:false }
+  ]},
+  { id:'ARN-03275', name:'Ashwini Bekery', mobile:'9943288449', mobile2:'', email:'ashwini@example.com', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'walkin', status:'converted', flag:'green', input_date:'2025-12-04', follow_up_date:'', follow_up_note:'', notes:'Bakery business, steady daily income', created_by:'Mathan Raj', created_at:'2025-12-04', subscriber_id:'SUB-4521', converted_at:'2026-04-20', interactions:[
+    { id:1, type:'inperson', date:'2026-04-20', time:'10:00', by:'Dineshkumar M', outcome:'Completed all KYC documents. Enrolled in ARN-G-072 (₹25,000 group). Converted.', flag_after:'green', follow_up_date:'', follow_up_note:'', fu_done:true }
+  ]},
+  { id:'ARN-03314', name:'Prakash (ajith kvb)', mobile:'9952333723', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'green', input_date:'2025-12-16', follow_up_date:'2026-06-10', follow_up_note:'Confirm after bank loan closure', notes:'Has ongoing loan, joining after closure', created_by:'Mathan Raj', created_at:'2025-12-16', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Loan closes next month. Very interested in joining thereafter.', flag_after:'green', follow_up_date:'2026-06-10', follow_up_note:'Confirm after bank loan closure', fu_done:false }
+  ]},
+  { id:'ARN-03472', name:'Devadoss (VAO)', mobile:'9994017871', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'yellow', input_date:'2026-01-02', follow_up_date:'2026-06-17', follow_up_note:'Confirm after transfer order', notes:'Government employee, pending transfer', created_by:'Mathan Raj', created_at:'2026-01-02', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Transfer order pending. If stays in Ariyalur, will join. Uncertain for now.', flag_after:'yellow', follow_up_date:'2026-06-17', follow_up_note:'Confirm after transfer order', fu_done:false }
+  ]},
+  { id:'ARN-03483', name:'Saravanan (VAO)', mobile:'9943421879', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'green', input_date:'2026-01-05', follow_up_date:'2026-06-16', follow_up_note:'After salary date', notes:'VAO, reliable income', created_by:'Mathan Raj', created_at:'2026-01-05', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Interested in ₹25K group. Salary hits on 15th. Will confirm by June 16.', flag_after:'green', follow_up_date:'2026-06-16', follow_up_note:'After salary date', fu_done:false }
+  ]},
+  { id:'ARN-03701', name:'Apparsamy (VAO)', mobile:'9171531375', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Rajkumar S', source:'field', status:'in_progress', flag:'green', input_date:'2026-02-23', follow_up_date:'2026-06-19', follow_up_note:'Confirm group preference', notes:'VAO, introduced by Saravanan', created_by:'Mathan Raj', created_at:'2026-02-23', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Interested. Wants to know more about different scheme amounts.', flag_after:'green', follow_up_date:'2026-06-19', follow_up_note:'Confirm group preference', fu_done:false }
+  ]},
+  { id:'ARN-03705', name:'Arunkumar (VAO)', mobile:'9088903902', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Rajkumar S', source:'field', status:'in_progress', flag:'green', input_date:'2026-02-23', follow_up_date:'2026-06-16', follow_up_note:'Call after promotion', notes:'VAO recently promoted', created_by:'Mathan Raj', created_at:'2026-02-23', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'Rajkumar S', outcome:'Recently promoted. Income increased. Wants ₹50K group. Very positive.', flag_after:'green', follow_up_date:'2026-06-16', follow_up_note:'Call after promotion confirmation', fu_done:false }
+  ]},
+  { id:'ARN-03736', name:'Fathima', mobile:'9443468944', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'online', status:'in_progress', flag:'red', input_date:'2026-02-27', follow_up_date:'2026-07-15', follow_up_note:'Try again after 2 months', notes:'Not ready currently, revisit later', created_by:'Mathan Raj', created_at:'2026-02-27', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Family situation not stable. Not in a position to join now. Said to call after 2 months.', flag_after:'red', follow_up_date:'2026-07-15', follow_up_note:'Try again after 2 months', fu_done:false }
+  ]},
+  { id:'ARN-03742', name:'Parkash', mobile:'7904007581', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'yellow', input_date:'2026-02-27', follow_up_date:'2026-06-09', follow_up_note:'Check on business situation', notes:'Business currently slow', created_by:'Mathan Raj', created_at:'2026-02-27', interactions:[
+    { id:1, type:'phone', date:'2026-05-13', time:'09:38', by:'TVN-Dineshkumar M', outcome:'Business slow currently. Interested but uncertain about monthly commitment.', flag_after:'yellow', follow_up_date:'2026-06-09', follow_up_note:'Check on business situation', fu_done:false }
+  ]},
+  { id:'ARN-03725', name:'Narayanamoorthi (VAO)', mobile:'7708748025', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Rajkumar S', source:'field', status:'in_progress', flag:'yellow', input_date:'2026-02-27', follow_up_date:'2026-06-03', follow_up_note:'Discuss with spouse', notes:'Needs spouse approval', created_by:'Mathan Raj', created_at:'2026-02-27', interactions:[
+    { id:1, type:'inperson', date:'2026-05-13', time:'09:38', by:'Rajkumar S', outcome:'Met at office. Interested personally but says he needs to discuss with spouse first.', flag_after:'yellow', follow_up_date:'2026-06-03', follow_up_note:'Discuss with spouse', fu_done:false }
+  ]}
+];
+
+/* ─── State ─── */
+let currentLeadId = null;
+let currentInteractionFlag = 'green';
+
+/* ─── localStorage helpers ─── */
+const LS_KEY = 'crm_leads_v2';
+
+function getLeads() {
+  const d = localStorage.getItem(LS_KEY);
+  return d ? JSON.parse(d) : [];
+}
+function setLeads(leads) {
+  localStorage.setItem(LS_KEY, JSON.stringify(leads));
+}
+function getLead(id) {
+  return getLeads().find(l => l.id === id);
+}
+function updateLead(updated) {
+  const leads = getLeads();
+  const idx = leads.findIndex(l => l.id === updated.id);
+  if (idx > -1) leads[idx] = updated;
+  else leads.push(updated);
+  setLeads(leads);
+}
+function deleteLead(id) {
+  setLeads(getLeads().filter(l => l.id !== id));
+}
+function resetData() {
+  if (confirm('Reset all lead data to original seed leads?')) {
+    setLeads(JSON.parse(JSON.stringify(SEED_LEADS)));
+    toast('Data reset to original seed leads.', 'success');
+    showView('list');
+  }
+}
+
+function loadSampleData() {
+  if (!confirm('This will ADD 10 sample leads with follow-up dates relative to today. Existing data is kept. Continue?')) return;
+
+  const d = (offset) => addDays(new Date().toISOString().split('T')[0], offset);
+  const today = new Date().toISOString().split('T')[0];
+
+  const samples = [
+    // ── Overdue ──────────────────────────────────────────────
+    { name:'Murugan Selvam',  mobile:'9443112233', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:d(-10), follow_up_note:'Call back — missed last time',        income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'Murugan Provision Store', business_place:'Ariyalur Market',     chit_value:'₹50,000',   ref_name:'Rajkumar S',    notes:'Interested in ₹50K group. Missed last call.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-25), time:'10:15', by:'Dineshkumar M', outcome:'Discussed ₹50K group. Owner keen — wants to know next auction date. Scheduled visit to branch.',                                       flag_after:'green',  follow_up_date:d(-10), follow_up_note:'Call back — confirm branch visit', fu_done:false },
+        { id:2, type:'inperson', date:d(-42), time:'11:30', by:'Dineshkumar M', outcome:'Visited provision store. Good turnover visible. Owner understood the scheme well. Very positive response.',                             flag_after:'green',  follow_up_date:d(-25), follow_up_note:'Follow up with scheme brochure',   fu_done:true  },
+      ]},
+    { name:'Kavitha Devi',    mobile:'9842234455', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   assigned_to:'Priya R',       flag:'yellow', follow_up_date:d(-6),  follow_up_note:'Confirm after husband discussion',   income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Sendurai',            chit_value:'₹25,000',   ref_name:'',              notes:'Needs family approval before joining.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-20), time:'09:30', by:'Priya R',        outcome:'Interested personally but husband is unsure. Asked to discuss at home and call back. Flagged yellow.',                                 flag_after:'yellow', follow_up_date:d(-6),  follow_up_note:'Confirm after husband discussion', fu_done:false },
+        { id:2, type:'phone',    date:d(-38), time:'14:00', by:'Priya R',        outcome:'First contact via TVN field camp. Teacher at govt school. Good income. Initially seemed very interested.',                             flag_after:'green',  follow_up_date:d(-20), follow_up_note:'Call back for final answer',        fu_done:true  },
+      ]},
+    { name:'Aravind Kumar',   mobile:'8124778899', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Rajkumar S',    flag:'yellow', follow_up_date:d(-3),  follow_up_note:'Check on loan closure',               income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'AK Printing Press',       business_place:'Ariyalur Bus Stand',  chit_value:'₹50,000',   ref_name:'Suresh V',      notes:'Has ongoing loan, may join after closure.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-18), time:'11:00', by:'Rajkumar S',     outcome:'Loan from KVB bank ongoing — EMI ₹8,500/month. Will close in 2 months. Wants to join ₹50K group after that.',                       flag_after:'yellow', follow_up_date:d(-3),  follow_up_note:'Check on loan closure status',     fu_done:false },
+        { id:2, type:'inperson', date:d(-35), time:'10:00', by:'Rajkumar S',     outcome:'Visited printing press. Business steady. Showed interest in scheme. Flagged green initially.',                                         flag_after:'green',  follow_up_date:d(-18), follow_up_note:'Discuss scheme after seeing income', fu_done:true  },
+        { id:3, type:'phone',    date:d(-50), time:'16:00', by:'Rajkumar S',     outcome:'First contact via referral by Suresh V. Printing business owner. Keen to save. Agreed to in-person meeting.',                         flag_after:'green',  follow_up_date:d(-35), follow_up_note:'Visit business and assess',         fu_done:true  },
+      ]},
+    { name:'Bhuvaneswari K',  mobile:'9843667788', branch:'ABH', branch_label:'Abhiram (ABH)',          assigned_to:'Mathan Raj',    flag:'red',    follow_up_date:d(-1),  follow_up_note:'Try again — agriculture season',      income_source:'Agriculture',   monthly_income:'Below ₹10,000',      business_name:'',                        business_place:'Andimadam',           chit_value:'₹25,000',   ref_name:'',              notes:'Seasonal income only. Revisit after harvest.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-15), time:'08:45', by:'Mathan Raj',     outcome:'Income very low currently. Paddy crop failed this season. Not in a position to commit. Revisit after harvest in 3 months. Flagged red.',flag_after:'red',   follow_up_date:d(-1),  follow_up_note:'Try again after harvest season',   fu_done:false },
+        { id:2, type:'phone',    date:d(-45), time:'10:30', by:'Mathan Raj',     outcome:'Walked into ABH branch enquiring about savings. Explained chit scheme. She was interested but income is seasonal.',                    flag_after:'green',  follow_up_date:d(-15), follow_up_note:'Check on income situation',         fu_done:true  },
+      ]},
+    // ── Due today ────────────────────────────────────────────
+    { name:'Senthilkumar R',  mobile:'7904556677', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:today,  follow_up_note:'Final scheme decision today',         income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Senthil Hardware',        business_place:'T.Palur Road',        chit_value:'₹1,00,000', ref_name:'Dineshkumar M', notes:'Hardware shop owner, solid income. Ready to decide.',
+      interactions:[
+        { id:1, type:'inperson', date:d(-14), time:'10:00', by:'Dineshkumar M', outcome:'Visited hardware shop. Daily sales around ₹15K. Owner ready to commit to ₹1L group. Asked to call today for final confirmation.',      flag_after:'green',  follow_up_date:today,  follow_up_note:'Final confirmation call',           fu_done:false },
+        { id:2, type:'phone',    date:d(-28), time:'09:00', by:'Dineshkumar M', outcome:'Follow-up from field event. Understood scheme well. Wants ₹1L group. Agreed to branch visit.',                                          flag_after:'green',  follow_up_date:d(-14), follow_up_note:'Arrange branch visit',              fu_done:true  },
+        { id:3, type:'phone',    date:d(-30), time:'11:15', by:'Dineshkumar M', outcome:'First contact at ARN field marketing event. Hardware business owner. Showed strong interest in chit savings.',                           flag_after:'green',  follow_up_date:d(-28), follow_up_note:'Send scheme details on WhatsApp',   fu_done:true  },
+      ]},
+    { name:'Deepa Lakshmi',   mobile:'9994889900', branch:'BCE', branch_label:'Bengaluru Central (BCE)',assigned_to:'Suresh V',      flag:'green',  follow_up_date:today,  follow_up_note:'Confirm joining before month end',    income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Bengaluru',           chit_value:'₹25,000',   ref_name:'',              notes:'School teacher, interested and ready.',
+      interactions:[
+        { id:1, type:'whatsapp', date:d(-10), time:'18:30', by:'Suresh V',      outcome:'Sent scheme PDF. She confirmed reading it. Very positive — said will join ₹25K group. Asked to call today to confirm.',                  flag_after:'green',  follow_up_date:today,  follow_up_note:'Confirm joining before month end',  fu_done:false },
+        { id:2, type:'phone',    date:d(-30), time:'13:00', by:'Suresh V',      outcome:'School teacher at govt school. Salary ₹22K/month. Interested in saving via chit. Good candidate for ₹25K group.',                      flag_after:'green',  follow_up_date:d(-10), follow_up_note:'Share scheme brochure on WhatsApp',  fu_done:true  },
+      ]},
+    // ── Upcoming ─────────────────────────────────────────────
+    { name:'Thirumaran V',    mobile:'9443990011', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Rajkumar S',    flag:'green',  follow_up_date:d(3),   follow_up_note:'Ready to join next auction cycle',    income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Thirumaran Cement Agency',business_place:'Kiliyur',             chit_value:'₹2,00,000', ref_name:'',              notes:'Cement dealer, high turnover. Very positive.',
+      interactions:[
+        { id:1, type:'inperson', date:d(-12), time:'11:00', by:'Rajkumar S',    outcome:'Visited cement agency. Confirmed he wants ₹2L group. Waiting for current auction slot to open. Very confident lead.',                   flag_after:'green',  follow_up_date:d(3),   follow_up_note:'Call when slot opens',              fu_done:false },
+        { id:2, type:'phone',    date:d(-25), time:'10:00', by:'Rajkumar S',    outcome:'Discussed scheme structure. High cash flow from cement business. Interested in large scheme.',                                            flag_after:'green',  follow_up_date:d(-12), follow_up_note:'Arrange in-person to finalise',     fu_done:true  },
+        { id:3, type:'phone',    date:d(-45), time:'09:15', by:'Rajkumar S',    outcome:'First contact via referral. Cement dealer in Kiliyur. Has good savings capacity. Scheduled initial discussion.',                         flag_after:'green',  follow_up_date:d(-25), follow_up_note:'Explain scheme options',            fu_done:true  },
+      ]},
+    { name:'Suganya Priya',   mobile:'8056001122', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   assigned_to:'Priya R',       flag:'green',  follow_up_date:d(7),   follow_up_note:'Confirm property income details',     income_source:'Rental Income', monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Ariyalur Town',       chit_value:'₹50,000',   ref_name:'Mathan Raj',    notes:'Has rental flats, stable monthly income.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-8),  time:'12:00', by:'Priya R',       outcome:'Confirmed she has 2 rental properties. Monthly rental income ₹28K stable. Happy to join ₹50K group next month.',                       flag_after:'green',  follow_up_date:d(7),   follow_up_note:'Confirm property income documents', fu_done:false },
+        { id:2, type:'inperson', date:d(-30), time:'10:30', by:'Priya R',       outcome:'Referred by Mathan Raj. Met at TVN branch. Explained scheme. Rental income is her primary income — good stability.',                    flag_after:'green',  follow_up_date:d(-8),  follow_up_note:'Call to get income details',        fu_done:true  },
+      ]},
+    { name:'Palaniappan S',   mobile:'9751223344', branch:'ABH', branch_label:'Abhiram (ABH)',          assigned_to:'Mathan Raj',    flag:'yellow', follow_up_date:d(12),  follow_up_note:'Call after salary date',               income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Abhiram',             chit_value:'₹50,000',   ref_name:'',              notes:'Govt employee, interested but cautious.',
+      interactions:[
+        { id:1, type:'phone',    date:d(-5),  time:'15:00', by:'Mathan Raj',    outcome:'Cautious about monthly commitment. Asked about penalty for missed month. Needs reassurance. Salary hits 10th so call after that.',       flag_after:'yellow', follow_up_date:d(12),  follow_up_note:'Call after salary — address concerns',fu_done:false },
+        { id:2, type:'phone',    date:d(-30), time:'10:00', by:'Mathan Raj',    outcome:'Govt clerk at ABH panchayat office. Stable income. Initially eager to join — flagged green. Will reconsider after more info.',           flag_after:'green',  follow_up_date:d(-5),  follow_up_note:'Address questions about scheme',    fu_done:true  },
+      ]},
+    { name:'Nithyakalyani M', mobile:'9600334455', branch:'BCE', branch_label:'Bengaluru Central (BCE)',assigned_to:'Suresh V',      flag:'red',    follow_up_date:d(21),  follow_up_note:'Long follow-up — revisit in 3 weeks', income_source:'Own Business',  monthly_income:'₹10,000 – ₹25,000', business_name:'NK Boutique',             business_place:'Jayanagar',           chit_value:'₹25,000',   ref_name:'',              notes:'New business, not stable yet. Revisit in 3 weeks.',
+      interactions:[
+        { id:1, type:'whatsapp', date:d(-9),  time:'19:00', by:'Suresh V',      outcome:'Boutique launched only 4 months ago. Income not yet stable. Not in a position to commit ₹25K/month. Revisit in 3 weeks. Flagged red.',  flag_after:'red',    follow_up_date:d(21),  follow_up_note:'Check if business stabilised',      fu_done:false },
+        { id:2, type:'phone',    date:d(-30), time:'11:00', by:'Suresh V',      outcome:'Contacted via Facebook ad. New boutique in Jayanagar. Keen on saving but unsure about monthly cash flow. Flagged yellow at first.',      flag_after:'yellow', follow_up_date:d(-9),  follow_up_note:'WhatsApp to check business progress',fu_done:true  },
+      ]},
+  ];
+
+  const existing = getLeads();
+  const existingMobiles = new Set(existing.map(l => l.mobile));
+  let added = 0;
+
+  samples.forEach(s => {
+    if (existingMobiles.has(s.mobile)) return; // skip if already present
+    const lead = {
+      id:             nextLeadNo(s.branch),
+      name:           s.name,
+      mobile:         s.mobile,
+      mobile2:        '',
+      email:          '',
+      branch:         s.branch,
+      branch_label:   s.branch_label,
+      assigned_to:    s.assigned_to,
+      source:         'import',
+      flag:           s.flag,
+      status:         'in_progress',
+      input_date:     addDays(today, -30),
+      follow_up_date: s.follow_up_date,
+      follow_up_note: s.follow_up_note,
+      notes:          s.notes,
+      income_source:  s.income_source,
+      monthly_income: s.monthly_income,
+      business_name:  s.business_name,
+      business_place: s.business_place,
+      chit_value:     s.chit_value,
+      ref_name:       s.ref_name,
+      created_by:     'Mathan Raj',
+      created_at:     addDays(today, -30),
+      updated_at:     today,
+      interactions:   s.interactions || [],
+      subscriber_id:  null,
+      converted_at:   null,
+    };
+    updateLead(lead);
+    existingMobiles.add(s.mobile);
+    added++;
+  });
+
+  const skipped = samples.length - added;
+  toast(`${added} sample lead${added !== 1 ? 's' : ''} added${skipped ? ` (${skipped} skipped — mobile already exists)` : ''}.`, 'success');
+  showView('calendar');
+}
+
+/* ─── Lead No generator ─── */
+function nextLeadNo(branchCode) {
+  const leads = getLeads();
+  const branch_leads = leads.filter(l => l.branch === branchCode);
+  const nums = branch_leads.map(l => parseInt(l.id.split('-')[1] || 0)).filter(n => !isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return branchCode + '-' + String(max + 1).padStart(5, '0');
+}
+
+/* ─── Navigation ─── */
+function showView(name, data) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+
+  document.querySelectorAll('.nav-main-link').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+
+  if (name === 'list')    { renderList(); renderKPI(); }
+  if (name === 'new')     { initNewForm(data); }
+  if (name === 'detail')  { renderDetail(data); }
+  if (name === 'reports') { renderReports(); }
+  if (name === 'import')  { impReset(); }
+  if (name === 'calendar'){ renderCalendar(); }
+
+  window.scrollTo(0, 0);
+}
+
+/* ─── KPI Strip ─── */
+function renderKPI() {
+  const leads = getLeads();
+  const total  = leads.length;
+  const greens = leads.filter(l => l.flag === 'green' && l.status !== 'dead').length;
+  const yellows= leads.filter(l => l.flag === 'yellow').length;
+  const reds   = leads.filter(l => l.flag === 'red').length;
+  const conv   = leads.filter(l => l.status === 'converted').length;
+
+  const today = new Date().toISOString().split('T')[0];
+  const overdueCount = leads.filter(l => l.follow_up_date && l.follow_up_date < today && l.status === 'in_progress').length;
+  const todayCount   = leads.filter(l => l.follow_up_date === today && l.status === 'in_progress').length;
+
+  document.getElementById('kpi-strip').innerHTML = `
+    <div class="kpi-card blue" style="flex:1.2;"><div class="kpi-num text-primary">${total}</div><div class="kpi-lbl">Total Leads</div></div>
+    <div class="kpi-card green"><div class="kpi-num" style="color:#16a34a;">${greens}</div><div class="kpi-lbl">🟢 Green</div></div>
+    <div class="kpi-card yellow"><div class="kpi-num" style="color:#d97706;">${yellows}</div><div class="kpi-lbl">🟡 Yellow</div></div>
+    <div class="kpi-card red"><div class="kpi-num" style="color:#dc2626;">${reds}</div><div class="kpi-lbl">🔴 Red</div></div>
+    <div class="kpi-card purple"><div class="kpi-num" style="color:#7c3aed;">${conv}</div><div class="kpi-lbl" style="color:#7c3aed;">✅ Converted</div></div>
+  `;
+
+  const alertEl = document.getElementById('overdue-alert');
+  if (overdueCount > 0 || todayCount > 0) {
+    const names = leads.filter(l => l.follow_up_date && l.follow_up_date <= today && l.status === 'in_progress')
+                       .slice(0, 4).map(l => l.name).join(', ');
+    document.getElementById('overdue-text').innerHTML =
+      `<strong>${overdueCount} overdue${todayCount > 0 ? ' &amp; ' + todayCount + ' due today' : ''} follow-up${overdueCount+todayCount > 1 ? 's' : ''}:</strong> ${names}`;
+    alertEl.classList.remove('d-none');
+  } else {
+    alertEl.classList.add('d-none');
+  }
+}
+
+/* ─── Lead List ─── */
+function renderList() {
+  let leads = getLeads();
+  const branch  = document.getElementById('f-branch').value;
+  const status  = document.getElementById('f-status').value;
+  const flag    = document.getElementById('f-flag').value;
+  const search  = document.getElementById('f-search').value.toLowerCase();
+
+  if (branch)  leads = leads.filter(l => l.branch === branch);
+  if (status)  leads = leads.filter(l => l.status === status);
+  if (flag)    leads = leads.filter(l => l.flag === flag);
+  if (search)  leads = leads.filter(l => l.name.toLowerCase().includes(search) || l.mobile.includes(search));
+
+  document.getElementById('list-title').innerHTML = `<i class="fa fa-list mr-1"></i> All Leads <span class="text-muted font-size-sm">(${leads.length} records)</span>`;
+
+  const tbody = document.getElementById('leads-tbody');
+  const empty = document.getElementById('list-empty');
+  tbody.innerHTML = '';
+
+  if (!leads.length) {
+    empty.classList.remove('d-none');
+    return;
+  }
+  empty.classList.add('d-none');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  leads.forEach((l, i) => {
+    const fuClass = !l.follow_up_date ? '' : (l.follow_up_date < today ? 'overdue' : l.follow_up_date <= addDays(today, 14) ? 'soon' : '');
+    const fuLabel = l.follow_up_date ? (l.follow_up_date < today ? '<i class="fa fa-exclamation-circle mr-1"></i>' + l.follow_up_date + ' · Overdue' : l.follow_up_date) : '—';
+    const statusBadge = {
+      new:        '<span class="badge badge-secondary">New</span>',
+      in_progress:'<span class="badge badge-info">In Progress</span>',
+      converted:  '<span class="badge badge-success">Converted</span>',
+      dead:       '<span class="badge badge-dark">Dead</span>',
+    }[l.status] || '';
+
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td class="text-center text-muted" style="font-size:12px;">${i+1}</td>
+        <td><span class="lead-no" onclick="showView('detail','${l.id}')">${l.id}</span></td>
+        <td>${l.input_date}</td>
+        <td><strong>${l.name}</strong></td>
+        <td><code>${l.mobile}</code></td>
+        <td>${l.branch_label}</td>
+        <td style="font-size:12.5px;">${l.assigned_to}</td>
+        <td>${flagBadge(l.flag, l.status)}</td>
+        <td>${statusBadge}</td>
+        <td class="${fuClass}" style="font-size:12.5px;">${fuLabel}</td>
+        <td>
+          <button class="btn btn-sm btn-alt-primary mr-1" onclick="showView('detail','${l.id}')">View</button>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-alt-secondary dropdown-toggle" data-toggle="dropdown">⋮</button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="#" onclick="editLead('${l.id}');return false;"><i class="fa fa-edit mr-2"></i>Edit</a>
+              <a class="dropdown-item" href="#" onclick="quickLog('${l.id}');return false;"><i class="fa fa-phone mr-2"></i>Log Interaction</a>
+              ${l.status !== 'converted' ? `<a class="dropdown-item" href="#" onclick="quickConvert('${l.id}');return false;"><i class="fa fa-user-check mr-2 text-success"></i>Convert</a>` : ''}
+              ${l.status !== 'dead' ? `<a class="dropdown-item" href="#" onclick="quickDead('${l.id}');return false;"><i class="fa fa-times mr-2 text-danger"></i>Mark Dead</a>` : ''}
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('${l.id}');return false;"><i class="fa fa-trash mr-2"></i>Delete</a>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+/* ─── Form: New / Edit ─── */
+function initNewForm(editId) {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('lead-form').reset();
+  document.getElementById('form-title').innerHTML = '<i class="fa fa-plus"></i><span class="ml-2 mr-2">Add New Lead</span><small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Fill in the prospect\'s details</small>';
+  document.getElementById('form-btn-label').textContent = 'Save Lead';
+
+  // Defaults
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  selectFlag('green');
+
+  // Pre-fill sample values for demo
+  if (!editId || editId === true) {
+    document.getElementById('f-name').value = 'Karthikeyan V';
+    document.getElementById('f-mobile').value = '9876543210';
+    document.getElementById('f-branch-sel').value = 'ARN';
+    document.getElementById('f-employee').value = 'Mathan Raj';
+    document.getElementById('f-source').value = 'walkin';
+    document.getElementById('f-income-source').value = 'Own Business';
+    document.getElementById('f-monthly-income').value = '₹25,000 – ₹50,000';
+    document.getElementById('f-business-name').value = 'Karthik Textiles';
+    document.getElementById('f-business-place').value = 'Ariyalur Main Road';
+    document.getElementById('f-chit-value').value = '₹50,000';
+    document.getElementById('f-ref-name').value = 'Suresh Kumar (existing subscriber)';
+    document.getElementById('f-notes').value = 'Met at Pongal event, owns a textile shop, keen interest';
+    const fu = addDays(new Date().toISOString().split('T')[0], 14);
+    document.getElementById('f-followup').value = fu;
+    selectFlag('green');
+    return;
+  }
+
+  if (typeof editId === 'string') {
+    const l = getLead(editId);
+    if (!l) return;
+    document.getElementById('edit-id').value = l.id;
+    document.getElementById('form-title').innerHTML = `<i class="fa fa-edit"></i><span class="ml-2 mr-2">Edit Lead — ${l.id}</span>`;
+    document.getElementById('form-btn-label').textContent = 'Update Lead';
+    document.getElementById('f-name').value = l.name;
+    document.getElementById('f-mobile').value = l.mobile;
+    document.getElementById('f-mobile2').value = l.mobile2 || '';
+    document.getElementById('f-email').value = l.email || '';
+    document.getElementById('f-branch-sel').value = l.branch || '';
+    document.getElementById('f-employee').value = l.assigned_to || '';
+    document.getElementById('f-source').value = l.source || 'walkin';
+    document.getElementById('f-date').value = l.input_date || '';
+    document.getElementById('f-followup').value = l.follow_up_date || '';
+    document.getElementById('f-notes').value = l.notes || '';
+    document.getElementById('f-income-source').value = l.income_source || '';
+    document.getElementById('f-monthly-income').value = l.monthly_income || '';
+    document.getElementById('f-business-name').value = l.business_name || '';
+    document.getElementById('f-business-place').value = l.business_place || '';
+    document.getElementById('f-chit-value').value = l.chit_value || '';
+    document.getElementById('f-ref-name').value = l.ref_name || '';
+    selectFlag(l.flag || 'green');
+  }
+}
+
+function saveLead(e) {
+  e.preventDefault();
+  const editId  = document.getElementById('edit-id').value;
+  const branch  = document.getElementById('f-branch-sel').value;
+  const branchLabels = { ARN:'Ariyalur (ARN)', TVN:'Tiruvannamalai (TVN)', BCE:'Bengaluru Central (BCE)', ABH:'Abhiram (ABH)', HOF:'Head Office (HOF)' };
+
+  const lead = {
+    id:              editId || nextLeadNo(branch || 'GEN'),
+    name:            document.getElementById('f-name').value.trim(),
+    mobile:          document.getElementById('f-mobile').value.trim(),
+    mobile2:         document.getElementById('f-mobile2').value.trim(),
+    email:           document.getElementById('f-email').value.trim(),
+    branch:          branch,
+    branch_label:    branchLabels[branch] || '',
+    assigned_to:     document.getElementById('f-employee').value,
+    source:          document.getElementById('f-source').value,
+    flag:            document.getElementById('f-flag-val').value,
+    status:          editId ? getLead(editId).status : 'new',
+    input_date:      document.getElementById('f-date').value || new Date().toISOString().split('T')[0],
+    follow_up_date:  document.getElementById('f-followup').value,
+    follow_up_note:  '',
+    notes:           document.getElementById('f-notes').value.trim(),
+    income_source:   document.getElementById('f-income-source').value,
+    monthly_income:  document.getElementById('f-monthly-income').value,
+    business_name:   document.getElementById('f-business-name').value.trim(),
+    business_place:  document.getElementById('f-business-place').value.trim(),
+    chit_value:      document.getElementById('f-chit-value').value,
+    ref_name:        document.getElementById('f-ref-name').value.trim(),
+    created_by:      'Mathan Raj',
+    created_at:      editId ? getLead(editId).created_at : new Date().toISOString().split('T')[0],
+    updated_at:      new Date().toISOString().split('T')[0],
+    interactions:    editId ? (getLead(editId).interactions || []) : [],
+    subscriber_id:   null,
+    converted_at:    editId ? getLead(editId).converted_at : null,
+  };
+
+  updateLead(lead);
+  toast(editId ? 'Lead updated successfully.' : `Lead ${lead.id} created!`, 'success');
+  showView('list');
+}
+
+function editLead(id) { showView('new', id); }
+function editCurrentLead() { showView('new', currentLeadId); }
+
+function confirmDelete(id) {
+  if (confirm('Delete this lead permanently? This cannot be undone.')) {
+    deleteLead(id);
+    toast('Lead deleted.', 'warning');
+    renderList();
+  }
+}
+
+/* ─── Lead Detail ─── */
+function renderDetail(id) {
+  currentLeadId = id;
+  const l = getLead(id);
+  if (!l) { showView('list'); return; }
+
+  document.getElementById('detail-title').innerHTML = `
+    <i class="fa fa-address-card"></i>
+    <span class="ml-2 mr-2">Lead — ${l.id}</span>
+    <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">${l.name} · ${l.branch_label}</small>
+  `;
+
+  // Show/hide action buttons based on status
+  document.getElementById('btn-convert').style.display = (l.status === 'converted' || l.status === 'dead') ? 'none' : '';
+  document.getElementById('btn-dead').style.display    = (l.status === 'dead' || l.status === 'converted') ? 'none' : '';
+
+  // Info table
+  const statusMap = { new:'<span class="badge badge-secondary">New</span>', in_progress:'<span class="badge badge-info">In Progress</span>', converted:'<span class="badge badge-success">Converted</span>', dead:'<span class="badge badge-dark">Dead</span>' };
+  const srcMap    = { walkin:'🚶 Walk-in / Referral', field:'📍 Field Event', online:'🌐 Online / Social', import:'📄 CSV Import' };
+  const today = new Date().toISOString().split('T')[0];
+  const fuClass = l.follow_up_date && l.follow_up_date < today ? 'overdue' : 'soon';
+
+  document.getElementById('detail-info').innerHTML = `
+    <table class="table table-sm table-borderless mb-0">
+      <tbody>
+        <tr><td style="width:40%;font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Lead No</td><td><code class="font-w700">${l.id}</code></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Name</td><td><strong>${l.name}</strong></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Mobile</td><td><code>${l.mobile}${l.mobile2 ? ' / '+l.mobile2 : ''}</code></td></tr>
+        ${l.email ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Email</td><td>${l.email}</td></tr>` : ''}
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Branch</td><td>${l.branch_label || '—'}</td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Source</td><td>${srcMap[l.source] || l.source}</td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Input Date</td><td>${l.input_date}</td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Assigned To</td><td>${l.assigned_to || '—'}</td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Status</td><td>${statusMap[l.status]}</td></tr>
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Flag</td><td>${flagBadge(l.flag, l.status)}</td></tr>
+        ${l.income_source ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Income Source</td><td>${l.income_source}</td></tr>` : ''}
+        ${l.monthly_income ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Monthly Income</td><td>${l.monthly_income}</td></tr>` : ''}
+        ${l.business_name ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Business Name</td><td>${l.business_name}</td></tr>` : ''}
+        ${l.business_place ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Business / Visit Place</td><td>${l.business_place}</td></tr>` : ''}
+        ${l.chit_value ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Proposed Chit Value</td><td><strong>${l.chit_value}</strong></td></tr>` : ''}
+        ${l.ref_name ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Reference</td><td>${l.ref_name}</td></tr>` : ''}
+        ${l.subscriber_id ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Subscriber ID</td><td><code class="text-success">${l.subscriber_id}</code></td></tr>` : ''}
+        ${l.converted_at ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Converted On</td><td>${l.converted_at}</td></tr>` : ''}
+        <tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Created By</td><td style="font-size:12px;">${l.created_by}</td></tr>
+        ${l.notes ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Notes</td><td style="font-size:12.5px;">${l.notes}</td></tr>` : ''}
+      </tbody>
+    </table>
+  `;
+
+  // Stats
+  const ints = l.interactions || [];
+  const lastInt = ints.length ? ints[0] : null;
+  document.getElementById('detail-stats').innerHTML = `
+    <div class="row text-center mb-3">
+      <div class="col-4"><div style="font-size:22px;font-weight:700;color:#3b82f6;">${ints.length}</div><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700;">Interactions</div></div>
+      <div class="col-4"><div style="font-size:22px;font-weight:700;color:#22c55e;">${ints.filter(i => i.fu_done).length}</div><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700;">FU Done</div></div>
+      <div class="col-4"><div style="font-size:22px;font-weight:700;color:#f59e0b;">${ints.filter(i => !i.fu_done && i.follow_up_date).length}</div><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700;">Pending</div></div>
+    </div>
+    ${lastInt ? `<div class="mb-2"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Last Contact</div><div style="font-size:14px;font-weight:700;">${lastInt.date}</div></div>` : ''}
+    ${l.follow_up_date ? `
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Next Follow-up</div>
+      <div style="font-size:14px;font-weight:700;" class="${fuClass}"><i class="fa fa-calendar-alt mr-1"></i>${l.follow_up_date}</div>
+      ${l.follow_up_note ? `<small class="text-muted">${l.follow_up_note}</small>` : ''}</div>
+    ` : '<div class="text-muted" style="font-size:13px;">No follow-up scheduled.</div>'}
+  `;
+
+  // Timeline
+  const tlEl = document.getElementById('detail-timeline');
+  if (!ints.length) {
+    tlEl.innerHTML = `<div class="empty-state"><i class="fa fa-comments"></i>No interactions logged yet.<br><button class="btn btn-primary mt-2" onclick="openLogModal()"><i class="fa fa-plus mr-1"></i> Log First Interaction</button></div>`;
+    return;
+  }
+
+  const typeLabels = { phone:'📞 Phone Call', inperson:'🤝 In-Person Visit', whatsapp:'💬 WhatsApp', email:'📧 Email' };
+  tlEl.innerHTML = '<div class="timeline">' + ints.map(i => `
+    <div class="tl-item">
+      <div class="tl-dot ${i.flag_after}"></div>
+      <div class="tl-head">${typeLabels[i.type] || i.type} ${flagBadge(i.flag_after)}</div>
+      <div class="tl-meta">${i.date}${i.time ? ' · ' + i.time : ''} &nbsp;·&nbsp; By: ${i.by}</div>
+      <div class="tl-body">${i.outcome}</div>
+      ${i.follow_up_date ? `<div class="tl-fu ${i.fu_done ? 'done' : 'pending'}">
+        <i class="fa fa-${i.fu_done ? 'check-circle' : 'calendar-check'} mr-1"></i>
+        <strong>Follow-up: ${i.follow_up_date}</strong>${i.follow_up_note ? ' — ' + i.follow_up_note : ''}${i.fu_done ? ' <strong>✅ Done</strong>' : ''}
+      </div>` : ''}
+    </div>
+  `).join('') + '</div>';
+}
+
+/* ─── Interaction Modal ─── */
+function openLogModal() {
+  const l = getLead(currentLeadId);
+  if (!l) return;
+  document.getElementById('i-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('i-time').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('i-notes').value = '';
+  document.getElementById('i-fudate').value = '';
+  document.getElementById('i-funote').value = '';
+  document.getElementById('i-hasfollowup').checked = true;
+  toggleFollowup();
+  setIFlag(l.flag);
+  $('#modal-interaction').modal('show');
+}
+
+function quickLog(id) {
+  currentLeadId = id;
+  openLogModal();
+}
+
+function setIFlag(f) {
+  currentInteractionFlag = f;
+  document.getElementById('i-flag').value = f;
+  ['green','yellow','red'].forEach(c => {
+    document.getElementById('ib-'+c).className = 'flg-btn' + (c === f ? ' act-'+c[0] : '');
+  });
+}
+
+function toggleFollowup() {
+  const show = document.getElementById('i-hasfollowup').checked;
+  document.getElementById('followup-section').style.display = show ? '' : 'none';
+}
+
+function saveInteraction() {
+  const notes = document.getElementById('i-notes').value.trim();
+  if (!notes) { alert('Please enter interaction outcome / notes.'); return; }
+
+  const lead = getLead(currentLeadId);
+  if (!lead) return;
+
+  const hasFU = document.getElementById('i-hasfollowup').checked;
+  const fuDate = hasFU ? document.getElementById('i-fudate').value : '';
+  const fuNote = hasFU ? document.getElementById('i-funote').value.trim() : '';
+  const flag   = document.getElementById('i-flag').value;
+
+  const interaction = {
+    id:             Date.now(),
+    type:           document.getElementById('i-type').value,
+    date:           document.getElementById('i-date').value,
+    time:           document.getElementById('i-time').value,
+    by:             'Mathan Raj',
+    outcome:        notes,
+    flag_after:     flag,
+    follow_up_date: fuDate,
+    follow_up_note: fuNote,
+    fu_done:        false,
+  };
+
+  lead.interactions = [interaction, ...(lead.interactions || [])];
+  lead.flag            = flag;
+  lead.status          = lead.status === 'new' ? 'in_progress' : lead.status;
+  lead.follow_up_date  = fuDate;
+  lead.follow_up_note  = fuNote;
+  lead.updated_at      = new Date().toISOString().split('T')[0];
+
+  updateLead(lead);
+  $('#modal-interaction').modal('hide');
+  toast('Interaction logged successfully.', 'success');
+  renderDetail(currentLeadId);
+}
+
+/* ─── Convert to Subscriber ─── */
+function openConvertModal() {
+  const l = getLead(currentLeadId);
+  if (!l) return;
+  document.getElementById('cv-name').value  = l.name;
+  document.getElementById('cv-mobile').value = l.mobile;
+  document.getElementById('cv-emp').value   = l.assigned_to;
+  document.getElementById('convert-summary').innerHTML = `
+    <div class="alert alert-light border d-flex" style="gap:16px;flex-wrap:wrap;">
+      <div><strong>Lead:</strong> <code>${l.id}</code></div>
+      <div><strong>Name:</strong> ${l.name}</div>
+      <div><strong>Mobile:</strong> <code>${l.mobile}</code></div>
+      <div><strong>Branch:</strong> ${l.branch_label}</div>
+      <div><strong>Interactions:</strong> ${(l.interactions||[]).length} logged</div>
+    </div>`;
+  $('#modal-convert').modal('show');
+}
+
+function quickConvert(id) {
+  currentLeadId = id;
+  openConvertModal();
+}
+
+function confirmConvert() {
+  const lead = getLead(currentLeadId);
+  if (!lead) return;
+  const subId = 'SUB-' + Math.floor(4000 + Math.random() * 1000);
+  lead.status       = 'converted';
+  lead.subscriber_id = subId;
+  lead.converted_at  = new Date().toISOString().split('T')[0];
+  lead.flag          = 'green';
+  lead.follow_up_date = '';
+  lead.updated_at   = new Date().toISOString().split('T')[0];
+  updateLead(lead);
+  $('#modal-convert').modal('hide');
+  toast(`✅ Lead converted! Subscriber ${subId} created.`, 'success');
+  renderDetail(currentLeadId);
+}
+
+/* ─── Mark Dead ─── */
+function markDead() {
+  if (confirm('Mark this lead as Dead? It will be removed from active follow-up.')) {
+    const l = getLead(currentLeadId);
+    l.status = 'dead';
+    l.follow_up_date = '';
+    l.updated_at = new Date().toISOString().split('T')[0];
+    updateLead(l);
+    toast('Lead marked as dead.', 'warning');
+    renderDetail(currentLeadId);
+  }
+}
+
+function quickDead(id) {
+  if (confirm('Mark this lead as Dead?')) {
+    const l = getLead(id);
+    l.status = 'dead';
+    l.follow_up_date = '';
+    l.updated_at = new Date().toISOString().split('T')[0];
+    updateLead(l);
+    toast('Lead marked as dead.', 'warning');
+    renderList();
+  }
+}
+
+/* ─── Reports ─── */
+function renderReports() {
+  const leads = getLeads();
+
+  // KPI
+  const total = leads.length;
+  const conv  = leads.filter(l => l.status === 'converted').length;
+  const rate  = total ? ((conv/total)*100).toFixed(1) : 0;
+
+  // Funnel
+  const counts = { new:0, in_progress:0, converted:0, dead:0, green:0, yellow:0, red:0 };
+  leads.forEach(l => {
+    if (counts[l.status] !== undefined) counts[l.status]++;
+    if (l.status !== 'dead' && counts[l.flag] !== undefined) counts[l.flag]++;
+  });
+  const max = Math.max(counts.new, counts.in_progress, counts.converted, counts.dead, 1);
+  function fBar(label, n, color) {
+    const pct = Math.round((n/total)*100);
+    return `<div class="f-row"><div class="f-lbl">${label}</div><div class="f-wrap"><div class="f-bar" style="width:${Math.max(pct,3)}%;background:${color};">${pct}%</div></div><div class="f-cnt" style="color:${color};">${n}</div></div>`;
+  }
+  document.getElementById('rpt-funnel').innerHTML = `
+    <div class="mb-1" style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;">By Status</div>
+    ${fBar('New',counts.new,'#6b7280')}
+    ${fBar('In Progress',counts.in_progress,'#3b82f6')}
+    ${fBar('Converted',counts.converted,'#22c55e')}
+    ${fBar('Dead',counts.dead,'#ef4444')}
+    <hr>
+    <div class="mb-1" style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;">By Flag</div>
+    ${fBar('🟢 Green',counts.green,'#22c55e')}
+    ${fBar('🟡 Yellow',counts.yellow,'#f59e0b')}
+    ${fBar('🔴 Red',counts.red,'#ef4444')}
+    <hr>
+    <div class="d-flex" style="gap:20px;font-size:13px;">
+      <div><strong>${total}</strong> Total Leads</div>
+      <div><strong style="color:#22c55e;">${conv}</strong> Converted</div>
+      <div><strong>${rate}%</strong> Rate</div>
+    </div>
+  `;
+
+  // Branch breakdown
+  const branches = {};
+  leads.forEach(l => {
+    if (!branches[l.branch]) branches[l.branch] = { label:l.branch_label, total:0, green:0, yellow:0, red:0, conv:0 };
+    branches[l.branch].total++;
+    if (l.flag === 'green')  branches[l.branch].green++;
+    if (l.flag === 'yellow') branches[l.branch].yellow++;
+    if (l.flag === 'red')    branches[l.branch].red++;
+    if (l.status === 'converted') branches[l.branch].conv++;
+  });
+
+  const branchRows = Object.values(branches).map(b => {
+    const r = b.total ? ((b.conv/b.total)*100).toFixed(0) : 0;
+    return `<tr>
+      <td><strong>${b.label}</strong></td>
+      <td class="text-center">${b.total}</td>
+      <td class="text-center" style="color:#16a34a;font-weight:700;">${b.green}</td>
+      <td class="text-center" style="color:#d97706;font-weight:700;">${b.yellow}</td>
+      <td class="text-center" style="color:#dc2626;font-weight:700;">${b.red}</td>
+      <td class="text-center" style="color:#22c55e;font-weight:700;">${b.conv}</td>
+      <td class="text-center"><span class="badge ${r >= 20 ? 'badge-success' : r >= 10 ? 'badge-warning' : 'badge-secondary'}">${r}%</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('rpt-branch').innerHTML = `
+    <table class="table table-bordered table-vcenter table-sm mb-0">
+      <thead><tr class="bg-body-light"><th>Branch</th><th class="text-center">Total</th><th class="text-center">🟢</th><th class="text-center">🟡</th><th class="text-center">🔴</th><th class="text-center">✅</th><th class="text-center">Rate</th></tr></thead>
+      <tbody>${branchRows}</tbody>
+    </table>
+  `;
+
+  // Detail table
+  const tbody = document.getElementById('rpt-tbody');
+  tbody.innerHTML = '';
+  leads.forEach((l, i) => {
+    const today = new Date().toISOString().split('T')[0];
+    const fuClass = l.follow_up_date && l.follow_up_date < today ? 'overdue' : '';
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${i+1}</td>
+        <td><span class="lead-no" onclick="showView('detail','${l.id}')">${l.id}</span></td>
+        <td>${l.input_date}</td>
+        <td><strong>${l.name}</strong></td>
+        <td><code>${l.mobile}</code></td>
+        <td>${{new:'<span class="badge badge-secondary">New</span>', in_progress:'<span class="badge badge-info">In Progress</span>', converted:'<span class="badge badge-success">Converted</span>', dead:'<span class="badge badge-dark">Dead</span>'}[l.status]}</td>
+        <td>${flagBadge(l.flag, l.status)}</td>
+        <td style="font-size:12px;">${l.assigned_to}</td>
+        <td class="${fuClass}" style="font-size:12.5px;">${l.follow_up_date || '—'}</td>
+        <td style="font-size:11.5px;">${l.created_by}</td>
+      </tr>
+    `);
+  });
+}
+
+/* ─── Helpers ─── */
+function flagBadge(flag, status) {
+  if (status === 'converted') return '<span class="flag-conv">✔ Converted</span>';
+  if (status === 'dead')      return '<span class="flag-dead">✕ Dead</span>';
+  if (flag === 'green')  return '<span class="flag-green">● Green</span>';
+  if (flag === 'yellow') return '<span class="flag-yellow">● Yellow</span>';
+  if (flag === 'red')    return '<span class="flag-red">● Red</span>';
+  return '';
+}
+
+function selectFlag(flag) {
+  document.getElementById('f-flag-val').value = flag;
+  document.getElementById('flg-green').className  = 'flg-opt' + (flag === 'green'  ? ' sel-g' : '');
+  document.getElementById('flg-yellow').className = 'flg-opt' + (flag === 'yellow' ? ' sel-y' : '');
+  document.getElementById('flg-red').className    = 'flg-opt' + (flag === 'red'    ? ' sel-r' : '');
+}
+
+function clearFilters() {
+  document.getElementById('f-branch').value = '';
+  document.getElementById('f-status').value = '';
+  document.getElementById('f-flag').value   = '';
+  document.getElementById('f-search').value = '';
+  renderList();
+}
+
+function populateBranchFilter() {
+  const leads = getLeads();
+  const branches = [...new Set(leads.map(l => JSON.stringify({ value:l.branch, label:l.branch_label })))].map(s => JSON.parse(s));
+  const sel = document.getElementById('f-branch');
+  sel.innerHTML = '<option value="">All Branches</option>';
+  branches.forEach(b => sel.insertAdjacentHTML('beforeend', `<option value="${b.value}">${b.label}</option>`));
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+function toast(msg, type) {
+  const t  = document.getElementById('toast');
+  const ti = document.getElementById('toast-inner');
+  const map = { success:'alert-success', warning:'alert-warning', danger:'alert-danger', info:'alert-info' };
+  ti.className = 'alert mb-0 shadow ' + (map[type] || 'alert-info');
+  ti.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+/* ─── Init ─── */
+(function init() {
+  // Seed data if first visit
+  if (!localStorage.getItem(LS_KEY)) {
+    setLeads(JSON.parse(JSON.stringify(SEED_LEADS)));
+  }
+  populateBranchFilter();
+  showView('list');
+})();
+
+/* ════════════════════════════════════════════════
+   FOLLOW-UP CALENDAR
+   ════════════════════════════════════════════════ */
+
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();   // 0-indexed
+let calSelectedDate = null;
+
+const MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+
+function calGoToday() {
+  calYear  = new Date().getFullYear();
+  calMonth = new Date().getMonth();
+  calSelectedDate = null;
+  renderCalendar();
+}
+
+function calShiftMonth(delta) {
+  calMonth += delta;
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  calSelectedDate = null;
+  renderCalendar();
+}
+
+function calFilteredLeads() {
+  const branch   = document.getElementById('cal-f-branch').value;
+  const employee = document.getElementById('cal-f-employee').value;
+  return getLeads().filter(l => {
+    if (!l.follow_up_date) return false;
+    if (l.status === 'converted' || l.status === 'dead') return false;
+    if (branch   && l.branch      !== branch)   return false;
+    if (employee && l.assigned_to !== employee) return false;
+    return true;
+  });
+}
+
+function renderCalendar() {
+  document.getElementById('cal-month-label').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+
+  const today     = new Date().toISOString().split('T')[0];
+  const leads     = calFilteredLeads();
+
+  // Build date → leads map
+  const fuMap = {};     // 'YYYY-MM-DD' → []
+  leads.forEach(l => {
+    const d = l.follow_up_date;
+    if (!fuMap[d]) fuMap[d] = [];
+    fuMap[d].push(l);
+  });
+
+  // Summary strip
+  const monthPrefix = calYear + '-' + String(calMonth + 1).padStart(2, '0');
+  const thisMonthLeads = leads.filter(l => l.follow_up_date.startsWith(monthPrefix));
+  const overdueLeads   = leads.filter(l => l.follow_up_date < today);
+  const todayLeads     = fuMap[today] || [];
+  const upcomingLeads  = leads.filter(l => l.follow_up_date > today && l.follow_up_date.startsWith(monthPrefix));
+
+  document.getElementById('cal-summary-strip').innerHTML = `
+    <div class="kpi-card red"    style="min-width:110px;"><div class="kpi-num">${overdueLeads.length}</div><div class="kpi-lbl">Overdue</div></div>
+    <div class="kpi-card blue"   style="min-width:110px;"><div class="kpi-num">${todayLeads.length}</div><div class="kpi-lbl">Due Today</div></div>
+    <div class="kpi-card green"  style="min-width:110px;"><div class="kpi-num">${upcomingLeads.length}</div><div class="kpi-lbl">This Month</div></div>
+    <div class="kpi-card yellow" style="min-width:110px;"><div class="kpi-num">${leads.length}</div><div class="kpi-lbl">Total Pending</div></div>
+  `;
+
+  // Build grid
+  const firstDay  = new Date(calYear, calMonth, 1).getDay();   // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const cells = document.getElementById('cal-cells');
+  cells.innerHTML = '';
+
+  // Empty cells before day 1
+  for (let i = 0; i < firstDay; i++) {
+    cells.insertAdjacentHTML('beforeend', '<div class="cal-cell cal-empty"></div>');
+  }
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = calYear + '-' + String(calMonth + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const dayLeads = fuMap[dateStr] || [];
+    const isToday    = dateStr === today;
+    const isPast     = dateStr < today;
+    const isOverdue  = isPast && dayLeads.length > 0;
+    const isSelected = dateStr === calSelectedDate;
+
+    let cls = 'cal-cell';
+    if (isToday)    cls += ' cal-today';
+    else if (isOverdue) cls += ' cal-overdue cal-past';
+    else if (isPast) cls += ' cal-past';
+    if (isSelected) cls += ' cal-selected';
+
+    // Count by flag
+    const g = dayLeads.filter(l => l.flag === 'green').length;
+    const y = dayLeads.filter(l => l.flag === 'yellow').length;
+    const r = dayLeads.filter(l => l.flag === 'red').length;
+
+    const badgesHtml = dayLeads.length ? `
+      <div class="cal-badges">
+        ${g ? `<span class="cal-b ${isOverdue ? 'ov' : 'g'}">${g}G</span>` : ''}
+        ${y ? `<span class="cal-b ${isOverdue ? 'ov' : 'y'}">${y}Y</span>` : ''}
+        ${r ? `<span class="cal-b ${isOverdue ? 'ov' : 'r'}">${r}R</span>` : ''}
+      </div>` : '';
+
+    const totalBadge = dayLeads.length
+      ? `<span class="cal-total">${dayLeads.length}</span>` : '';
+
+    cells.insertAdjacentHTML('beforeend', `
+      <div class="${cls}" onclick="calSelectDay('${dateStr}')">
+        ${totalBadge}
+        <div class="cal-dn">${d}</div>
+        ${badgesHtml}
+      </div>
+    `);
+  }
+
+  // Re-render detail panel if a date is selected
+  if (calSelectedDate) calRenderDetail(calSelectedDate);
+}
+
+function calSelectDay(dateStr) {
+  if (calSelectedDate === dateStr) {
+    calSelectedDate = null;
+    calCloseDetail();
+    renderCalendar();
+    return;
+  }
+  calSelectedDate = dateStr;
+  renderCalendar();
+  calRenderDetail(dateStr);
+  document.getElementById('cal-detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function calRenderDetail(dateStr) {
+  const leads   = calFilteredLeads().filter(l => l.follow_up_date === dateStr);
+  const today   = new Date().toISOString().split('T')[0];
+  const isPast  = dateStr < today;
+  const isToday = dateStr === today;
+
+  const [y, m, d] = dateStr.split('-');
+  const label = `${parseInt(d)} ${MONTH_NAMES[parseInt(m)-1]} ${y}`;
+  const suffix = isToday ? ' — Today' : isPast ? ' — Overdue' : '';
+
+  document.getElementById('cal-detail-title').innerHTML =
+    `<i class="fa fa-calendar-day mr-1 text-primary"></i> Follow-ups: ${label}${suffix}
+     <span class="badge badge-${leads.length ? (isPast ? 'danger' : 'primary') : 'secondary'} ml-2">${leads.length} lead${leads.length !== 1 ? 's' : ''}</span>`;
+
+  const panel = document.getElementById('cal-detail-panel');
+  const body  = document.getElementById('cal-detail-body');
+
+  if (!leads.length) {
+    body.innerHTML = '<div class="text-muted py-3 text-center"><i class="fa fa-check-circle mr-1 text-success"></i> No follow-ups scheduled for this date.</div>';
+    panel.style.display = '';
+    return;
+  }
+
+  const srcMap = { walkin:'Walk-in', field:'Field Event', online:'Online', import:'Import' };
+
+  body.innerHTML = leads.map(l => `
+    <div class="cal-detail-row ${l.flag[0]}" style="justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div>
+        <span class="lead-no" onclick="showView('detail','${l.id}')">${l.id}</span>
+        <strong class="ml-2">${l.name}</strong>
+        <code class="ml-2" style="font-size:12px;">${l.mobile}</code>
+        ${flagBadge(l.flag, l.status)}
+      </div>
+      <div class="text-muted" style="font-size:12px; flex:1; min-width:160px;">
+        <i class="fa fa-user mr-1"></i>${l.assigned_to || '—'}
+        &nbsp;·&nbsp;
+        <i class="fa fa-code-branch mr-1"></i>${l.branch_label || l.branch || '—'}
+      </div>
+      ${l.follow_up_note ? `<div style="font-size:12px; color:#374151; width:100%;"><i class="fa fa-sticky-note mr-1 text-warning"></i>${l.follow_up_note}</div>` : ''}
+      <div>
+        <button class="btn btn-sm btn-alt-primary" onclick="showView('detail','${l.id}')"><i class="fa fa-eye mr-1"></i>View</button>
+        <button class="btn btn-sm btn-alt-warning ml-1" onclick="calQuickLog('${l.id}')"><i class="fa fa-phone mr-1"></i>Log</button>
+      </div>
+    </div>
+  `).join('');
+
+  panel.style.display = '';
+}
+
+function calCloseDetail() {
+  document.getElementById('cal-detail-panel').style.display = 'none';
+  calSelectedDate = null;
+  renderCalendar();
+}
+
+function calQuickLog(id) {
+  currentLeadId = id;
+  openLogModal();
+}
+
+/* ════════════════════════════════════════════════
+   IMPORT LEADS
+   ════════════════════════════════════════════════ */
+
+let impParsedRows = [];   // rows after CSV parse
+let impValidRows  = [];   // rows that will actually be imported
+
+const COL_MAP = {
+  name:           ['name','subscriber name','subscriber_name','full name','full_name'],
+  mobile:         ['mobile','phone','phone number','phone_number','mobile no','mobile_no','contact'],
+  email:          ['email','email address'],
+  business_name:  ['business name','business_name'],
+  business_place: ['business place','business_place','visit place','visit_place','location'],
+  income_source:  ['income source','income_source'],
+  monthly_income: ['monthly income','monthly_income','monthly source','monthly_source'],
+  chit_value:     ['proposed chit value','chit value','chit_value','proposed chit','scheme value'],
+  ref_name:       ['reference name','ref name','ref_name','reference','referred by'],
+  flag:           ['flag','lead rating','lead_rating','rating'],
+  follow_up_date: ['remainder date','remainder_date','follow up date','follow_up_date','followup date','next call'],
+  follow_up_note: ['remainder note','remainder_note','follow up note','follow_up_note','remarks note'],
+  notes:          ['notes','remarks','comments','initial notes'],
+  source:         ['source','lead source','lead_source'],
+};
+
+function impReset() {
+  impGoStep(1);
+  impParsedRows = [];
+  impValidRows  = [];
+  document.getElementById('imp-paste').value = '';
+  document.getElementById('imp-file-input').value = '';
+  const dz = document.getElementById('imp-dropzone');
+  if (dz) { dz.style.borderColor = '#c7d2fe'; dz.style.background = '#f5f7ff'; }
+}
+
+function impGoStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('imp-panel-' + i).style.display = (i === n) ? '' : 'none';
+    const s = document.getElementById('imp-step-' + i);
+    s.classList.toggle('active', i === n);
+    s.classList.toggle('done',   i < n);
+  });
+}
+
+function impStep1Next() {
+  const branch   = document.getElementById('imp-branch').value;
+  const employee = document.getElementById('imp-employee').value;
+  if (!branch)   { alert('Please select a branch before continuing.'); return; }
+  if (!employee) { alert('Please select a responsible employee before continuing.'); return; }
+  impGoStep(2);
+}
+
+function impHandleDrop(e) {
+  e.preventDefault();
+  document.getElementById('imp-dropzone').style.borderColor = '#c7d2fe';
+  document.getElementById('imp-dropzone').style.background  = '#f5f7ff';
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.csv')) impReadFileObj(file);
+  else alert('Please drop a .csv file.');
+}
+
+function impReadFile(input) {
+  const file = input.files[0];
+  if (file) impReadFileObj(file);
+}
+
+function impReadFileObj(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('imp-paste').value = e.target.result;
+    toast('File "' + file.name + '" loaded. Click Preview Import to continue.', 'success');
+  };
+  reader.readAsText(file);
+}
+
+function impNormHeader(h) {
+  return h.trim().toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function impMapHeaders(rawHeaders) {
+  const mapping = {};  // fieldKey → csvColumnIndex
+  rawHeaders.forEach((raw, idx) => {
+    const norm = impNormHeader(raw);
+    for (const [field, aliases] of Object.entries(COL_MAP)) {
+      if (!mapping[field] && aliases.includes(norm)) {
+        mapping[field] = idx;
+      }
+    }
+  });
+  return mapping;
+}
+
+function impParseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return { headers: [], rows: [] };
+  const rawHeaders = lines[0].split(',');
+  const mapping = impMapHeaders(rawHeaders);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',');
+    const row = { _raw: vals, _errors: [] };
+    for (const [field, idx] of Object.entries(mapping)) {
+      row[field] = (vals[idx] || '').trim();
+    }
+    rows.push(row);
+  }
+  return { rawHeaders, mapping, rows };
+}
+
+function impParseAndPreview() {
+  const text = document.getElementById('imp-paste').value.trim();
+  if (!text) { alert('Please upload a CSV file or paste CSV content first.'); return; }
+
+  const { rawHeaders, mapping, rows } = impParseCSV(text);
+  if (!rows.length) { alert('No data rows found. Make sure your CSV has a header row and at least one data row.'); return; }
+
+  if (mapping.name === undefined && mapping.mobile === undefined) {
+    alert('Could not find "Name" or "Mobile" columns. Please check your CSV headers match the supported names listed below the upload area.');
+    return;
+  }
+
+  // Validate rows
+  const existingMobiles = new Set(getLeads().map(l => l.mobile));
+  impParsedRows = rows;
+  impValidRows  = [];
+
+  rows.forEach(row => {
+    row._errors = [];
+    if (!row.name)   row._errors.push('Missing name');
+    if (!row.mobile) row._errors.push('Missing mobile');
+    if (row.mobile && existingMobiles.has(row.mobile)) row._errors.push('Duplicate mobile (already exists)');
+    if (row._errors.length === 0) impValidRows.push(row);
+  });
+
+  // Build preview table
+  const previewFields = ['name','mobile','business_name','monthly_income','chit_value','ref_name','flag','follow_up_date'];
+  const shownFields   = previewFields.filter(f => mapping[f] !== undefined || ['name','mobile'].includes(f));
+
+  const thead = document.getElementById('imp-preview-head');
+  const tbody = document.getElementById('imp-preview-body');
+  thead.innerHTML = '<tr><th>#</th>' + shownFields.map(f => `<th>${f.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</th>`).join('') + '<th>Status</th></tr>';
+
+  tbody.innerHTML = '';
+  const preview = rows.slice(0, 50);  // show max 50
+  preview.forEach((row, i) => {
+    const isValid = row._errors.length === 0;
+    const statusCell = isValid
+      ? '<td><span class="badge badge-success">OK</span></td>'
+      : `<td><span class="badge badge-danger" title="${row._errors.join(', ')}">⚠ ${row._errors.join(', ')}</span></td>`;
+    const rowClass = isValid ? '' : 'table-warning';
+    tbody.insertAdjacentHTML('beforeend',
+      `<tr class="${rowClass}"><td class="text-muted" style="font-size:11px;">${i+1}</td>` +
+      shownFields.map(f => `<td style="font-size:12px;">${row[f] || '<span class="text-muted">—</span>'}</td>`).join('') +
+      statusCell + '</tr>'
+    );
+  });
+
+  if (rows.length > 50) {
+    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="${shownFields.length + 2}" class="text-center text-muted" style="font-size:12px;">… and ${rows.length - 50} more rows (all will be imported)</td></tr>`);
+  }
+
+  // Stats banner
+  const dupes  = rows.filter(r => r._errors.some(e => e.includes('Duplicate'))).length;
+  const errors = rows.filter(r => r._errors.some(e => !e.includes('Duplicate'))).length;
+  document.getElementById('imp-preview-stats').innerHTML = `
+    <div class="d-flex flex-wrap" style="gap:10px; margin-bottom:12px;">
+      <div class="kpi-card blue"  style="min-width:100px;"><div class="kpi-num">${rows.length}</div><div class="kpi-lbl">Total Rows</div></div>
+      <div class="kpi-card green" style="min-width:100px;"><div class="kpi-num">${impValidRows.length}</div><div class="kpi-lbl">Will Import</div></div>
+      ${dupes  ? `<div class="kpi-card yellow" style="min-width:100px;"><div class="kpi-num">${dupes}</div><div class="kpi-lbl">Duplicates (skip)</div></div>` : ''}
+      ${errors ? `<div class="kpi-card red" style="min-width:100px;"><div class="kpi-num">${errors}</div><div class="kpi-lbl">Invalid (skip)</div></div>` : ''}
+    </div>
+    ${impValidRows.length === 0 ? '<div class="alert alert-danger"><i class="fa fa-exclamation-triangle mr-2"></i>No valid rows to import. Fix the issues above and try again.</div>' : ''}
+  `;
+
+  document.getElementById('imp-confirm-label').textContent = `Import ${impValidRows.length} Lead${impValidRows.length !== 1 ? 's' : ''}`;
+  document.getElementById('imp-confirm-btn').disabled = impValidRows.length === 0;
+  document.getElementById('imp-summary-badge').innerHTML = `<span class="badge badge-${impValidRows.length > 0 ? 'success' : 'danger'}">${impValidRows.length} ready to import</span>`;
+
+  impGoStep(3);
+}
+
+function impDoImport() {
+  const branch      = document.getElementById('imp-branch').value;
+  const employee    = document.getElementById('imp-employee').value;
+  const source      = document.getElementById('imp-source').value;
+  const branchLabels = { ARN:'Ariyalur (ARN)', TVN:'Tiruvannamalai (TVN)', BCE:'Bengaluru Central (BCE)', ABH:'Abhiram (ABH)', HOF:'Head Office (HOF)' };
+  const today = new Date().toISOString().split('T')[0];
+  const flagMap = { green:'green', yellow:'yellow', red:'red', 'high potential':'green', 'uncertain':'yellow', 'low priority':'red' };
+
+  let imported = 0;
+  impValidRows.forEach(row => {
+    const id = nextLeadNo(branch);
+    const lead = {
+      id,
+      name:           row.name,
+      mobile:         row.mobile,
+      mobile2:        '',
+      email:          row.email || '',
+      branch,
+      branch_label:   branchLabels[branch] || branch,
+      assigned_to:    employee,
+      source:         row.source || source,
+      flag:           flagMap[(row.flag || '').toLowerCase()] || 'green',
+      status:         'new',
+      input_date:     today,
+      follow_up_date: row.follow_up_date || '',
+      follow_up_note: row.follow_up_note || '',
+      notes:          row.notes || '',
+      income_source:  row.income_source || '',
+      monthly_income: row.monthly_income || '',
+      business_name:  row.business_name || '',
+      business_place: row.business_place || '',
+      chit_value:     row.chit_value || '',
+      ref_name:       row.ref_name || '',
+      created_by:     'Mathan Raj',
+      created_at:     today,
+      updated_at:     today,
+      interactions:   [],
+      subscriber_id:  null,
+      converted_at:   null,
+    };
+    updateLead(lead);
+    imported++;
+  });
+
+  const skipped = impParsedRows.length - imported;
+  document.getElementById('imp-done-title').textContent = `${imported} Lead${imported !== 1 ? 's' : ''} Imported!`;
+  document.getElementById('imp-done-body').innerHTML =
+    `Assigned to <strong>${employee}</strong> · Branch: <strong>${branchLabels[branch]}</strong><br>` +
+    (skipped ? `<span class="text-warning"><i class="fa fa-exclamation-triangle mr-1"></i>${skipped} row${skipped !== 1 ? 's' : ''} skipped (duplicates or missing required fields).</span>` : 'All rows imported successfully.');
+
+  impGoStep(4);
+  toast(`${imported} leads imported successfully.`, 'success');
+}
+
+</script>
+</body>
+</html>

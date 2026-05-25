@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM Reports - Staging ROSCA Org</title>
+<link rel="stylesheet" href="./assets/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+  .flag-badge-green  { background:#d1fae5; color:#065f46; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .flag-badge-yellow { background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .flag-badge-red    { background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .flag-badge-conv   { background:#ede9fe; color:#5b21b6; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .stat-kpi { border-left:4px solid; padding:14px 16px; background:#fff; }
+  .stat-kpi.blue   { border-color:#3b82f6; }
+  .stat-kpi.green  { border-color:#22c55e; }
+  .stat-kpi.purple { border-color:#8b5cf6; }
+  .stat-kpi.orange { border-color:#f59e0b; }
+  .stat-kpi .kpi-num   { font-size:28px; font-weight:700; line-height:1; }
+  .stat-kpi .kpi-label { font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; margin-top:4px; font-weight:700; }
+  .stat-kpi .kpi-sub   { font-size:12px; color:#9ca3af; margin-top:2px; }
+  /* Funnel bar */
+  .funnel-row { display:flex; align-items:center; margin-bottom:10px; }
+  .funnel-row .f-label { width:100px; font-size:12.5px; color:#374151; font-weight:600; flex-shrink:0; }
+  .funnel-row .f-bar-wrap { flex:1; background:#f3f4f6; border-radius:4px; height:22px; overflow:hidden; }
+  .funnel-row .f-bar { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:8px; font-size:12px; font-weight:700; color:#fff; }
+  .funnel-row .f-count { width:50px; text-align:right; font-size:13px; font-weight:700; margin-left:10px; }
+  /* Branch table */
+  .branch-bar { height:10px; border-radius:3px; background:#3b82f6; display:inline-block; }
+  .overdue-text { color:#dc2626 !important; font-weight:600; }
+  .soon-text    { color:#d97706 !important; }
+  .lead-no-link { font-family:monospace; font-weight:700; color:#2d6df6; }
+</style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="#">
+        <img src="./assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-invoice-dollar"></i><span class="nav-main-link-name">Collections</span></a></li>
+        <li class="nav-main-heading">CRM</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leads-list.html"><i class="nav-main-link-icon fa fa-address-card"></i><span class="nav-main-link-name">Leads</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="reports.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">CRM Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-import"></i><span class="nav-main-link-name">Import Leads</span></a></li>
+        <li class="nav-main-heading">Accounting</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-container">
+
+    <!-- Page Title -->
+    <div class="bg-primary-dark">
+      <div class="content content-full">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
+          <h3 class="flex-sm-fill my-2 text-white">
+            <i class="fa fa-chart-bar"></i>
+            <span class="ml-2 mr-2">CRM Reports &amp; Analytics</span>
+            <small class="d-block d-sm-inline-block mt-2 mt-sm-0 font-size-base font-w400 text-light">Lead funnel, conversion rates, follow-up compliance</small>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Filter Block -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-filter mr-1"></i> Report Filters</h3>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="form-row align-items-end">
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">From Date</label>
+              <input type="date" class="form-control form-control-sm" value="2026-01-01">
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">To Date</label>
+              <input type="date" class="form-control form-control-sm" value="2026-05-25">
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Branch</label>
+              <select class="form-control form-control-sm">
+                <option>All Branches</option>
+                <option>Ariyalur (ARN)</option>
+                <option>Tiruvannamalai (TVN)</option>
+                <option>BCE</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Employee</label>
+              <select class="form-control form-control-sm">
+                <option>All Employees</option>
+                <option>Dineshkumar M</option>
+                <option>Rajkumar S</option>
+              </select>
+            </div>
+            <div class="form-group col-sm mb-2 d-flex" style="gap:6px;">
+              <button class="btn btn-sm btn-primary"><i class="fa fa-sync mr-1"></i>Apply</button>
+              <button class="btn btn-sm btn-outline-secondary ml-auto"><i class="fa fa-download mr-1"></i>Export CSV</button>
+              <button class="btn btn-sm btn-outline-secondary"><i class="fa fa-print mr-1"></i>Print</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="row mb-3">
+        <div class="col-6 col-md-3">
+          <div class="block block-rounded mb-0 stat-kpi blue">
+            <div class="kpi-num text-primary">143</div>
+            <div class="kpi-label">Total Leads</div>
+            <div class="kpi-sub">Jan – May 2026</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="block block-rounded mb-0 stat-kpi green">
+            <div class="kpi-num" style="color:#16a34a;">28</div>
+            <div class="kpi-label">Converted</div>
+            <div class="kpi-sub" style="color:#16a34a;">↑ 19.6% rate</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mt-2 mt-md-0">
+          <div class="block block-rounded mb-0 stat-kpi orange">
+            <div class="kpi-num" style="color:#d97706;">4.2</div>
+            <div class="kpi-label">Avg Follow-ups to Convert</div>
+            <div class="kpi-sub">per converted lead</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mt-2 mt-md-0">
+          <div class="block block-rounded mb-0 stat-kpi purple">
+            <div class="kpi-num" style="color:#7c3aed;">76%</div>
+            <div class="kpi-label">Follow-up Compliance</div>
+            <div class="kpi-sub">on-time vs missed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+
+        <!-- Lead Funnel -->
+        <div class="col-lg-5">
+          <div class="block block-rounded block-bordered">
+            <div class="block-header border-bottom">
+              <h3 class="block-title"><i class="fa fa-filter mr-1"></i> Lead Funnel</h3>
+            </div>
+            <div class="block-content block-content-full">
+              <div class="funnel-row">
+                <div class="f-label">New</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:31%;background:#6b7280;">31%</div>
+                </div>
+                <div class="f-count text-muted">45</div>
+              </div>
+              <div class="funnel-row">
+                <div class="f-label">In Progress</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:49%;background:#3b82f6;">49%</div>
+                </div>
+                <div class="f-count" style="color:#3b82f6;">70</div>
+              </div>
+              <div class="funnel-row">
+                <div class="f-label">Converted</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:20%;background:#22c55e;">20%</div>
+                </div>
+                <div class="f-count" style="color:#22c55e;">28</div>
+              </div>
+              <div class="funnel-row">
+                <div class="f-label">Dead</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:7%;background:#ef4444;">7%</div>
+                </div>
+                <div class="f-count" style="color:#ef4444;">10</div>
+              </div>
+              <hr>
+              <div class="funnel-row">
+                <div class="f-label">🟢 Green</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:62%;background:#22c55e;">62%</div>
+                </div>
+                <div class="f-count" style="color:#22c55e;">89</div>
+              </div>
+              <div class="funnel-row">
+                <div class="f-label">🟡 Yellow</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:22%;background:#f59e0b;">22%</div>
+                </div>
+                <div class="f-count" style="color:#f59e0b;">32</div>
+              </div>
+              <div class="funnel-row">
+                <div class="f-label">🔴 Red</div>
+                <div class="f-bar-wrap">
+                  <div class="f-bar" style="width:8%;background:#ef4444;">8%</div>
+                </div>
+                <div class="f-count" style="color:#ef4444;">12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Branch Breakdown -->
+        <div class="col-lg-7">
+          <div class="block block-rounded block-bordered">
+            <div class="block-header border-bottom">
+              <h3 class="block-title"><i class="fa fa-store mr-1"></i> Branch-wise Breakdown</h3>
+            </div>
+            <div class="block-content block-content-full">
+              <table class="table table-bordered table-vcenter">
+                <thead>
+                  <tr class="bg-body-light">
+                    <th>Branch</th>
+                    <th class="text-center">Total Leads</th>
+                    <th class="text-center">🟢 Green</th>
+                    <th class="text-center">🟡 Yellow</th>
+                    <th class="text-center">🔴 Red</th>
+                    <th class="text-center">Converted</th>
+                    <th class="text-center">Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Ariyalur (ARN)</strong></td>
+                    <td class="text-center">52</td>
+                    <td class="text-center" style="color:#16a34a;font-weight:700;">32</td>
+                    <td class="text-center" style="color:#d97706;font-weight:700;">14</td>
+                    <td class="text-center" style="color:#dc2626;font-weight:700;">6</td>
+                    <td class="text-center"><strong style="color:#22c55e;">8</strong></td>
+                    <td class="text-center"><span class="badge badge-success">15.4%</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Tiruvannamalai (TVN)</strong></td>
+                    <td class="text-center">41</td>
+                    <td class="text-center" style="color:#16a34a;font-weight:700;">28</td>
+                    <td class="text-center" style="color:#d97706;font-weight:700;">9</td>
+                    <td class="text-center" style="color:#dc2626;font-weight:700;">4</td>
+                    <td class="text-center"><strong style="color:#22c55e;">12</strong></td>
+                    <td class="text-center"><span class="badge badge-success">29.3%</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Bengaluru Central (BCE)</strong></td>
+                    <td class="text-center">30</td>
+                    <td class="text-center" style="color:#16a34a;font-weight:700;">20</td>
+                    <td class="text-center" style="color:#d97706;font-weight:700;">7</td>
+                    <td class="text-center" style="color:#dc2626;font-weight:700;">3</td>
+                    <td class="text-center"><strong style="color:#22c55e;">8</strong></td>
+                    <td class="text-center"><span class="badge badge-success">26.7%</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Abhiram (ABH)</strong></td>
+                    <td class="text-center">20</td>
+                    <td class="text-center" style="color:#16a34a;font-weight:700;">9</td>
+                    <td class="text-center" style="color:#d97706;font-weight:700;">2</td>
+                    <td class="text-center" style="color:#dc2626;font-weight:700;">9</td>
+                    <td class="text-center"><strong style="color:#ef4444;">0</strong></td>
+                    <td class="text-center"><span class="badge badge-secondary">0%</span></td>
+                  </tr>
+                  <tr class="bg-body-light">
+                    <td><strong>Total</strong></td>
+                    <td class="text-center font-w700">143</td>
+                    <td class="text-center font-w700" style="color:#16a34a;">89</td>
+                    <td class="text-center font-w700" style="color:#d97706;">32</td>
+                    <td class="text-center font-w700" style="color:#dc2626;">22</td>
+                    <td class="text-center font-w700" style="color:#22c55e;">28</td>
+                    <td class="text-center"><span class="badge badge-primary">19.6%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Detailed Lead Report Table -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-table mr-1"></i> Detailed Lead Report</h3>
+          <div class="block-options">
+            <button class="btn btn-sm btn-outline-primary mr-1"><i class="fa fa-download mr-1"></i>Export CSV</button>
+            <button class="btn btn-sm btn-outline-secondary"><i class="fa fa-print mr-1"></i>Print</button>
+          </div>
+        </div>
+        <div class="block-content block-content-full">
+          <table class="table table-bordered table-striped table-vcenter table-sm">
+            <thead>
+              <tr class="bg-body-light">
+                <th>#</th>
+                <th>Lead No</th>
+                <th>Input Date</th>
+                <th>Subscriber Name</th>
+                <th>Mobile No</th>
+                <th>Status</th>
+                <th>Updated Date</th>
+                <th>Update By</th>
+                <th>Employee Name</th>
+                <th>Lead Status</th>
+                <th>Remainder Date</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-02783</a></td>
+                <td>08-Sep-2025</td>
+                <td><strong>Ramesh</strong></td>
+                <td><code>9443243225</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">Follow Up</span></td>
+                <td class="soon-text">17-Jun-2026</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03074</a></td>
+                <td>04-Nov-2025</td>
+                <td><strong>Ammayee Educational Trust</strong></td>
+                <td><code>9443438453</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-yellow">Follow Up</span></td>
+                <td>18-Jun-2026</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03267</a></td>
+                <td>02-Dec-2025</td>
+                <td><strong>Balaji Jewellery</strong></td>
+                <td><code>9443880113</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">Follow Up</span></td>
+                <td>18-Jun-2026</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03314</a></td>
+                <td>16-Dec-2025</td>
+                <td><strong>Prakash (ajith kvb)</strong></td>
+                <td><code>9952333723</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">Follow Up</span></td>
+                <td class="overdue-text"><i class="fa fa-exclamation-circle mr-1"></i>10-Jun · Overdue</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03472</a></td>
+                <td>02-Jan-2026</td>
+                <td><strong>Devadoss (VAO)</strong></td>
+                <td><code>9994017871</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-yellow">Follow Up</span></td>
+                <td>17-Jun-2026</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03736</a></td>
+                <td>27-Feb-2026</td>
+                <td><strong>Fathima</strong></td>
+                <td><code>9443468944</code></td>
+                <td><span class="badge badge-info">In Progress</span></td>
+                <td>13-May-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-red">Follow Up</span></td>
+                <td>15-Jul-2026</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03275</a></td>
+                <td>04-Dec-2025</td>
+                <td><strong>Ashwini Bekery</strong></td>
+                <td><code>9943288449</code></td>
+                <td><span class="badge badge-success">Converted</span></td>
+                <td>20-Apr-2026</td>
+                <td>TVN-Dineshkumar M</td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-conv">✔ Converted</span></td>
+                <td class="text-muted">—</td>
+                <td style="font-size:11px;">ARN - Dineshkumar Munusamy (BCE)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="text-muted" style="font-size:12.5px;">Showing 1–7 of 143 leads · Total mobile sum: 120,922,596,410</span>
+            <div>
+              <button class="btn btn-sm btn-secondary mr-1" disabled>← Prev</button>
+              <button class="btn btn-sm btn-primary">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead Detail - ARN-02783 - Staging ROSCA Org</title>
+<link rel="stylesheet" href="./assets/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+  .flag-badge-green  { background:#d1fae5; color:#065f46; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .flag-badge-yellow { background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .flag-badge-red    { background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+
+  /* Interaction timeline */
+  .timeline { position:relative; padding-left:30px; }
+  .timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:#dee2e6; }
+  .timeline-item { position:relative; margin-bottom:28px; }
+  .timeline-item::before { content:''; position:absolute; left:-24px; top:4px; width:14px; height:14px; border-radius:50%; background:#3b82f6; border:3px solid #fff; box-shadow:0 0 0 2px #3b82f6; }
+  .timeline-item.green::before  { background:#22c55e; box-shadow:0 0 0 2px #22c55e; }
+  .timeline-item.yellow::before { background:#f59e0b; box-shadow:0 0 0 2px #f59e0b; }
+  .timeline-item.red::before    { background:#ef4444; box-shadow:0 0 0 2px #ef4444; }
+  .timeline-header { font-size:13px; font-weight:700; color:#1e293b; }
+  .timeline-meta   { font-size:12px; color:#6b7280; margin-top:2px; }
+  .timeline-body   { font-size:13.5px; color:#374151; margin-top:8px; background:#f8f9fa; border-left:3px solid #dee2e6; padding:10px 14px; border-radius:0 6px 6px 0; }
+  .timeline-followup { font-size:12px; color:#0369a1; background:#e0f2fe; border-radius:6px; padding:5px 10px; margin-top:8px; display:inline-block; }
+
+  /* Modal */
+  .modal-header { background:#f8f9fa; border-bottom:1px solid #dee2e6; }
+  .modal-title { font-size:15px; }
+  .flag-selector-sm { display:flex; gap:8px; }
+  .flag-sel-btn { border:2px solid #dee2e6; border-radius:6px; padding:6px 14px; cursor:pointer; font-size:12px; font-weight:700; }
+  .flag-sel-btn.active-green  { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
+  .flag-sel-btn.active-yellow { border-color:#f59e0b; background:#fffbeb; color:#b45309; }
+  .flag-sel-btn.active-red    { border-color:#ef4444; background:#fef2f2; color:#b91c1c; }
+  .stat-label { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; font-weight:700; }
+  .stat-value { font-size:14px; font-weight:700; color:#1e293b; margin-top:2px; }
+</style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="#">
+        <img src="./assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-invoice-dollar"></i><span class="nav-main-link-name">Collections</span></a></li>
+        <li class="nav-main-heading">CRM</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="leads-list.html"><i class="nav-main-link-icon fa fa-address-card"></i><span class="nav-main-link-name">Leads</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="reports.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">CRM Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-import"></i><span class="nav-main-link-name">Import Leads</span></a></li>
+        <li class="nav-main-heading">Accounting</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-container">
+
+    <!-- Page Title -->
+    <div class="bg-primary-dark">
+      <div class="content content-full">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
+          <h3 class="flex-sm-fill my-2 text-white">
+            <i class="fa fa-address-card"></i>
+            <span class="ml-2 mr-2">Lead — ARN-02783</span>
+            <small class="d-block d-sm-inline-block mt-2 mt-sm-0 font-size-base font-w400 text-light">Ramesh · Ariyalur Branch</small>
+          </h3>
+          <div class="mt-2 mt-sm-0" style="display:flex;gap:8px;">
+            <a href="leads-list.html" class="btn btn-sm btn-alt-secondary"><i class="fa fa-arrow-left mr-1"></i> Back</a>
+            <button class="btn btn-sm btn-alt-warning" data-toggle="modal" data-target="#logInteractionModal">
+              <i class="fa fa-phone mr-1"></i> Log Interaction
+            </button>
+            <a href="convert-subscriber.html" class="btn btn-sm btn-success">
+              <i class="fa fa-user-check mr-1"></i> Convert to Subscriber
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="row">
+
+        <!-- Left: Lead Summary -->
+        <div class="col-lg-4">
+
+          <!-- Lead Info Card -->
+          <div class="block block-rounded block-bordered">
+            <div class="block-header border-bottom">
+              <h3 class="block-title">Lead Details</h3>
+              <div class="block-options">
+                <a href="#" class="btn btn-sm btn-alt-primary"><i class="fa fa-edit mr-1"></i>Edit</a>
+              </div>
+            </div>
+            <div class="block-content block-content-full">
+              <table class="table table-sm table-borderless mb-0">
+                <tbody>
+                  <tr>
+                    <td class="stat-label" style="width:40%;">Lead No</td>
+                    <td><code class="font-w700">ARN-02783</code></td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Name</td>
+                    <td><strong>Ramesh</strong></td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Mobile</td>
+                    <td><code>9443 243 225</code></td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Branch</td>
+                    <td>Ariyalur (ARN)</td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Source</td>
+                    <td><i class="fa fa-map-marker-alt text-warning mr-1"></i>Field Event</td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Input Date</td>
+                    <td>08-Sep-2025</td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Assigned To</td>
+                    <td>Dineshkumar M</td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Status</td>
+                    <td><span class="badge badge-info">In Progress</span></td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Flag</td>
+                    <td><span class="flag-badge-green">● Green</span></td>
+                  </tr>
+                  <tr>
+                    <td class="stat-label">Created By</td>
+                    <td class="text-muted" style="font-size:12px;">ARN-Dineshkumar Munusamy (BCE)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="block block-rounded block-bordered">
+            <div class="block-header border-bottom">
+              <h3 class="block-title">Activity Summary</h3>
+            </div>
+            <div class="block-content block-content-full">
+              <div class="row text-center">
+                <div class="col-4">
+                  <div style="font-size:22px;font-weight:700;color:#3b82f6;">3</div>
+                  <div class="stat-label">Interactions</div>
+                </div>
+                <div class="col-4">
+                  <div style="font-size:22px;font-weight:700;color:#22c55e;">2</div>
+                  <div class="stat-label">Honoured</div>
+                </div>
+                <div class="col-4">
+                  <div style="font-size:22px;font-weight:700;color:#f59e0b;">1</div>
+                  <div class="stat-label">Pending</div>
+                </div>
+              </div>
+              <hr>
+              <div>
+                <div class="stat-label">Last Contact</div>
+                <div class="stat-value">13-May-2026</div>
+              </div>
+              <div class="mt-3">
+                <div class="stat-label">Next Follow-up</div>
+                <div class="stat-value" style="color:#d97706;">
+                  <i class="fa fa-calendar-alt mr-1"></i>17-Jun-2026
+                </div>
+                <small class="text-muted">Call back after salary credit</small>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Interaction Timeline -->
+        <div class="col-lg-8">
+          <div class="block block-rounded block-bordered">
+            <div class="block-header border-bottom">
+              <h3 class="block-title"><i class="fa fa-history mr-1"></i> Interaction Timeline</h3>
+              <div class="block-options">
+                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#logInteractionModal">
+                  <i class="fa fa-plus mr-1"></i> Log Interaction
+                </button>
+              </div>
+            </div>
+            <div class="block-content block-content-full">
+
+              <div class="timeline">
+
+                <!-- Interaction 1 -->
+                <div class="timeline-item green">
+                  <div class="timeline-header">
+                    <i class="fa fa-phone mr-1"></i> Phone Call
+                    <span class="flag-badge-green ml-2">● Green</span>
+                    <span class="text-muted ml-2" style="font-size:12px;font-weight:400;">13-May-2026 · 9:39 AM</span>
+                  </div>
+                  <div class="timeline-meta">By: TVN-Dineshkumar M (BCE/ABH)</div>
+                  <div class="timeline-body">
+                    Discussed chit scheme options. Prospect is interested in the ₹50,000 group starting in July. Has a stable income from jewellery business. Very responsive on call.
+                  </div>
+                  <div class="timeline-followup">
+                    <i class="fa fa-calendar-check mr-1"></i>
+                    <strong>Follow-up: 17-Jun-2026</strong> — "Call back after salary credit, he'll confirm by then"
+                  </div>
+                </div>
+
+                <!-- Interaction 2 -->
+                <div class="timeline-item green">
+                  <div class="timeline-header">
+                    <i class="fa fa-walking mr-1"></i> In-Person Visit
+                    <span class="flag-badge-green ml-2">● Green</span>
+                    <span class="text-muted ml-2" style="font-size:12px;font-weight:400;">28-Apr-2026 · 11:00 AM</span>
+                  </div>
+                  <div class="timeline-meta">By: TVN-Dineshkumar M (BCE/ABH)</div>
+                  <div class="timeline-body">
+                    Met at the Ariyalur branch. Reviewed scheme documents informally. He brought his wife along. Understood the chit fund structure well. No objections raised.
+                  </div>
+                  <div class="timeline-followup" style="background:#dcfce7;color:#166534;">
+                    <i class="fa fa-check-circle mr-1"></i>
+                    Follow-up: 13-May-2026 — "Confirm interest" <strong>✅ Completed</strong>
+                  </div>
+                </div>
+
+                <!-- Interaction 3 -->
+                <div class="timeline-item green">
+                  <div class="timeline-header">
+                    <i class="fa fa-phone mr-1"></i> Phone Call
+                    <span class="flag-badge-green ml-2">● Green</span>
+                    <span class="text-muted ml-2" style="font-size:12px;font-weight:400;">08-Sep-2025 · 10:00 AM</span>
+                  </div>
+                  <div class="timeline-meta">By: ARN-Dineshkumar Munusamy (BCE)</div>
+                  <div class="timeline-body">
+                    First contact after field event. Prospect expressed interest in chit funds as a savings instrument. Has steady income. Agreed to visit the branch for more information.
+                  </div>
+                  <div class="timeline-followup">
+                    <i class="fa fa-calendar-check mr-1"></i>
+                    <strong>Follow-up: 28-Apr-2026</strong> — "Schedule in-person meeting at branch"
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Log Interaction Modal -->
+<div class="modal fade" id="logInteractionModal" tabindex="-1" role="dialog" aria-labelledby="logInteractionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logInteractionModalLabel">
+          <i class="fa fa-phone mr-2 text-primary"></i>Log Interaction — Ramesh (ARN-02783)
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group col-sm-4">
+            <label>Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" value="2026-05-25">
+          </div>
+          <div class="form-group col-sm-4">
+            <label>Time <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" value="10:30">
+          </div>
+          <div class="form-group col-sm-4">
+            <label>Interaction Type <span class="text-danger">*</span></label>
+            <select class="form-control">
+              <option>Phone Call</option>
+              <option>In-Person Visit</option>
+              <option>WhatsApp</option>
+              <option>Email</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-12">
+            <label>Outcome / Notes <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="3" placeholder="What was discussed? What was the outcome?"></textarea>
+          </div>
+          <div class="form-group col-sm-12">
+            <label>Update Flag</label>
+            <div class="flag-selector-sm">
+              <button type="button" class="flag-sel-btn active-green">🟢 Green — Still promising</button>
+              <button type="button" class="flag-sel-btn">🟡 Yellow — Uncertain now</button>
+              <button type="button" class="flag-sel-btn">🔴 Red — Not interested</button>
+            </div>
+          </div>
+          <div class="form-group col-sm-12">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="scheduleFollowup" checked>
+              <label class="custom-control-label font-w600" for="scheduleFollowup">Schedule a follow-up</label>
+            </div>
+          </div>
+          <div class="form-group col-sm-4">
+            <label>Follow-up Date</label>
+            <input type="date" class="form-control">
+          </div>
+          <div class="form-group col-sm-8">
+            <label>Follow-up Note</label>
+            <input type="text" class="form-control" placeholder="Reminder note for the follow-up…">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary"><i class="fa fa-save mr-1"></i> Save Interaction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+</body>
+</html>

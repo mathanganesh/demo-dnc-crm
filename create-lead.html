@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Lead - Staging ROSCA Org</title>
+<link rel="stylesheet" href="./assets/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+  .flag-option { border:2px solid #e2e8f0; border-radius:8px; padding:14px 16px; cursor:pointer; text-align:center; transition:border-color .15s, background .15s; }
+  .flag-option:hover { border-color:#93c5fd; background:#f0f9ff; }
+  .flag-option.selected-green  { border-color:#22c55e; background:#f0fdf4; }
+  .flag-option.selected-yellow { border-color:#f59e0b; background:#fffbeb; }
+  .flag-option.selected-red    { border-color:#ef4444; background:#fef2f2; }
+  .flag-dot { width:22px; height:22px; border-radius:50%; margin:0 auto 8px; }
+  .source-option { border:2px solid #e2e8f0; border-radius:8px; padding:12px 14px; cursor:pointer; display:flex; align-items:flex-start; gap:12px; transition:border-color .15s, background .15s; }
+  .source-option:hover, .source-option.selected { border-color:#3b82f6; background:#eff6ff; }
+  .source-option input[type=radio] { margin-top:3px; accent-color:#3b82f6; }
+</style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="#">
+        <img src="./assets/rosca-digital-sm.png" alt="ROSCA Org" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-invoice-dollar"></i><span class="nav-main-link-name">Collections</span></a></li>
+        <li class="nav-main-heading">CRM</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="leads-list.html"><i class="nav-main-link-icon fa fa-address-card"></i><span class="nav-main-link-name">Leads</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="reports.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">CRM Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-file-import"></i><span class="nav-main-link-name">Import Leads</span></a></li>
+        <li class="nav-main-heading">Accounting</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search subscribers, groups...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-container">
+
+    <!-- Page Title -->
+    <div class="bg-primary-dark">
+      <div class="content content-full">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
+          <h3 class="flex-sm-fill my-2 text-white">
+            <i class="fa fa-plus"></i>
+            <span class="ml-2 mr-2">Add New Lead</span>
+            <small class="d-block d-sm-inline-block mt-2 mt-sm-0 font-size-base font-w400 text-light">Enter the prospect's details below</small>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <form>
+
+        <!-- Contact Info -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-user mr-1 text-primary"></i> Contact Information</h3>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="form-row">
+              <div class="form-group col-sm-6">
+                <label for="lead_name">Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="lead_name" placeholder="e.g. Ramesh Kumar">
+              </div>
+              <div class="form-group col-sm-3">
+                <label for="mobile1">Mobile (Primary) <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="mobile1" placeholder="10-digit number">
+              </div>
+              <div class="form-group col-sm-3">
+                <label for="mobile2">Mobile (Alternate)</label>
+                <input type="text" class="form-control" id="mobile2" placeholder="Optional">
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="email">Email Address</label>
+                <input type="email" class="form-control" id="email" placeholder="Optional">
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="notes">Initial Notes / Remarks</label>
+                <input type="text" class="form-control" id="notes" placeholder="Any first impression or context">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Branch & Assignment -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-sitemap mr-1 text-primary"></i> Branch &amp; Assignment</h3>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="form-row">
+              <div class="form-group col-sm-4">
+                <label for="branch_id">Branch <span class="text-danger">*</span></label>
+                <select class="form-control" id="branch_id">
+                  <option value="">— Select Branch —</option>
+                  <option selected>Ariyalur (ARN)</option>
+                  <option>Tiruvannamalai (TVN)</option>
+                  <option>Bengaluru Central (BCE)</option>
+                  <option>Abhiram (ABH)</option>
+                  <option>Head Office</option>
+                </select>
+              </div>
+              <div class="form-group col-sm-4">
+                <label for="assigned_to">Assign To (Employee) <span class="text-danger">*</span></label>
+                <select class="form-control" id="assigned_to">
+                  <option value="">— Select Employee —</option>
+                  <option selected>Dineshkumar M (BCE/ABH)</option>
+                  <option>Rajkumar S (ARN)</option>
+                  <option>Priya R (TVN)</option>
+                </select>
+                <small class="form-text text-muted">The employee responsible for follow-up.</small>
+              </div>
+              <div class="form-group col-sm-2">
+                <label for="input_date">Input Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="input_date" value="2026-05-25">
+              </div>
+              <div class="form-group col-sm-2">
+                <label for="followup_date">First Follow-up Date</label>
+                <input type="date" class="form-control" id="followup_date">
+                <small class="form-text text-muted">Optional reminder.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lead Source -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-satellite-dish mr-1 text-primary"></i> Lead Source <span class="text-danger">*</span></h3>
+          </div>
+          <div class="block-content block-content-full">
+            <div class="row">
+              <div class="col-sm-3 mb-3">
+                <label class="source-option selected">
+                  <input type="radio" name="source" checked>
+                  <div>
+                    <div class="font-w700"><i class="fa fa-walking text-primary mr-1"></i> Walk-in / Referral</div>
+                    <small class="text-muted">Walked in to a branch or referred by an existing subscriber</small>
+                  </div>
+                </label>
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label class="source-option">
+                  <input type="radio" name="source">
+                  <div>
+                    <div class="font-w700"><i class="fa fa-map-marker-alt text-warning mr-1"></i> Field Marketing Event</div>
+                    <small class="text-muted">Generated during a field campaign or door-to-door visit</small>
+                  </div>
+                </label>
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label class="source-option">
+                  <input type="radio" name="source">
+                  <div>
+                    <div class="font-w700"><i class="fa fa-globe text-success mr-1"></i> Online / Social Media</div>
+                    <small class="text-muted">Website inquiry, Facebook ad, WhatsApp campaign</small>
+                  </div>
+                </label>
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label class="source-option">
+                  <input type="radio" name="source">
+                  <div>
+                    <div class="font-w700"><i class="fa fa-file-csv" style="color:#8b5cf6;" ></i> CSV Import</div>
+                    <small class="text-muted">Imported from external marketing tool export</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Initial Flag -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header border-bottom">
+            <h3 class="block-title"><i class="fa fa-flag mr-1 text-primary"></i> Initial Assessment Flag <span class="text-danger">*</span></h3>
+          </div>
+          <div class="block-content block-content-full">
+            <p class="text-muted mb-3">Based on first impression, how would you rate this prospect's conversion potential?</p>
+            <div class="row">
+              <div class="col-sm-4 mb-2">
+                <div class="flag-option selected-green">
+                  <div class="flag-dot" style="background:#22c55e;"></div>
+                  <div class="font-w700" style="color:#15803d;">Green — High Potential</div>
+                  <small class="text-muted">Capable &amp; clearly interested in joining</small>
+                </div>
+              </div>
+              <div class="col-sm-4 mb-2">
+                <div class="flag-option">
+                  <div class="flag-dot" style="background:#f59e0b;"></div>
+                  <div class="font-w700" style="color:#b45309;">Yellow — Uncertain</div>
+                  <small class="text-muted">Needs more follow-ups, not yet committed</small>
+                </div>
+              </div>
+              <div class="col-sm-4 mb-2">
+                <div class="flag-option">
+                  <div class="flag-dot" style="background:#ef4444;"></div>
+                  <div class="font-w700" style="color:#b91c1c;">Red — Low Priority</div>
+                  <small class="text-muted">Not ready or unlikely to convert soon</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-content block-content-full">
+            <button type="submit" class="btn btn-primary mr-2">
+              <i class="fa fa-save mr-1"></i> Save Lead
+            </button>
+            <a href="leads-list.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+</div>
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM Leads - Staging ROSCA Org</title>
+<link rel="stylesheet" href="./assets/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./assets/select2.min.css">
+<link rel="stylesheet" href="./assets/oneui.css">
+<link rel="stylesheet" href="./assets/app.css">
+<style>
+  .flag-badge-green  { background:#d1fae5; color:#065f46; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .flag-badge-yellow { background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .flag-badge-red    { background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .flag-badge-conv   { background:#ede9fe; color:#5b21b6; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .dot-g { color:#16a34a; font-size:8px; }
+  .dot-y { color:#d97706; font-size:8px; }
+  .dot-r { color:#dc2626; font-size:8px; }
+  .overdue-text { color:#dc2626 !important; font-weight:600; }
+  .soon-text    { color:#d97706 !important; }
+  .lead-no-link { font-family:monospace; font-weight:700; color:#2d6df6; }
+  .stat-mini { border-left:3px solid; padding:12px 16px; background:#fff; }
+  .stat-mini.blue   { border-color:#3b82f6; }
+  .stat-mini.green  { border-color:#22c55e; }
+  .stat-mini.yellow { border-color:#f59e0b; }
+  .stat-mini.red    { border-color:#ef4444; }
+  .stat-mini.purple { border-color:#8b5cf6; }
+  .stat-mini .num   { font-size:24px; font-weight:700; line-height:1; }
+  .stat-mini .lbl   { font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+</style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="#">
+        <img src="./assets/rosca-digital-sm.png" alt="ROSCA Org" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon si si-speedometer"></i>
+            <span class="nav-main-link-name">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon fa fa-users"></i>
+            <span class="nav-main-link-name">Subscribers</span>
+          </a>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon fa fa-layer-group"></i>
+            <span class="nav-main-link-name">Groups</span>
+          </a>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon fa fa-file-invoice-dollar"></i>
+            <span class="nav-main-link-name">Collections</span>
+          </a>
+        </li>
+
+        <li class="nav-main-heading">CRM</li>
+
+        <li class="nav-main-item">
+          <a class="nav-main-link active" href="leads-list.html">
+            <i class="nav-main-link-icon fa fa-address-card"></i>
+            <span class="nav-main-link-name">Leads</span>
+          </a>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="reports.html">
+            <i class="nav-main-link-icon fa fa-chart-bar"></i>
+            <span class="nav-main-link-name">CRM Reports</span>
+          </a>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon fa fa-file-import"></i>
+            <span class="nav-main-link-name">Import Leads</span>
+          </a>
+        </li>
+
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item">
+          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" href="#">
+            <i class="nav-main-link-icon fa fa-tasks"></i>
+            <span class="nav-main-link-name">To Be Collected</span>
+          </a>
+          <ul class="nav-main-submenu">
+            <li class="nav-main-item"><a class="nav-main-link" href="#"><span class="nav-main-link-name">Subscriber Wise</span></a></li>
+            <li class="nav-main-item"><a class="nav-main-link" href="#"><span class="nav-main-link-name">Group Wise</span></a></li>
+          </ul>
+        </li>
+        <li class="nav-main-item">
+          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" href="#">
+            <i class="nav-main-link-icon fa fa-check-double"></i>
+            <span class="nav-main-link-name">Collections</span>
+          </a>
+          <ul class="nav-main-submenu">
+            <li class="nav-main-item"><a class="nav-main-link" href="#"><span class="nav-main-link-name">Summary</span></a></li>
+            <li class="nav-main-item"><a class="nav-main-link" href="#"><span class="nav-main-link-name">Date Wise</span></a></li>
+          </ul>
+        </li>
+
+        <li class="nav-main-heading">Accounting</li>
+        <li class="nav-main-item">
+          <a class="nav-main-link" href="#">
+            <i class="nav-main-link-icon fa fa-money-bill-wave"></i>
+            <span class="nav-main-link-name">Branch Payouts</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle">
+          <i class="fa fa-fw fa-bars"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle">
+          <i class="fa fa-fw fa-ellipsis-v"></i>
+        </button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search subscribers, groups...">
+          <div class="input-group-append">
+            <span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" id="page-header-user-dropdown" data-toggle="dropdown">
+            <i class="far fa-user"></i>
+            <span class="d-none d-sm-inline-block ml-1">Mathan Raj</span>
+            <i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main -->
+  <main id="main-container">
+
+    <!-- Page Title -->
+    <div class="bg-primary-dark">
+      <div class="content content-full">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
+          <div>
+            <h3 class="flex-sm-fill my-2 text-white">
+              <i class="fa fa-address-card"></i>
+              <span class="ml-2 mr-2">CRM — Lead Management</span>
+              <small class="d-block d-sm-inline-block mt-2 mt-sm-0 font-size-base font-w400 text-light">Track prospects and convert them into subscribers</small>
+            </h3>
+          </div>
+          <div class="mt-2 mt-sm-0">
+            <a href="create-lead.html" class="btn btn-sm btn-primary">
+              <i class="fa fa-plus mr-1"></i> New Lead
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END Page Title -->
+
+    <div class="content">
+
+      <!-- Summary Stats -->
+      <div class="row mb-3">
+        <div class="col-6 col-md">
+          <div class="block block-rounded mb-0 stat-mini blue">
+            <div class="num text-primary">143</div>
+            <div class="lbl">Total Leads</div>
+          </div>
+        </div>
+        <div class="col-6 col-md">
+          <div class="block block-rounded mb-0 stat-mini green">
+            <div class="num" style="color:#16a34a;">89</div>
+            <div class="lbl">🟢 Green</div>
+          </div>
+        </div>
+        <div class="col-6 col-md mt-2 mt-md-0">
+          <div class="block block-rounded mb-0 stat-mini yellow">
+            <div class="num" style="color:#d97706;">32</div>
+            <div class="lbl">🟡 Yellow</div>
+          </div>
+        </div>
+        <div class="col-6 col-md mt-2 mt-md-0">
+          <div class="block block-rounded mb-0 stat-mini red">
+            <div class="num" style="color:#dc2626;">12</div>
+            <div class="lbl">🔴 Red</div>
+          </div>
+        </div>
+        <div class="col-6 col-md mt-2 mt-md-0">
+          <div class="block block-rounded mb-0 stat-mini purple">
+            <div class="num" style="color:#7c3aed;">28</div>
+            <div class="lbl">✅ Converted</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Follow-up Alert -->
+      <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert">
+        <div>
+          <i class="fa fa-bell mr-2"></i>
+          <strong>2 overdue follow-ups &amp; 1 due today:</strong>
+          PARKASH (ARN-03742), NARAYANAMOORTHI (ARN-03725), Prakash-ajith (ARN-03314)
+        </div>
+        <a href="#" class="btn btn-sm btn-warning ml-3">View All</a>
+      </div>
+
+      <!-- Filter Block -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-filter mr-1"></i> Filters</h3>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="form-row align-items-end">
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Branch</label>
+              <select class="form-control form-control-sm">
+                <option>All Branches</option>
+                <option selected>Ariyalur (ARN)</option>
+                <option>Tiruvannamalai (TVN)</option>
+                <option>Bengaluru Central (BCE)</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Employee</label>
+              <select class="form-control form-control-sm">
+                <option>All Employees</option>
+                <option>Dineshkumar M</option>
+                <option>Rajkumar S</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Status</label>
+              <select class="form-control form-control-sm">
+                <option>All Statuses</option>
+                <option>New</option>
+                <option>In Progress</option>
+                <option>Converted</option>
+                <option>Dead</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Flag</label>
+              <select class="form-control form-control-sm">
+                <option>All Flags</option>
+                <option>Green</option>
+                <option>Yellow</option>
+                <option>Red</option>
+              </select>
+            </div>
+            <div class="form-group col-sm-2 mb-2">
+              <label class="mb-1" style="font-size:12px;">Search</label>
+              <input type="text" class="form-control form-control-sm" placeholder="Name or mobile…">
+            </div>
+            <div class="form-group col-sm mb-2 d-flex" style="gap:6px;">
+              <button class="btn btn-sm btn-primary"><i class="fa fa-search mr-1"></i>Search</button>
+              <button class="btn btn-sm btn-secondary">Reset</button>
+              <button class="btn btn-sm btn-outline-secondary ml-auto"><i class="fa fa-download mr-1"></i>Export CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leads Table -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-list mr-1"></i> Leads — Ariyalur Branch</h3>
+          <div class="block-options">
+            <span class="text-muted" style="font-size:13px;">Showing 1–10 of 13</span>
+          </div>
+        </div>
+        <div class="block-content block-content-full">
+          <table class="table table-bordered table-striped table-vcenter">
+            <thead>
+              <tr class="bg-body-light">
+                <th class="text-center" style="width:40px;">#</th>
+                <th>Lead No</th>
+                <th>Input Date</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Assigned To</th>
+                <th>Flag</th>
+                <th>Lead Status</th>
+                <th>Next Follow-up</th>
+                <th style="width:70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center text-muted">1</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-02783</a></td>
+                <td>08-Sep-2025</td>
+                <td><strong>Ramesh</strong></td>
+                <td><code>9443 243 225</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">● Green</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td class="soon-text">17-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">2</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03074</a></td>
+                <td>04-Nov-2025</td>
+                <td><strong>Ammayee Educational Trust</strong></td>
+                <td><code>9443 438 453</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-yellow">● Yellow</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td class="soon-text">18-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">3</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03267</a></td>
+                <td>02-Dec-2025</td>
+                <td><strong>Balaji Jewellery</strong></td>
+                <td><code>9443 880 113</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">● Green</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td>18-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">4</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03271</a></td>
+                <td>02-Dec-2025</td>
+                <td><strong>Arunai Jewellery</strong></td>
+                <td><code>9442 312 870</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-red">● Red</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td>16-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">5</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03275</a></td>
+                <td>04-Dec-2025</td>
+                <td><strong>Ashwini Bekery</strong></td>
+                <td><code>9943 288 449</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">● Green</span></td>
+                <td><span class="flag-badge-conv">✔ Converted</span></td>
+                <td class="text-muted">—</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">6</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03314</a></td>
+                <td>16-Dec-2025</td>
+                <td><strong>Prakash (ajith kvb)</strong></td>
+                <td><code>9952 333 723</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">● Green</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td class="overdue-text"><i class="fa fa-exclamation-circle mr-1"></i>10-Jun · Overdue</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">7</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03472</a></td>
+                <td>02-Jan-2026</td>
+                <td><strong>Devadoss (VAO)</strong></td>
+                <td><code>9994 017 871</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-yellow">● Yellow</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td>17-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">8</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03483</a></td>
+                <td>05-Jan-2026</td>
+                <td><strong>Saravanan (VAO)</strong></td>
+                <td><code>9943 421 879</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-green">● Green</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td>16-Jun-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">9</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03736</a></td>
+                <td>27-Feb-2026</td>
+                <td><strong>Fathima</strong></td>
+                <td><code>9443 468 944</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-red">● Red</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td>15-Jul-2026</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+              <tr>
+                <td class="text-center text-muted">10</td>
+                <td><a href="lead-detail.html" class="lead-no-link">ARN-03742</a></td>
+                <td>27-Feb-2026</td>
+                <td><strong>Parkash</strong></td>
+                <td><code>7904 007 581</code></td>
+                <td>Dineshkumar M</td>
+                <td><span class="flag-badge-yellow">● Yellow</span></td>
+                <td><span class="badge badge-info">Follow Up</span></td>
+                <td class="overdue-text"><i class="fa fa-exclamation-circle mr-1"></i>09-Jun · Overdue</td>
+                <td><a href="lead-detail.html" class="btn btn-sm btn-alt-primary">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="text-muted" style="font-size:13px;">Showing 1–10 of 13 leads</span>
+            <div>
+              <button class="btn btn-sm btn-secondary mr-1" disabled>← Prev</button>
+              <button class="btn btn-sm btn-primary">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+<script src="./assets/oneui.core.min.js"></script>
+<script src="./assets/oneui.app.min.js"></script>
+</body>
+</html>
