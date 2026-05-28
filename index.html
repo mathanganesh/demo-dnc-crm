@@ -166,7 +166,7 @@
 
       <li class="nav-main-heading">Other</li>
       <li class="nav-main-item">
-        <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-tasks"></i><span class="nav-main-link-name">Tasks</span></a>
+        <a class="nav-main-link" id="nav-mytasks" href="#" onclick="showView('mytasks'); return false;"><i class="nav-main-link-icon fa fa-check-square"></i><span class="nav-main-link-name">My Tasks</span></a>
       </li>
       <li class="nav-main-item">
         <a class="nav-main-link disabled" href="#"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Branch Payouts</span></a>
@@ -868,6 +868,112 @@
   </div>
 </div>
 
+<!-- ─────────────── VIEW: MY TASKS ─────────────── -->
+<div id="view-mytasks" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <h3 class="flex-sm-fill my-2 text-white">
+          <i class="fa fa-check-square"></i>
+          <span class="ml-2 mr-2">My Tasks</span>
+          <small class="d-block d-sm-inline-block font-size-base font-w400 text-light">Pending operational tasks and CRM follow-ups assigned to you</small>
+        </h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI strip -->
+    <div class="row mb-3" id="tasks-kpi-row">
+      <div class="col-6 col-md-3">
+        <div class="block block-rounded mb-0">
+          <div class="block-content text-center py-3">
+            <div class="font-size-h2 font-w700" id="tk-total" style="color:#1e293b;">—</div>
+            <div class="text-muted font-size-sm">Total Pending</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="block block-rounded mb-0">
+          <div class="block-content text-center py-3">
+            <div class="font-size-h2 font-w700 text-danger" id="tk-overdue">—</div>
+            <div class="text-muted font-size-sm">Overdue</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="block block-rounded mb-0">
+          <div class="block-content text-center py-3">
+            <div class="font-size-h2 font-w700 text-warning" id="tk-today">—</div>
+            <div class="text-muted font-size-sm">Due Today</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="block block-rounded mb-0">
+          <div class="block-content text-center py-3">
+            <div class="font-size-h2 font-w700 text-info" id="tk-upcoming">—</div>
+            <div class="text-muted font-size-sm">Upcoming (7 days)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="block block-rounded">
+      <div class="block-header border-bottom">
+        <ul class="nav nav-tabs nav-tabs-block" role="tablist" style="border:none;">
+          <li class="nav-item">
+            <a class="nav-link active" id="tab-all" href="#" onclick="filterTasks('all'); return false;">All Tasks</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-crm" href="#" onclick="filterTasks('crm'); return false;">
+              <i class="fa fa-address-card mr-1"></i> CRM Follow-ups
+              <span id="tk-crm-badge" class="badge badge-danger ml-1" style="display:none;"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-ops" href="#" onclick="filterTasks('ops'); return false;">
+              <i class="fa fa-cogs mr-1"></i> Operational
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="block-content block-content-full p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-striped font-size-sm mb-0">
+            <thead class="thead-dark">
+              <tr class="text-center">
+                <th style="width:22%;text-align:left;">Title</th>
+                <th>Process</th>
+                <th>Current Stage</th>
+                <th>Assignee</th>
+                <th style="width:8%;">Status</th>
+                <th style="width:7%;">Progress</th>
+                <th style="width:8%;">Created</th>
+                <th style="width:9%;">Overall Due</th>
+                <th style="width:5%;">Overdue</th>
+              </tr>
+            </thead>
+            <tbody id="tasks-tbody">
+              <tr><td colspan="9" class="text-center text-muted py-4">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="text-muted font-size-sm mt-1">
+      <span class="badge badge-danger mr-2">Overdue</span>
+      <span class="badge badge-warning mr-2">In Progress</span>
+      <span class="badge badge-success mr-2">Completed</span>
+      &nbsp;·&nbsp; CRM rows link to the lead detail. Operational rows are sample data from rosca-digital.
+    </div>
+  </div>
+</div>
+
 </main><!-- /main-container -->
 </div><!-- /page-container -->
 
@@ -1065,6 +1171,7 @@ let currentInteractionFlag = 'green';
 
 /* ─── localStorage helpers ─── */
 const LS_KEY = 'crm_leads_v2';
+function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function getLeads() {
   const d = localStorage.getItem(LS_KEY);
@@ -1228,6 +1335,7 @@ function showView(name, data) {
   if (name === 'reports') { renderReports(); }
   if (name === 'import')  { impReset(); }
   if (name === 'calendar'){ renderCalendar(); }
+  if (name === 'mytasks') { renderMyTasks(); }
 
   window.scrollTo(0, 0);
 }
@@ -2033,6 +2141,149 @@ const COL_MAP = {
   notes:          ['notes','remarks','comments','initial notes'],
   source:         ['source','lead source','lead_source'],
 };
+
+/* ─── My Tasks ─── */
+function opsDate(offset) {
+  const d = new Date(); d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
+}
+const SAMPLE_OPS_TASKS = [
+  { title:'Disb.Prize Money — SILAMBARASAN E', process:'Disb.Prize Money', stage:'Payment Verification',  assignee:'CHN-RO Rajesh V',  status:'InProgress', progress:60,  created:opsDate(-3), due:opsDate(8),  isOverdue:false, isCrm:false },
+  { title:'Disb.Prize Money — SELVAM DURAI',   process:'Disb.Prize Money', stage:'Documentation',         assignee:'CHN-RO Rajesh V',  status:'InProgress', progress:40,  created:opsDate(-3), due:opsDate(8),  isOverdue:false, isCrm:false },
+  { title:'Collection Verification — KOTTI K', process:'Collection',        stage:'Branch Approval',       assignee:'ARN Dineshkumar',  status:'InProgress', progress:75,  created:opsDate(-5), due:opsDate(1),  isOverdue:false, isCrm:false },
+  { title:'Prize Money Advance — MURUGESAN',   process:'Pr.Mn.Advance',     stage:'Documentation',         assignee:'TVN Priya S',      status:'InProgress', progress:30,  created:opsDate(-8), due:opsDate(-2), isOverdue:true,  isCrm:false },
+  { title:'Enrollment Quality Check — GRP-048',process:'Enrollment',        stage:'Central Verification',  assignee:'BCE Suresh K',     status:'InProgress', progress:50,  created:opsDate(-6), due:opsDate(-3), isOverdue:true,  isCrm:false },
+  { title:'Branch Payout Approval — ARN-May',  process:'Branch Payout',     stage:'Manager Approval',      assignee:'ARN Dineshkumar',  status:'InProgress', progress:80,  created:opsDate(-1), due:opsDate(3),  isOverdue:false, isCrm:false },
+  { title:'Disb.Prize Money — FATHIMA B',      process:'Disb.Prize Money', stage:'Cheque Preparation',    assignee:'TVN Priya S',      status:'InProgress', progress:55,  created:opsDate(-2), due:opsDate(5),  isOverdue:false, isCrm:false },
+  { title:'Subscriber KYC — RAJAN M (S-4821)', process:'KYC Verification',  stage:'Document Upload',       assignee:'BCE Suresh K',     status:'InProgress', progress:20,  created:opsDate(0),  due:opsDate(5),  isOverdue:false, isCrm:false },
+  { title:'Recovery TBC — NARAYANAMOORTHI',    process:'Collection',        stage:'Field Visit Required',  assignee:'ARN Dineshkumar',  status:'InProgress', progress:10,  created:opsDate(-9), due:opsDate(-4), isOverdue:true,  isCrm:false },
+];
+
+let taskFilter = 'all';
+
+function renderMyTasks() {
+  taskFilter = 'all';
+  ['tab-all','tab-crm','tab-ops'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('tab-all').classList.add('active');
+
+  const today = new Date().toISOString().split('T')[0];
+  const leads  = getLeads();
+
+  // Build CRM task rows from leads with a follow-up date that isn't done/converted/dead
+  const crmTasks = leads
+    .filter(l => l.follow_up_date && !['converted','dead'].includes(l.status))
+    .map(l => {
+      const isOverdue = l.follow_up_date < today;
+      const isToday   = l.follow_up_date === today;
+      const flagIcon  = l.flag === 'green' ? '🟢' : l.flag === 'yellow' ? '🟡' : '🔴';
+      return {
+        title:     l.name + ' (' + (l.lead_no || l.id) + ')',
+        process:   'CRM Follow-up',
+        stage:     flagIcon + ' ' + (l.flag.charAt(0).toUpperCase() + l.flag.slice(1)) + ' — ' + (l.status === 'new' ? 'New Lead' : 'In Progress'),
+        assignee:  l.employee || 'Unassigned',
+        status:    isOverdue ? 'Overdue' : 'InProgress',
+        due:       l.follow_up_date,
+        isOverdue: isOverdue,
+        isToday:   isToday,
+        isCrm:     true,
+        leadId:    l.id,
+        note:      l.follow_up_note || '',
+        created:   l.input_date || '—',
+        progress:  null,
+      };
+    });
+
+  // KPI
+  const overdue  = crmTasks.filter(t => t.isOverdue).length + SAMPLE_OPS_TASKS.filter(t => t.isOverdue).length;
+  const todayCt  = crmTasks.filter(t => t.isToday).length;
+  const allTasks = [...crmTasks, ...SAMPLE_OPS_TASKS];
+  const upcoming = crmTasks.filter(t => !t.isOverdue && !t.isToday && t.due > today && t.due <= addDays(today, 7)).length;
+
+  document.getElementById('tk-total').textContent   = allTasks.length;
+  document.getElementById('tk-overdue').textContent  = overdue;
+  document.getElementById('tk-today').textContent    = todayCt;
+  document.getElementById('tk-upcoming').textContent = upcoming;
+
+  const crmOverdueCt = crmTasks.filter(t => t.isOverdue).length;
+  const badge = document.getElementById('tk-crm-badge');
+  badge.textContent   = crmOverdueCt;
+  badge.style.display = crmOverdueCt > 0 ? '' : 'none';
+
+  // Sort all mixed: overdue first (by date asc), then upcoming by date asc
+  function sortTasks(arr) {
+    return [...arr].sort((a,b) => {
+      if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
+      return (a.due||'').localeCompare(b.due||'');
+    });
+  }
+
+  window._allTaskRows = { crm: crmTasks, ops: SAMPLE_OPS_TASKS, sortFn: sortTasks };
+  renderTaskRows(sortTasks(allTasks));
+}
+
+function filterTasks(tab) {
+  taskFilter = tab;
+  ['tab-all','tab-crm','tab-ops'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const { crm, ops, sortFn } = window._allTaskRows || { crm:[], ops:[], sortFn: x=>x };
+  const rows = tab === 'crm' ? crm : tab === 'ops' ? ops : sortFn([...crm, ...ops]);
+  renderTaskRows(rows);
+}
+
+function renderTaskRows(tasks) {
+  const tbody = document.getElementById('tasks-tbody');
+  if (!tasks.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No tasks found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tasks.map(t => {
+    const statusBadge = t.isOverdue
+      ? '<span class="badge badge-danger">Overdue</span>'
+      : t.status === 'Completed'
+        ? '<span class="badge badge-success">Completed</span>'
+        : '<span class="badge badge-warning">In Progress</span>';
+
+    const overdueCell = t.isOverdue
+      ? '<span class="text-danger font-w700">⚠</span>'
+      : '<span class="text-muted">—</span>';
+
+    const dueCellStyle = t.isOverdue ? 'color:#dc2626;font-weight:600;' : '';
+
+    const titleCell = t.isCrm
+      ? `<a href="#" onclick="showView('detail','${t.leadId}'); return false;" class="font-w600">${escH(t.title)}</a>`
+      : `<span class="font-w600">${escH(t.title)}</span>`;
+
+    const noteHtml = t.isCrm && t.note
+      ? `<div class="font-size-xs text-muted mt-1"><i class="fa fa-sticky-note mr-1 text-warning"></i>${escH(t.note)}</div>`
+      : '';
+
+    const processBadge = t.isCrm
+      ? `<span class="badge badge-info mr-1" style="font-size:10px;vertical-align:middle;">CRM</span>`
+      : '';
+
+    const pct = t.progress != null ? t.progress : (t.isCrm ? null : 50);
+    const progressHtml = pct != null
+      ? `<div class="d-flex align-items-center justify-content-center" style="gap:4px;">
+           <div style="flex:1;height:5px;background:#e2e8f0;border-radius:3px;min-width:40px;">
+             <div style="width:${pct}%;height:100%;background:${pct===100?'#22c55e':t.isOverdue?'#ef4444':'#f59e0b'};border-radius:3px;"></div>
+           </div>
+           <small>${pct}%</small>
+         </div>`
+      : '<small class="text-muted">—</small>';
+
+    return `<tr class="${t.isOverdue ? 'table-danger' : ''}">
+      <td>${titleCell}${noteHtml}</td>
+      <td>${processBadge}${escH(t.process)}</td>
+      <td>${escH(t.stage)}</td>
+      <td>${escH(t.assignee)}</td>
+      <td class="text-center">${statusBadge}</td>
+      <td class="text-center">${progressHtml}</td>
+      <td class="text-center text-muted">${t.created || '—'}</td>
+      <td class="text-center" style="${dueCellStyle}">${t.due || '—'}</td>
+      <td class="text-center">${overdueCell}</td>
+    </tr>`;
+  }).join('');
+}
 
 function impReset() {
   impGoStep(1);

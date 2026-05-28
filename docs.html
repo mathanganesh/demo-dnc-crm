@@ -1067,8 +1067,8 @@
         <div class="phase-content">
           <div class="phase-tag">Phase 3b</div>
           <h4>Notifications &amp; Task Bubble Integration</h4>
-          <p>Extend TaskController::bubbleSummary() to merge CRM follow-ups. New artisan command crm:send-followup-reminders scheduled daily at 08:00. New CrmFollowUpDailyDigest notification via existing SMS channel.</p>
-          <div class="phase-deliverable"><strong>Deliverable:</strong> CRM follow-ups appear in the existing task bubble; daily 08:00 SMS lists due leads.</div>
+          <p>Extend TaskController::bubbleSummary() to merge CRM follow-ups. Overdue and today's follow-ups appear in the existing task bubble alongside operational tasks — no new UI or notification infrastructure needed.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> CRM follow-ups appear in the existing task bubble — overdue items pulse red automatically.</div>
         </div>
       </div>
 
@@ -1140,7 +1140,7 @@
       <h2>Notifications &amp; Follow-up Alerts</h2>
     </div>
 
-    <p>No new notification infrastructure — CRM follow-ups are merged into the <strong>existing task bubble</strong> that rosca-digital already shows to every logged-in user.</p>
+    <p>CRM follow-ups are merged into the <strong>existing task bubble</strong> that rosca-digital already shows to every logged-in user — no new notification infrastructure needed at this stage.</p>
 
     <h3>Task Bubble Integration</h3>
     <div class="notif-diagram">
@@ -1160,22 +1160,11 @@
       <strong>Critical constraint:</strong> <code>leads.assigned_to</code> must store <code>user_id</code> (integer FK to users table) — NOT an employee name string. The bubble query uses <code>WHERE assigned_to = $user->id</code>.
     </div>
 
-    <h3>Daily SMS Reminder Command</h3>
-    <div class="code-block"><span class="code-comment">// Console/Kernel.php</span>
-$schedule-&gt;command(<span class="code-string">'crm:send-followup-reminders'</span>)-&gt;dailyAt(<span class="code-string">'08:00'</span>);
-
-<span class="code-comment">// app/Console/Commands/SendCrmFollowUpReminders.php</span>
-<span class="code-comment">// Queries leads where follow_up_date &lt;= today</span>
-<span class="code-comment">// Groups by assigned_to (user_id)</span>
-<span class="code-comment">// Sends CrmFollowUpDailyDigest notification per employee</span>
-<span class="code-comment">// Uses existing SMS gateway — no new infrastructure</span></div>
-
     <h3>What Employees See</h3>
     <table class="doc-table">
       <thead><tr><th>Channel</th><th>When</th><th>Content</th></tr></thead>
       <tbody>
         <tr><td>Task bubble (bottom-right)</td><td>Always visible, refreshes every 5 min</td><td>Today + overdue follow-ups mixed with operational tasks</td></tr>
-        <tr><td>SMS / push</td><td>08:00 daily</td><td>Count of due + overdue leads, link to CRM list</td></tr>
         <tr><td>Calendar view</td><td>On demand</td><td>Full monthly calendar with clickable dates</td></tr>
         <tr><td>Follow-up alert banner</td><td>CRM Lead List page</td><td>Yellow/red strip showing overdue count</td></tr>
       </tbody>
@@ -1430,7 +1419,7 @@ $schedule-&gt;command(<span class="code-string">'crm:send-followup-reminders'</s
           <span class="acc-icon">▾</span>
         </button>
         <div class="acc-body">
-          <p>Decision: extend existing <code>TaskController::bubbleSummary()</code> — no new UI. CRM follow-ups due today or overdue appear in the same bubble alongside operational tasks. Daily 08:00 artisan command sends SMS digest per employee.</p>
+          <p>Decision: extend existing <code>TaskController::bubbleSummary()</code> — no new UI. CRM follow-ups due today or overdue appear in the same bubble alongside operational tasks.</p>
         </div>
       </div>
 
@@ -1447,7 +1436,6 @@ $schedule-&gt;command(<span class="code-string">'crm:send-followup-reminders'</s
             <li>✅ follow_up_date from CSV: accept as-is; invalid dates simply won't appear in queue.</li>
             <li>✅ GL code / financial category: enrollment level only, not lead level.</li>
             <li>⏳ CRM follow-ups in "My Tasks" page: optional Phase 2 item (bubble confirmed).</li>
-            <li>⏳ SMS notification content: confirm with team (count + link, or individual lead names).</li>
           </ul>
         </div>
       </div>
