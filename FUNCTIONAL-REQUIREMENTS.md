@@ -212,7 +212,105 @@ CSV export columns (matching old tool):
 
 ---
 
-## 13. Open Items / To Confirm
+## 13. Notifications & Daily Follow-up Reminders
+
+### Approach: Merge CRM into existing Task Bubble
+
+rosca-digital already has a task bubble (`resources/views/layouts/task_bubble.blade.php`) that:
+- Shows bottom-right floating widget to the logged-in user
+- Polls `/tasks/bubble-summary` every 5 minutes
+- Displays pending task count, overdue badge (red pulsing), and a task list
+- Auto-opens if there are overdue items
+
+**Decision: extend `bubbleSummary()` to include CRM follow-ups** — no new UI needed.
+
+CRM follow-ups due today or overdue appear in the same bubble alongside operational tasks.
+The employee sees "3 pending tasks + 2 CRM follow-ups" in one place.
+
+### `TaskController::bubbleSummary()` — change at Phase 1
+
+File: `app/Http/Controllers/TaskController.php`, method `bubbleSummary()` (line 856)
+
+Replace the final `return response()->json(...)` with:
+
+```php
+$today = now()->toDateString();
+
+$crmOverdue = \App\Lead::where('assigned_to', $user->id)
+    ->whereNotNull('follow_up_date')
+    ->where('follow_up_date', '<', $today)
+    ->whereNotIn('status', ['converted', 'dead'])
+    ->count();
+
+$crmDue = \App\Lead::where('assigned_to', $user->id)
+    ->whereNotNull('follow_up_date')
+    ->where('follow_up_date', '<=', $today)
+    ->whereNotIn('status', ['converted', 'dead'])
+    ->count();
+
+$crmItems = \App\Lead::where('assigned_to', $user->id)
+    ->whereNotNull('follow_up_date')
+    ->where('follow_up_date', '<=', $today)
+    ->whereNotIn('status', ['converted', 'dead'])
+    ->orderBy('follow_up_date')
+    ->limit(10)
+    ->get()
+    ->map(fn($l) => [
+        'id'           => $l->id,
+        'title'        => $l->name,
+        'entity_label' => $l->name,
+        'process'      => 'CRM Follow-up',
+        'stage'        => $l->lead_no . ' · ' . ucfirst($l->flag),
+        'status'       => 'InProgress',
+        'is_overdue'   => $l->follow_up_date < $today,
+        'due_date'     => $l->follow_up_date,
+        'url'          => route('leads.show', $l->id),
+    ]);
+
+return response()->json([
+    'total'   => $totalCount + $crmDue,
+    'overdue' => $overdueCount + $crmOverdue,
+    'tasks'   => $taskData->concat($crmItems)->sortBy('due_date')->values(),
+]);
+```
+
+> **Critical dependency**: `leads.assigned_to` must store `user_id` (integer FK to `users` table),
+> same as `tasks.assigned_to`. Do NOT store employee name string.
+
+### Daily Morning SMS/Push Notification
+
+New artisan command: `crm:send-followup-reminders`
+File: `app/Console/Commands/SendCrmFollowUpReminders.php`
+
+Logic:
+1. Run daily at 08:00 via Laravel scheduler (`Console/Kernel.php`)
+2. Query all leads where `follow_up_date <= today` and status not in `[converted, dead]`
+3. Group by `assigned_to` (user_id)
+4. For each employee, send a notification via existing SMS/push channel:
+   - Summary: "You have X follow-ups due today and Y overdue. [link]"
+   - List of lead names + lead numbers
+
+```php
+// Console/Kernel.php
+$schedule->command('crm:send-followup-reminders')->dailyAt('08:00');
+```
+
+Notification class: `app/Notifications/CrmFollowUpDailyDigest.php`
+- Uses existing notification channels (SMS gateway already wired for rosca-digital)
+- No new infrastructure needed
+
+### What employees see
+
+| Channel | When | Content |
+|---|---|---|
+| Task bubble (bottom-right) | Always visible, refreshes every 5 min | Today + overdue follow-ups mixed with operational tasks |
+| SMS / push | 08:00 daily | Count of due + overdue leads, link to CRM list |
+| Calendar view (CRM) | On demand | Full monthly calendar with clickable dates |
+| Follow-up alert banner | CRM Lead List page | Yellow/red strip showing overdue count |
+
+---
+
+## 14. Open Items / To Confirm
 
 - [ ] Should imported leads with an existing `source` column override the default source selection?
   - **Current decision**: Yes, if source column exists and is a recognised value, it overrides.
@@ -224,3 +322,7 @@ CSV export columns (matching old tool):
   - **Current decision**: Accept as-is; invalid dates will just not show in follow-up queue.
 - [ ] GL code or financial category for conversion — needed at lead level or only at enrollment?
   - **Current decision**: Enrollment level only; lead is pre-sales.
+- [ ] Should CRM follow-ups also appear in the "My Tasks" page (tasks list view) alongside operational tasks, or only in the bubble?
+  - **Current decision**: TBD — bubble is confirmed. My Tasks page integration is optional Phase 2 item.
+- [ ] SMS notification content — should it list individual lead names or just a count + link?
+  - **Current decision**: TBD — confirm with team before building the notification class.
