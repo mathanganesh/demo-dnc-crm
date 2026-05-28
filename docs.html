@@ -595,14 +595,59 @@
 </head>
 <body>
 
+<!-- ── Auth Wall ──────────────────────────────────────────────────────────── -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS CRM</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · CRM Initiative · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
 <!-- ── Top bar ───────────────────────────────────────────────────────────── -->
 <div class="topbar">
   <div class="topbar-left">
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    <a href="start.html">← Home</a>
+    <a href="index.html">← Home</a>
     <div class="topbar-title">CRM <span>Documentation</span></div>
   </div>
-  <a href="index.html" class="topbar a btn-preview">Launch Preview →</a>
+  <a href="prototype.html" class="topbar a btn-preview">Launch Preview →</a>
 </div>
 
 <div class="layout">
@@ -842,7 +887,7 @@
       <span class="section-icon">🖥️</span>
       <h2>UI Screens</h2>
     </div>
-    <p>Eight screens cover the full lead lifecycle. <a href="index.html" style="color:var(--blue);font-weight:600;">Open the interactive prototype →</a> to see them live.</p>
+    <p>Eight screens cover the full lead lifecycle. <a href="prototype.html" style="color:var(--blue);font-weight:600;">Open the interactive prototype →</a> to see them live.</p>
 
     <div class="screen-grid">
 
