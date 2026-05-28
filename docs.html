@@ -1065,10 +1065,63 @@
           <div class="phase-dot dot-purple">3b</div>
         </div>
         <div class="phase-content">
-          <div class="phase-tag">Phase 3b</div>
-          <h4>Notifications &amp; Task Bubble Integration</h4>
-          <p>Extend TaskController::bubbleSummary() to merge CRM follow-ups. Overdue and today's follow-ups appear in the existing task bubble alongside operational tasks — no new UI or notification infrastructure needed.</p>
-          <div class="phase-deliverable"><strong>Deliverable:</strong> CRM follow-ups appear in the existing task bubble — overdue items pulse red automatically.</div>
+          <div class="phase-tag">Phase 3b — Larger Phase</div>
+          <h4>Task Management Integration</h4>
+          <p>CRM follow-ups must become <strong>real task records</strong> in the existing task management system — not a bolt-on query. The task system has Processes, Stages, Stage History, Performance Reports, and Owner Performance that all need to work for CRM follow-ups automatically.</p>
+
+          <div style="margin:14px 0;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:8px;">Design Decision</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+              <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;">
+                <div style="font-weight:700;color:#b91c1c;margin-bottom:4px;">❌ Bolt-on approach (current)</div>
+                <div style="color:#7f1d1d;line-height:1.6;">Query leads table directly in <code>bubbleSummary()</code>. CRM items appear in bubble but are not real tasks — no stage history, no performance reports, no task search, no compliance tracking.</div>
+              </div>
+              <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;">
+                <div style="font-weight:700;color:#15803d;margin-bottom:4px;">✅ Full integration (correct)</div>
+                <div style="color:#14532d;line-height:1.6;">Create a <strong>CRM Follow-up Process</strong> with stages. When a follow-up date is set on a lead, create an actual <code>tasks</code> record. Bubble, My Tasks, Stage History, and all reports work automatically.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin:14px 0 8px;">What needs to be built</div>
+
+          <div style="font-size:13.5px;color:#475569;line-height:1.8;">
+            <div style="margin-bottom:6px;"><strong style="color:#1e293b;">1. Seed: CRM Follow-up Process &amp; Stages</strong><br>
+            Add a new Process row: <code>"CRM Follow-up"</code>. Stages: <code>Scheduled → Due Today → Overdue → Done</code>. Each stage has a SLA window. This is a one-time seeder (<code>ProcessSeeder</code> or admin panel).</div>
+
+            <div style="margin-bottom:6px;"><strong style="color:#1e293b;">2. Task Auto-creation on Follow-up Scheduled</strong><br>
+            In <code>LeadInteraction::saved()</code> observer — when <code>follow_up_date</code> is set and not null, create a <code>tasks</code> record:
+            <code style="display:block;background:#1e293b;color:#e2e8f0;padding:8px 12px;border-radius:6px;margin:6px 0;font-size:12px;">title = lead->name . ' (' . lead->lead_no . ')'
+process_id = CRM Follow-up process ID
+current_stage = 'Scheduled'
+assigned_to = lead->assigned_to  (user_id FK)
+overall_due_date = follow_up_date
+entity_type = 'Lead', entity_id = lead->id</code>
+            If a task already exists for this lead's follow-up (prior scheduled FU), close it and open a new one.</div>
+
+            <div style="margin-bottom:6px;"><strong style="color:#1e293b;">3. Stage Transitions via Scheduler</strong><br>
+            New artisan command <code>crm:advance-followup-stages</code> runs daily at 06:00. Moves tasks:
+            <ul style="margin:4px 0 4px 20px;">
+              <li><code>Scheduled → Due Today</code> when <code>overall_due_date = today</code></li>
+              <li><code>Due Today → Overdue</code> when <code>overall_due_date &lt; today</code> and not done</li>
+            </ul>
+            This drives the bubble pulse, overdue badge, and stage history automatically.</div>
+
+            <div style="margin-bottom:6px;"><strong style="color:#1e293b;">4. Task Completion on Follow-up Done</strong><br>
+            When <code>fu_done = true</code> is saved on a <code>LeadInteraction</code>, transition the linked task to stage <code>Done</code> → status <code>Completed</code>. Logged as a stage history entry with timestamp and user_id.</div>
+
+            <div style="margin-bottom:6px;"><strong style="color:#1e293b;">5. Lead Detail — Linked Task Status</strong><br>
+            Lead detail page shows the current linked task's stage and due date inline — so the employee sees "Follow-up: Due Today · Task #7924" with a link to the task detail in rosca-digital.</div>
+
+            <div><strong style="color:#1e293b;">6. No changes to bubble, My Tasks, or Reports</strong><br>
+            Because CRM follow-ups are real <code>tasks</code> records, <code>bubbleSummary()</code>, <code>/tasks/my-tasks</code>, Stage History, Process Performance, and Owner Performance all work automatically. Zero extra code for those.</div>
+          </div>
+
+          <div style="margin-top:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:13px;color:#78350f;">
+            <strong>⚠ Critical constraint:</strong> <code>leads.assigned_to</code> and <code>tasks.assigned_to</code> must both store <code>user_id</code> (FK → users). If <code>leads.assigned_to</code> stores an employee name string, task auto-creation will not be able to set the correct assignee and the bubble query will fail.
+          </div>
+
+          <div class="phase-deliverable" style="margin-top:12px;"><strong>Deliverable:</strong> Every scheduled CRM follow-up creates a real task. Bubble, My Tasks page, Stage History, and all performance reports reflect CRM follow-up workload alongside operational tasks — no parallel system, fully unified.</div>
         </div>
       </div>
 
@@ -1419,7 +1472,7 @@
           <span class="acc-icon">▾</span>
         </button>
         <div class="acc-body">
-          <p>Decision: extend existing <code>TaskController::bubbleSummary()</code> — no new UI. CRM follow-ups due today or overdue appear in the same bubble alongside operational tasks.</p>
+          <p>CRM follow-ups are created as real <code>tasks</code> records using a <strong>CRM Follow-up Process</strong> with stages: <code>Scheduled → Due Today → Overdue → Done</code>. A daily scheduler command advances stages. Bubble, My Tasks page, Stage History, and performance reports all pick up CRM tasks automatically — no extra code needed for those surfaces once the task records exist.</p>
         </div>
       </div>
 
