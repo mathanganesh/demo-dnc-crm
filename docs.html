@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Documentation — DNC CHITS</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --navy: #0f172a;
+    --sidebar-w: 256px;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ────────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color .15s;
+  }
+  .topbar a:hover { color: #fff; }
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .topbar-title span { color: #60a5fa; }
+  .btn-preview {
+    background: var(--blue);
+    color: #fff !important;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .btn-preview:hover { background: #2563eb; }
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  .layout {
+    display: flex;
+    flex: 1;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid #e2e8f0;
+    position: sticky;
+    top: 52px;
+    height: calc(100vh - 52px);
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 14px 20px 6px;
+  }
+  .sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    font-size: 13.5px;
+    color: #475569;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all .12s;
+    font-weight: 500;
+  }
+  .sidebar nav a:hover { background: #f1f5f9; color: #1e293b; }
+  .sidebar nav a.active { border-left-color: var(--blue); background: #eff6ff; color: var(--blue); }
+  .sidebar nav a .nav-icon { font-size: 15px; flex-shrink: 0; }
+
+  /* ── Main content ───────────────────────────────────────── */
+  .main {
+    flex: 1;
+    min-width: 0;
+    padding: 40px 48px 80px;
+    max-width: 860px;
+  }
+
+  /* Section headings */
+  .doc-section {
+    margin-bottom: 64px;
+    scroll-margin-top: 72px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .section-icon { font-size: 24px; }
+  .doc-section h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .doc-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 28px 0 12px;
+  }
+  .doc-section p {
+    font-size: 14.5px;
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  /* ── Overview box ───────────────────────────────────────── */
+  .overview-box {
+    background: linear-gradient(135deg, #0f172a, #1e3a5f);
+    color: #fff;
+    border-radius: 14px;
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .overview-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(59,130,246,.2) 0%, transparent 70%);
+  }
+  .overview-box h3 { color: #fff; font-size: 20px; margin-bottom: 10px; position: relative; }
+  .overview-box p { color: #94a3b8; margin-bottom: 0; position: relative; }
+  .overview-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    position: relative;
+  }
+  .overview-chip {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  /* ── Flow diagram ───────────────────────────────────────── */
+  .flow-diagram {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    margin-bottom: 16px;
+  }
+  .flow-row.wrap { flex-wrap: wrap; }
+  .flow-box {
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+    background: #f8fafc;
+    color: #334155;
+    white-space: nowrap;
+    min-width: 110px;
+  }
+  .flow-box.source { border-color: #7dd3fc; background: #e0f2fe; color: #0369a1; min-width: 90px; font-size: 11.5px; }
+  .flow-box.entry  { border-color: var(--blue); background: #eff6ff; color: #1d4ed8; }
+  .flow-box.created { border-color: #6366f1; background: #eef2ff; color: #3730a3; }
+  .flow-box.assign { border-color: #a78bfa; background: #f5f3ff; color: #6d28d9; }
+  .flow-box.converted { border-color: var(--green); background: #f0fdf4; color: #15803d; font-size: 12px; }
+  .flow-box.dead    { border-color: var(--red); background: #fef2f2; color: #b91c1c; }
+  .flow-box.followup { border-color: var(--amber); background: #fffbeb; color: #92400e; }
+  .flow-diamond {
+    border: 2px solid #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 14px;
+    transform: rotate(0deg);
+    border-radius: 4px;
+    white-space: nowrap;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    width: 120px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .flow-arrow { color: #94a3b8; font-size: 20px; flex-shrink: 0; }
+  .flow-arrow.down { display: block; text-align: center; color: #94a3b8; font-size: 18px; margin: 4px auto; }
+  .flow-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .flow-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+  /* ── Status chain ───────────────────────────────────────── */
+  .status-chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+  .status-pill {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  .pill-new  { background: #f1f5f9; color: #475569; }
+  .pill-inprogress { background: #eff6ff; color: #1d4ed8; }
+  .pill-converted  { background: #f0fdf4; color: #15803d; }
+  .pill-dead { background: #fef2f2; color: #b91c1c; }
+  .status-arrow { color: #cbd5e1; font-size: 20px; padding: 0 8px; }
+
+  /* ── Flag cards ─────────────────────────────────────────── */
+  .flag-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .flag-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid;
+  }
+  .flag-card.green { border-color: #86efac; background: #f0fdf4; }
+  .flag-card.yellow { border-color: #fde68a; background: #fffbeb; }
+  .flag-card.red { border-color: #fca5a5; background: #fef2f2; }
+  .flag-emoji { font-size: 28px; margin-bottom: 8px; }
+  .flag-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .flag-card.green h4 { color: #15803d; }
+  .flag-card.yellow h4 { color: #92400e; }
+  .flag-card.red h4 { color: #b91c1c; }
+  .flag-card p { font-size: 12.5px; line-height: 1.5; }
+  .flag-card.green p { color: #166534; }
+  .flag-card.yellow p { color: #78350f; }
+  .flag-card.red p { color: #991b1b; }
+  .flag-note {
+    font-size: 12.5px;
+    background: #f1f5f9;
+    border-left: 3px solid #3b82f6;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    color: #334155;
+    margin-top: 14px;
+  }
+
+  /* ── Tables ─────────────────────────────────────────────── */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin: 16px 0;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .doc-table th {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .doc-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+  }
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table tr:hover td { background: #f8fafc; }
+  .field-required { font-weight: 700; color: #0f172a; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .badge-required { background: #fee2e2; color: #b91c1c; }
+  .badge-fk { background: #ede9fe; color: #6d28d9; }
+  .badge-enum { background: #fef3c7; color: #92400e; }
+  .badge-auto { background: #dcfce7; color: #15803d; }
+
+  /* ── Screen wireframes ──────────────────────────────────── */
+  .screen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 16px 0;
+  }
+  .screen-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .screen-header {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .screen-dots { display: flex; gap: 5px; }
+  .screen-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .screen-dot:nth-child(1) { background: #ef4444; }
+  .screen-dot:nth-child(2) { background: #f59e0b; }
+  .screen-dot:nth-child(3) { background: #22c55e; }
+  .screen-title-bar { font-size: 11px; color: #94a3b8; font-weight: 600; }
+  .screen-body { padding: 12px 14px; }
+  .screen-body h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .screen-body p { font-size: 12px; color: #64748b; line-height: 1.5; margin-bottom: 8px; }
+  .screen-pre {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px;
+    overflow-x: auto;
+    white-space: pre;
+    color: #334155;
+    line-height: 1.5;
+  }
+
+  /* ── Phase timeline ─────────────────────────────────────── */
+  .phase-timeline { margin: 16px 0; }
+  .phase-item {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 32px;
+    position: relative;
+  }
+  .phase-item:last-child { padding-bottom: 0; }
+  .phase-item::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+  }
+  .phase-item:last-child::before { display: none; }
+  .phase-dot-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+  .phase-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .dot-blue   { background: var(--blue); }
+  .dot-indigo { background: #6366f1; }
+  .dot-green  { background: var(--green); }
+  .dot-purple { background: var(--purple); }
+  .dot-amber  { background: var(--amber); }
+  .dot-teal   { background: #14b8a6; }
+  .phase-content { flex: 1; padding-top: 8px; }
+  .phase-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #1e293b;
+  }
+  .phase-content p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+  .phase-tag {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .phase-deliverable {
+    margin-top: 8px;
+    font-size: 12.5px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #475569;
+  }
+  .phase-deliverable strong { color: #1e293b; }
+
+  /* ── Role badges ─────────────────────────────────────────── */
+  .role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .04em;
+  }
+  .role-marketing { background: #dbeafe; color: #1d4ed8; }
+  .role-branch    { background: #ede9fe; color: #6d28d9; }
+  .role-admin     { background: #fee2e2; color: #b91c1c; }
+  .role-subscriber { background: #f1f5f9; color: #64748b; }
+
+  /* ── Notification diagram ─────────────────────────────────── */
+  .notif-diagram {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 24px;
+    color: #e2e8f0;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  .notif-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .notif-row:last-child { margin-bottom: 0; }
+  .notif-box {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .notif-arrow { color: #60a5fa; font-size: 18px; }
+  .notif-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+  .code-block {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    margin: 12px 0;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .code-comment { color: #64748b; }
+  .code-keyword { color: #93c5fd; }
+  .code-string  { color: #86efac; }
+
+  /* ── Accordion ───────────────────────────────────────────── */
+  .accordion { margin: 8px 0; }
+  .acc-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .acc-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    transition: background .12s;
+  }
+  .acc-toggle:hover { background: #f8fafc; }
+  .acc-toggle .acc-icon { font-size: 18px; color: #94a3b8; transition: transform .2s; }
+  .acc-toggle.open .acc-icon { transform: rotate(180deg); }
+  .acc-body {
+    display: none;
+    padding: 0 18px 16px;
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.7;
+  }
+  .acc-body.open { display: block; }
+  .acc-body table { font-size: 13px; }
+  .acc-body ul { padding-left: 20px; }
+  .acc-body li { margin-bottom: 4px; }
+
+  /* ── Info boxes ──────────────────────────────────────────── */
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .info-blue  { background: #eff6ff; border-left: 4px solid var(--blue); color: #1d4ed8; }
+  .info-amber { background: #fffbeb; border-left: 4px solid var(--amber); color: #92400e; }
+  .info-green { background: #f0fdf4; border-left: 4px solid var(--green); color: #15803d; }
+  .info-red   { background: #fef2f2; border-left: 4px solid var(--red); color: #b91c1c; }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; position: fixed; top: 52px; left: 0; width: 100%; height: calc(100vh - 52px); z-index: 90; }
+    .sidebar.open { display: block; }
+    .main { padding: 24px 20px 60px; }
+    .menu-toggle { display: block; }
+    .screen-grid { grid-template-columns: 1fr; }
+    .flag-cards { grid-template-columns: 1fr; }
+    .topbar-title { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ───────────────────────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <a href="start.html">← Home</a>
+    <div class="topbar-title">CRM <span>Documentation</span></div>
+  </div>
+  <a href="index.html" class="topbar a btn-preview">Launch Preview →</a>
+</div>
+
+<div class="layout">
+
+<!-- ── Sidebar ───────────────────────────────────────────────────────────── -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-section-title">Contents</div>
+  <nav>
+    <a href="#overview" class="nav-link active"><span class="nav-icon">🏠</span> Overview</a>
+    <a href="#flow" class="nav-link"><span class="nav-icon">🔄</span> System Flow</a>
+    <a href="#lifecycle" class="nav-link"><span class="nav-icon">📋</span> Lead Lifecycle</a>
+    <a href="#datamodel" class="nav-link"><span class="nav-icon">🗄️</span> Data Model</a>
+    <a href="#screens" class="nav-link"><span class="nav-icon">🖥️</span> UI Screens</a>
+    <a href="#phases" class="nav-link"><span class="nav-icon">🚀</span> Implementation Phases</a>
+    <a href="#access" class="nav-link"><span class="nav-icon">🔐</span> Access Control</a>
+    <a href="#notifications" class="nav-link"><span class="nav-icon">🔔</span> Notifications</a>
+    <a href="#csv" class="nav-link"><span class="nav-icon">📥</span> CSV Import Rules</a>
+    <a href="#requirements" class="nav-link"><span class="nav-icon">📄</span> Functional Requirements</a>
+  </nav>
+</div>
+
+<!-- ── Main ──────────────────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- 1. OVERVIEW -->
+  <div class="doc-section" id="overview">
+    <div class="section-header">
+      <span class="section-icon">🏠</span>
+      <h2>Overview</h2>
+    </div>
+
+    <div class="overview-box">
+      <h3>CRM Lead Management for DNC CHITS</h3>
+      <p>A purpose-built CRM module integrated into rosca-digital — capturing, tracking, and converting prospects into chit fund subscribers with a full interaction timeline and follow-up calendar.</p>
+      <div class="overview-chips">
+        <span class="overview-chip">🏦 Chit Fund Focus</span>
+        <span class="overview-chip">🔗 rosca-digital Integration</span>
+        <span class="overview-chip">📱 Multi-channel Notifications</span>
+        <span class="overview-chip">🏢 Multi-branch</span>
+        <span class="overview-chip">5 Implementation Phases</span>
+      </div>
+    </div>
+
+    <p>The existing rosca-digital system already has <strong>Subscriber</strong>, <strong>Employee</strong>, <strong>Branch</strong>, <strong>Enrollment</strong>, and task management. This CRM sits on top — leads flow in from multiple sources, get worked by marketing staff, and convert to Subscriber records in one click.</p>
+
+    <h3>What problem does this solve?</h3>
+    <p>Marketing teams currently track leads in a separate external tool (spreadsheet / CSV-based software). This creates double entry when leads become subscribers, no visibility into follow-up compliance, and no integration with operational branch staff. This CRM eliminates that gap.</p>
+  </div>
+
+  <!-- 2. SYSTEM FLOW -->
+  <div class="doc-section" id="flow">
+    <div class="section-header">
+      <span class="section-icon">🔄</span>
+      <h2>System Flow</h2>
+    </div>
+
+    <div class="flow-diagram">
+
+      <!-- Sources row -->
+      <div class="flow-label">Lead Sources</div>
+      <div class="flow-row">
+        <div class="flow-box source">🚶 Walk-in /<br>Referral</div>
+        <div class="flow-box source">🎪 Field<br>Marketing</div>
+        <div class="flow-box source">📱 Online /<br>Social Media</div>
+        <div class="flow-box source">📄 CSV<br>Import</div>
+      </div>
+
+      <!-- Arrow down -->
+      <div class="flow-arrow down">↓</div>
+
+      <!-- Entry -->
+      <div class="flow-row">
+        <div class="flow-box entry" style="min-width:200px;">📝 Lead Entry (Name + Mobile)</div>
+      </div>
+      <div class="flow-arrow down">↓</div>
+
+      <!-- Created -->
+      <div class="flow-row">
+        <div class="flow-box created" style="min-width:240px;">✨ Lead Created · Status: New · Flag: 🟢 Green</div>
+      </div>
+      <div class="flow-arrow down">↓</div>
+
+      <!-- Assign -->
+      <div class="flow-row">
+        <div class="flow-box assign" style="min-width:240px;">👤 Assign to Employee + Branch</div>
+      </div>
+      <div class="flow-arrow down">↓</div>
+
+      <!-- Interaction -->
+      <div class="flow-row">
+        <div class="flow-box" style="min-width:280px;border-color:#6366f1;background:#eef2ff;color:#3730a3;">💬 Log Interaction (Call / Visit / WhatsApp / Email)</div>
+      </div>
+      <div class="flow-arrow down">↓</div>
+
+      <!-- Decision -->
+      <div class="flow-row">
+        <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:8px;padding:12px 24px;font-weight:700;font-size:13px;color:#92400e;">❓ Ready to Join a Chit?</div>
+      </div>
+
+      <!-- Three outcomes -->
+      <div style="display:flex;justify-content:center;gap:40px;margin-top:16px;flex-wrap:wrap;">
+        <div class="flow-col">
+          <div class="flow-arrow">↙</div>
+          <div class="flow-box converted">✅ Create Subscriber<br>in rosca-digital</div>
+          <div style="margin-top:8px;" class="flow-box converted">🎉 Status: Converted<br>→ Enroll in Chit Group</div>
+        </div>
+        <div class="flow-col">
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box followup">📅 Schedule Follow-up<br>Date + Reminder Note</div>
+          <div style="margin-top:8px;font-size:11px;color:#92400e;text-align:center;">↑ Loop back to<br>Interaction</div>
+        </div>
+        <div class="flow-col">
+          <div class="flow-arrow">↘</div>
+          <div class="flow-box dead">❌ Mark Dead<br>Log Reason</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. LEAD LIFECYCLE -->
+  <div class="doc-section" id="lifecycle">
+    <div class="section-header">
+      <span class="section-icon">📋</span>
+      <h2>Lead Lifecycle</h2>
+    </div>
+
+    <h3>Status Flow</h3>
+    <div class="status-chain">
+      <div class="status-pill pill-new">new</div>
+      <span class="status-arrow">→</span>
+      <div class="status-pill pill-inprogress">in_progress</div>
+      <span class="status-arrow">→</span>
+      <div class="status-pill pill-converted">converted</div>
+      <br style="flex-basis:100%;height:0;">
+      <div style="width:100%;height:8px;"></div>
+      <div class="status-pill pill-new" style="opacity:0;pointer-events:none;">new</div>
+      <span class="status-arrow" style="opacity:0;">→</span>
+      <div class="status-pill pill-inprogress">in_progress</div>
+      <span class="status-arrow">→</span>
+      <div class="status-pill pill-dead">dead</div>
+    </div>
+
+    <table class="doc-table">
+      <thead><tr><th>Status</th><th>Meaning</th><th>Triggered By</th></tr></thead>
+      <tbody>
+        <tr><td><span class="status-pill pill-new" style="font-size:12px;padding:4px 10px;">new</span></td><td>Just entered, no interaction yet</td><td>Lead creation / CSV import</td></tr>
+        <tr><td><span class="status-pill pill-inprogress" style="font-size:12px;padding:4px 10px;">in_progress</span></td><td>At least one interaction logged</td><td>First interaction saved</td></tr>
+        <tr><td><span class="status-pill pill-converted" style="font-size:12px;padding:4px 10px;">converted</span></td><td>Subscriber record created and linked</td><td>"Convert to Subscriber" action</td></tr>
+        <tr><td><span class="status-pill pill-dead" style="font-size:12px;padding:4px 10px;">dead</span></td><td>Permanently closed; not interested</td><td>Manual — requires a reason note</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Flag System (Lead Rating)</h3>
+    <div class="flag-cards">
+      <div class="flag-card green">
+        <div class="flag-emoji">🟢</div>
+        <h4>Green — High Potential</h4>
+        <p>Capable, clearly interested, and financially able. Prioritise and move quickly.</p>
+      </div>
+      <div class="flag-card yellow">
+        <div class="flag-emoji">🟡</div>
+        <h4>Yellow — Uncertain</h4>
+        <p>Needs more follow-ups. Interested in principle but not yet committed to a chit.</p>
+      </div>
+      <div class="flag-card red">
+        <div class="flag-emoji">🔴</div>
+        <h4>Red — Low Priority</h4>
+        <p>Not ready or unlikely to convert soon. Keep and re-contact periodically.</p>
+      </div>
+    </div>
+    <div class="flag-note">⚠️ Red-flagged leads are <strong>NOT</strong> dead leads — they remain active and appear in the follow-up queue for future re-engagement.</div>
+  </div>
+
+  <!-- 4. DATA MODEL -->
+  <div class="doc-section" id="datamodel">
+    <div class="section-header">
+      <span class="section-icon">🗄️</span>
+      <h2>Data Model</h2>
+    </div>
+
+    <h3>leads table <span class="badge badge-auto">new</span></h3>
+    <table class="doc-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><span class="field-required">id</span></td><td>bigint PK</td><td></td></tr>
+        <tr><td><span class="field-required">lead_no</span></td><td>string</td><td><span class="badge badge-auto">auto</span> e.g. ARN-02783 — per-branch sequence</td></tr>
+        <tr><td><span class="field-required">name</span></td><td>string</td><td><span class="badge badge-required">required</span> Prospect full name</td></tr>
+        <tr><td><span class="field-required">mobile_primary</span></td><td>string</td><td><span class="badge badge-required">required</span> Used for duplicate detection</td></tr>
+        <tr><td>mobile_alternate</td><td>string</td><td>nullable</td></tr>
+        <tr><td>email</td><td>string</td><td>nullable</td></tr>
+        <tr><td>branch_id</td><td>FK → branches</td><td><span class="badge badge-fk">FK</span> Owning branch</td></tr>
+        <tr><td>assigned_to</td><td>FK → users</td><td><span class="badge badge-fk">FK</span> <strong>Must be user_id — not name string</strong> (required for task bubble query)</td></tr>
+        <tr><td>source</td><td>enum</td><td><span class="badge badge-enum">enum</span> walkin / field / online / import</td></tr>
+        <tr><td>status</td><td>enum</td><td><span class="badge badge-enum">enum</span> new / in_progress / converted / dead</td></tr>
+        <tr><td>flag</td><td>enum</td><td><span class="badge badge-enum">enum</span> green / yellow / red — default: green</td></tr>
+        <tr><td>subscriber_id</td><td>FK → subscribers</td><td><span class="badge badge-fk">FK</span> nullable — populated on conversion</td></tr>
+        <tr><td>input_date</td><td>date</td><td>Date lead was entered</td></tr>
+        <tr><td>converted_at</td><td>timestamp</td><td>nullable</td></tr>
+        <tr><td>income_source</td><td>string</td><td>nullable — Salary / Business / Agriculture / Pension / Rental / Other</td></tr>
+        <tr><td>monthly_income</td><td>string</td><td>nullable — income bracket</td></tr>
+        <tr><td>business_name</td><td>string</td><td>nullable</td></tr>
+        <tr><td>business_place</td><td>string</td><td>nullable</td></tr>
+        <tr><td>chit_value</td><td>string</td><td>nullable — proposed scheme: ₹25K–₹10L</td></tr>
+        <tr><td>ref_name</td><td>string</td><td>nullable — referrer name</td></tr>
+        <tr><td>follow_up_date</td><td>date</td><td>nullable — drives task bubble overdue indicator</td></tr>
+        <tr><td>notes</td><td>text</td><td>nullable</td></tr>
+        <tr><td>created_by / updated_by</td><td>FK → users</td><td><span class="badge badge-fk">FK</span> Audit fields</td></tr>
+      </tbody>
+    </table>
+
+    <h3>lead_interactions table <span class="badge badge-auto">new</span></h3>
+    <table class="doc-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td>bigint PK</td><td></td></tr>
+        <tr><td>lead_id</td><td>FK → leads</td><td><span class="badge badge-fk">FK</span></td></tr>
+        <tr><td>user_id</td><td>FK → users</td><td><span class="badge badge-fk">FK</span> Who logged this interaction</td></tr>
+        <tr><td>type</td><td>enum</td><td><span class="badge badge-enum">enum</span> phone / in_person / whatsapp / email</td></tr>
+        <tr><td>interaction_date</td><td>datetime</td><td>When it happened</td></tr>
+        <tr><td>outcome</td><td>text</td><td>What was discussed</td></tr>
+        <tr><td>flag_after</td><td>enum</td><td><span class="badge badge-enum">enum</span> Updates lead's current flag</td></tr>
+        <tr><td>follow_up_date</td><td>date</td><td>nullable — next follow-up scheduled</td></tr>
+        <tr><td>follow_up_note</td><td>text</td><td>nullable — reminder note</td></tr>
+        <tr><td>fu_done</td><td>boolean</td><td>Whether this follow-up was completed</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-blue">
+      <strong>Existing models reused as-is:</strong> Subscriber, Employee, Branch, User, Enrollment. No schema changes needed for those — new relationships are added via Eloquent only.
+    </div>
+  </div>
+
+  <!-- 5. UI SCREENS -->
+  <div class="doc-section" id="screens">
+    <div class="section-header">
+      <span class="section-icon">🖥️</span>
+      <h2>UI Screens</h2>
+    </div>
+    <p>Eight screens cover the full lead lifecycle. <a href="index.html" style="color:var(--blue);font-weight:600;">Open the interactive prototype →</a> to see them live.</p>
+
+    <div class="screen-grid">
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 1 — Lead List</div>
+        </div>
+        <div class="screen-body">
+          <h4>Lead List</h4>
+          <p>Filterable by branch, employee, status, flag. Summary row with totals.</p>
+          <pre class="screen-pre">┌─────────────────────────────────┐
+│ DNC CHITS › CRM      [+New Lead]│
+├─────────────────────────────────┤
+│ [Branch▼][Employee▼][Status▼]  │
+├──────────┬──────────────────────┤
+│ ARN-02783│ Ramesh      🟢 New  │
+│ ARN-03074│ Ammayee     🟡 In.. │
+│ ARN-03267│ Balaji      🟢 Conv │
+└──────────┴──────────────────────┘
+│ Total:13  🟢8  🟡3  🔴2  ✅1  │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 2 — Create Lead</div>
+        </div>
+        <div class="screen-body">
+          <h4>Create / Edit Lead</h4>
+          <p>Two-column layout. Only Name + Mobile are mandatory. Business fields in separate tab.</p>
+          <pre class="screen-pre">┌────────────────┬───────────────┐
+│ LEAD INFO      │ ASSIGNMENT    │
+│ Name *         │ Branch *      │
+│ [__________]   │ [ARN ▼]       │
+│ Mobile *       │ Employee *    │
+│ [__________]   │ [Dinesh ▼]    │
+│                │ Source *      │
+│                │ [Field Mktg▼] │
+│                │ Flag: 🟢🟡🔴  │
+├────────────────┴───────────────┤
+│ [Cancel]         [Save Lead]   │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 3 — Lead Detail + Timeline</div>
+        </div>
+        <div class="screen-body">
+          <h4>Lead Detail</h4>
+          <p>Summary header + full interaction timeline. Convert button for branch heads.</p>
+          <pre class="screen-pre">┌──────────────────────┬──────────┐
+│ ARN-02783 Ramesh     │ Stats    │
+│ Mobile: 9443243225   │ Calls: 3 │
+│ Branch: ARN          │ Next FU: │
+│ Status: In Progress  │ 17-Jun   │
+├──────────────────────┴──────────┤
+│ INTERACTIONS   [+Log New]       │
+│ ● 13-May Phone 🟢 "Discussed.."│
+│ ● 28-Apr Visit 🟢 "Met branch" │
+│ ● 08-Sep Phone 🟢 "First call" │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 4 — Log Interaction</div>
+        </div>
+        <div class="screen-body">
+          <h4>Log Interaction (Modal)</h4>
+          <p>Type, date/time, outcome, flag update, optional follow-up scheduling.</p>
+          <pre class="screen-pre">┌─────────────────────────────┐
+│ Log Interaction — Ramesh    │
+│ Date: [25-May]  Time:[10:30]│
+│ Type: ●Phone ○Visit ○WA    │
+│ Outcome: [________________]│
+│ Update Flag: 🟢 ● 🟡 🔴   │
+│ Schedule FU? [✓]            │
+│ Date: [17-Jun]              │
+│ Note: [Call after salary]   │
+│ [Cancel]  [Save Interaction]│</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 5 — Follow-up Dashboard</div>
+        </div>
+        <div class="screen-body">
+          <h4>Follow-up Queue</h4>
+          <p>Overdue in red, today highlighted, upcoming 7 days. Per-employee filter.</p>
+          <pre class="screen-pre">┌─────────────────────────────────┐
+│ 📅 MY FOLLOW-UPS    [View All]  │
+├──────────┬───────────┬──────────┤
+│ ⚠ Overdue│ PARKASH   │🟡 [Log] │
+│ ⚠ Overdue│ NARAYANA  │🟡 [Log] │
+│ Today    │ Prakash   │🟢 [Log] │
+│ 03-Jun   │ SARAVANAN │🟢 [Log] │
+│ 09-Jun   │ FATHIMA   │🔴 [Log] │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 6 — Convert to Subscriber</div>
+        </div>
+        <div class="screen-body">
+          <h4>Conversion Flow</h4>
+          <p>Pre-fills from lead data. Creates Subscriber in rosca-digital on submit.</p>
+          <pre class="screen-pre">┌─────────────────────────────────┐
+│ Convert Lead → Subscriber       │
+│ ARN-02783 — Ramesh              │
+│ Name:   [Ramesh            ]    │
+│ Mobile: [9443243225        ]    │
+│ Branch: [ARN ▼             ]    │
+│ ── KYC (optional) ────────────  │
+│ PAN:    [                  ]    │
+│ Aadhaar:[                  ]    │
+│ [Cancel] [✅ Create Subscriber] │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 7 — Reports</div>
+        </div>
+        <div class="screen-body">
+          <h4>Reports &amp; Analytics</h4>
+          <p>Funnel metrics, branch-wise breakdown, CSV export matching old tool format.</p>
+          <pre class="screen-pre">┌─────────────────────────────────┐
+│ CRM Reports [Branch▼][Date▼]   │
+│ Total:143  Converted:28  19.6% │
+├─────────────────────────────────┤
+│ Funnel:                         │
+│ New         ████████ 45        │
+│ In Progress ████████████ 70    │
+│ Converted   ████ 28            │
+│ Dead        ██ 10              │
+│             [📥 Export CSV]     │</pre>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-header">
+          <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+          <div class="screen-title-bar">Screen 8 — CSV Import</div>
+        </div>
+        <div class="screen-body">
+          <h4>CSV Import Wizard</h4>
+          <p>4-step: Branch+Employee → Upload → Preview with duplicate detection → Confirm import.</p>
+          <pre class="screen-pre">┌─────────────────────────────────┐
+│ Import Leads  Step 2 of 4       │
+│ [📄 Drop CSV here or browse]    │
+│ ✅ 13 rows  ⚠ 1 duplicate skip │
+│ CSV Column    → Maps To         │
+│ Subscriber Name → name          │
+│ Mobile No      → mobile_primary │
+│ Remainder Date → follow_up_date │
+│ [Cancel] [⬆ Import 12 Leads]   │</pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 6. IMPLEMENTATION PHASES -->
+  <div class="doc-section" id="phases">
+    <div class="section-header">
+      <span class="section-icon">🚀</span>
+      <h2>Implementation Phases</h2>
+    </div>
+
+    <div class="phase-timeline">
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-blue">1</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 1</div>
+          <h4>Lead Core CRUD</h4>
+          <p>leads table migration, Lead model with branch/employee/source/status/flag, LeadsController (index, create, store, show, edit, update), auto-generated lead_no per branch, Blade views (list, detail, create/edit), MARKETING_STAFF role.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> Marketing staff can log a new lead and see a list of their leads.</div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-indigo">2</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 2</div>
+          <h4>Interactions &amp; Follow-up Tracking</h4>
+          <p>lead_interactions table migration, LeadInteraction model, interaction timeline UI on lead detail, "Log Interaction" form (type, date, outcome, flag, follow-up date), follow-up dashboard widget.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> Full interaction history per lead with a daily follow-up queue per employee.</div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-green">3</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 3</div>
+          <h4>Conversion Flow</h4>
+          <p>"Convert to Subscriber" button on lead detail, pre-fill subscriber form from lead fields, create Subscriber on save, set leads.subscriber_id + leads.status = converted, link to enrollment flow.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> One-click conversion bridging lead → subscriber → enrollment.</div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-purple">3b</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 3b</div>
+          <h4>Notifications &amp; Task Bubble Integration</h4>
+          <p>Extend TaskController::bubbleSummary() to merge CRM follow-ups. New artisan command crm:send-followup-reminders scheduled daily at 08:00. New CrmFollowUpDailyDigest notification via existing SMS channel.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> CRM follow-ups appear in the existing task bubble; daily 08:00 SMS lists due leads.</div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-amber">4</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 4</div>
+          <h4>Reports &amp; Analytics</h4>
+          <p>Lead summary dashboard (status, flag, branch-wise, employee-wise), conversion rate report, follow-up compliance report, CSV export matching old marketing tool format (Lead No, Input Date, Subscriber Name, Mobile…).</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> Management runs same reports as old marketing tool, plus new analytics.</div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-dot-wrap">
+          <div class="phase-dot dot-teal">5</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-tag">Phase 5</div>
+          <h4>CSV Import &amp; Marketing Tool Integration</h4>
+          <p>CSV import UI (upload → preview → confirm), column auto-detection (14+ field aliases), duplicate detection by mobile, bulk import with per-row validation, import history log.</p>
+          <div class="phase-deliverable"><strong>Deliverable:</strong> Marketing team imports from old tool to rosca-digital in one step, no double entry.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 7. ACCESS CONTROL -->
+  <div class="doc-section" id="access">
+    <div class="section-header">
+      <span class="section-icon">🔐</span>
+      <h2>Access Control</h2>
+    </div>
+
+    <table class="doc-table">
+      <thead><tr><th>Role</th><th>Permissions</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="role-badge role-marketing">MARKETING_STAFF</span> <small style="color:#64748b;">(new)</small></td>
+          <td>Create leads, log interactions on own leads, view own leads only. Cannot import or convert.</td>
+        </tr>
+        <tr>
+          <td><span class="role-badge role-branch">BRANCH_HEAD</span></td>
+          <td>View all branch leads, reassign to any employee (any branch), convert to subscriber, import leads. Cluster heads can assign across branches.</td>
+        </tr>
+        <tr>
+          <td><span class="role-badge role-admin">ORG_ADMIN</span> / <span class="role-badge role-admin">SUPER_ADMIN</span></td>
+          <td>Full access — all branches, all employees, reports, bulk import, delete leads.</td>
+        </tr>
+        <tr>
+          <td><span class="role-badge role-subscriber">SUBSCRIBER</span></td>
+          <td>No CRM access.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-amber">
+      <strong>Import rule:</strong> Only BRANCH_HEAD and above can import leads. During import, Branch and Employee are independent — no constraint that the employee must belong to the selected branch.
+    </div>
+  </div>
+
+  <!-- 8. NOTIFICATIONS -->
+  <div class="doc-section" id="notifications">
+    <div class="section-header">
+      <span class="section-icon">🔔</span>
+      <h2>Notifications &amp; Follow-up Alerts</h2>
+    </div>
+
+    <p>No new notification infrastructure — CRM follow-ups are merged into the <strong>existing task bubble</strong> that rosca-digital already shows to every logged-in user.</p>
+
+    <h3>Task Bubble Integration</h3>
+    <div class="notif-diagram">
+      <div class="notif-row">
+        <div class="notif-box">🗄️ leads table<br><small style="color:#64748b;">follow_up_date ≤ today</small></div>
+        <div class="notif-arrow">→</div>
+        <div class="notif-box">TaskController<br>::bubbleSummary()</div>
+        <div class="notif-arrow">→</div>
+        <div class="notif-box">JSON response<br>total / overdue / tasks[]</div>
+        <div class="notif-arrow">→</div>
+        <div class="notif-box">🔴 Task Bubble<br>bottom-right</div>
+      </div>
+      <div style="font-size:12px;color:#475569;margin-top:8px;">Polls every 5 minutes. Auto-opens if overdue &gt; 0. CRM items appear alongside operational tasks.</div>
+    </div>
+
+    <div class="info-box info-red">
+      <strong>Critical constraint:</strong> <code>leads.assigned_to</code> must store <code>user_id</code> (integer FK to users table) — NOT an employee name string. The bubble query uses <code>WHERE assigned_to = $user->id</code>.
+    </div>
+
+    <h3>Daily SMS Reminder Command</h3>
+    <div class="code-block"><span class="code-comment">// Console/Kernel.php</span>
+$schedule-&gt;command(<span class="code-string">'crm:send-followup-reminders'</span>)-&gt;dailyAt(<span class="code-string">'08:00'</span>);
+
+<span class="code-comment">// app/Console/Commands/SendCrmFollowUpReminders.php</span>
+<span class="code-comment">// Queries leads where follow_up_date &lt;= today</span>
+<span class="code-comment">// Groups by assigned_to (user_id)</span>
+<span class="code-comment">// Sends CrmFollowUpDailyDigest notification per employee</span>
+<span class="code-comment">// Uses existing SMS gateway — no new infrastructure</span></div>
+
+    <h3>What Employees See</h3>
+    <table class="doc-table">
+      <thead><tr><th>Channel</th><th>When</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>Task bubble (bottom-right)</td><td>Always visible, refreshes every 5 min</td><td>Today + overdue follow-ups mixed with operational tasks</td></tr>
+        <tr><td>SMS / push</td><td>08:00 daily</td><td>Count of due + overdue leads, link to CRM list</td></tr>
+        <tr><td>Calendar view</td><td>On demand</td><td>Full monthly calendar with clickable dates</td></tr>
+        <tr><td>Follow-up alert banner</td><td>CRM Lead List page</td><td>Yellow/red strip showing overdue count</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 9. CSV IMPORT -->
+  <div class="doc-section" id="csv">
+    <div class="section-header">
+      <span class="section-icon">📥</span>
+      <h2>CSV Import Rules</h2>
+    </div>
+
+    <h3>Pre-import (mandatory)</h3>
+    <p>Before uploading the file, the user must select <strong>Branch</strong> and <strong>Employee</strong>. These are independent — a cluster head can assign to any employee from any branch. Default source is set to <code>import</code> unless the CSV contains a Source column.</p>
+
+    <h3>Mandatory CSV columns</h3>
+    <table class="doc-table">
+      <thead><tr><th>Column Name(s)</th><th>Maps To</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Name, Subscriber Name, Full Name</td><td>name</td><td><span class="badge badge-required">required</span></td></tr>
+        <tr><td>Mobile, Phone, Phone Number, Mobile No</td><td>mobile_primary</td><td><span class="badge badge-required">required</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional auto-detected columns</h3>
+    <table class="doc-table">
+      <thead><tr><th>CSV Column Name(s)</th><th>Maps To</th></tr></thead>
+      <tbody>
+        <tr><td>Business Name, Business_Name</td><td>business_name</td></tr>
+        <tr><td>Business Place, Visit Place</td><td>business_place</td></tr>
+        <tr><td>Income Source</td><td>income_source</td></tr>
+        <tr><td>Monthly Income, Monthly Source</td><td>monthly_income</td></tr>
+        <tr><td>Proposed Chit Value, Chit Value, Scheme Value</td><td>chit_value</td></tr>
+        <tr><td>Reference Name, Ref Name, Referred By</td><td>ref_name</td></tr>
+        <tr><td>Flag, Lead Rating, Rating</td><td>flag (green/yellow/red)</td></tr>
+        <tr><td>Remainder Date, Follow Up Date, Next Call</td><td>follow_up_date</td></tr>
+        <tr><td>Remainder Note, Follow Up Note</td><td>follow_up_note</td></tr>
+        <tr><td>Notes, Remarks, Comments</td><td>notes</td></tr>
+        <tr><td>Email, Email Address</td><td>email</td></tr>
+        <tr><td>Source, Lead Source</td><td>source (overrides default if valid)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Duplicate handling</h3>
+    <p>A row is a <strong>duplicate</strong> if the mobile number already exists in the system. Duplicates are <strong>skipped</strong> — shown in preview with a warning. No merge/update via CSV (update through lead detail UI only).</p>
+
+    <div class="info-box info-green">
+      Column names are matched <strong>case-insensitively</strong>. Spaces, underscores, and hyphens are normalised. So <code>mobile_no</code>, <code>Mobile No</code>, and <code>MOBILE-NO</code> all map to the same field.
+    </div>
+  </div>
+
+  <!-- 10. FUNCTIONAL REQUIREMENTS -->
+  <div class="doc-section" id="requirements">
+    <div class="section-header">
+      <span class="section-icon">📄</span>
+      <h2>Functional Requirements</h2>
+    </div>
+    <p>All confirmed business rules. These are the source of truth during Laravel implementation.</p>
+
+    <div class="accordion">
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>1. Lead Mandatory Fields</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <table class="doc-table">
+            <thead><tr><th>Context</th><th>Mandatory</th><th>Optional</th></tr></thead>
+            <tbody>
+              <tr><td>Creating a lead (UI form)</td><td>Name, Mobile</td><td>Branch, Employee, Source, Date, Flag, all business/income fields</td></tr>
+              <tr><td>CSV Import (per row)</td><td>Name, Mobile</td><td>Everything else</td></tr>
+              <tr><td>CSV Import — before upload</td><td>Branch, Employee</td><td>Source (defaults to "CSV Import")</td></tr>
+            </tbody>
+          </table>
+          <p>Branch and Employee during import are the default assignment for all imported rows. They are independent — a cluster head can assign leads to any employee from any branch.</p>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>2. Lead Sources</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <table class="doc-table">
+            <thead><tr><th>Value</th><th>Label</th></tr></thead>
+            <tbody>
+              <tr><td><code>walkin</code></td><td>Walk-in / Referral</td></tr>
+              <tr><td><code>field</code></td><td>Field Marketing Event</td></tr>
+              <tr><td><code>online</code></td><td>Online / Social Media</td></tr>
+              <tr><td><code>import</code></td><td>CSV Import (from external marketing tool)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>3. Lead Status Lifecycle</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <p>Status transitions to <code>in_progress</code> automatically when first interaction is logged. Status transitions to <code>converted</code> when "Convert to Subscriber" is completed. <code>dead</code> can be set manually — a reason should be logged as an interaction note.</p>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>4. Flag System (Lead Rating)</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li>Flag is set at lead creation (default: green).</li>
+            <li>Flag can be updated with each interaction.</li>
+            <li>Red-flagged leads are still kept and re-contacted in future — they are NOT dead leads.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>5. Business &amp; Income Fields</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <p>All optional. Come from existing marketing tool to assess financial profile.</p>
+          <table class="doc-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Values</th></tr></thead>
+            <tbody>
+              <tr><td>income_source</td><td>dropdown</td><td>Salary/Job, Own Business, Agriculture, Pension, Rental Income, Others</td></tr>
+              <tr><td>monthly_income</td><td>dropdown</td><td>Below ₹10K / ₹10K–₹25K / ₹25K–₹50K / ₹50K–₹1L / Above ₹1L</td></tr>
+              <tr><td>business_name</td><td>text</td><td>Name of business if applicable</td></tr>
+              <tr><td>business_place</td><td>text</td><td>Location / visit place</td></tr>
+              <tr><td>chit_value</td><td>dropdown</td><td>₹25K / ₹50K / ₹1L / ₹2L / ₹5L / ₹10L</td></tr>
+              <tr><td>ref_name</td><td>text</td><td>Name of person who referred this lead</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>6. Interaction Log</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li>Logging an interaction updates <code>lead.status</code> to <code>in_progress</code> if it was <code>new</code>.</li>
+            <li><code>flag_after</code> updates the lead's current flag.</li>
+            <li>If a follow-up date is set, it appears in the employee's follow-up queue.</li>
+            <li>Interaction types: phone, inperson, whatsapp, email.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>7. Lead Number Auto-generation</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <p>Format: <strong>{BRANCH_CODE}-{5-DIGIT-SEQUENCE}</strong> e.g. <code>ARN-02783</code>, <code>TVN-00001</code>, <code>BCE-00042</code></p>
+          <ul>
+            <li>Sequence is per branch — each branch has its own counter.</li>
+            <li>Auto-incremented from the highest existing lead number for that branch.</li>
+            <li>Imported CSV leads get auto-generated numbers (even if source CSV had its own numbers).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>8. CSV Import Rules</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li>First row must be headers.</li>
+            <li>Column names matched case-insensitively; spaces, underscores, hyphens normalised.</li>
+            <li>Rows missing both name and mobile are skipped with error shown in preview.</li>
+            <li>Duplicate mobile = skipped (no merge). Shown in preview with warning.</li>
+            <li>All imported leads default to status <code>new</code>, flag <code>green</code> (unless CSV specifies otherwise).</li>
+            <li>Import date = today's date.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>9. Conversion Flow (Lead → Subscriber)</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ol style="padding-left:20px;line-height:2;">
+            <li>Branch staff clicks <strong>Convert</strong> on lead detail page.</li>
+            <li>Form pre-fills subscriber details from lead (name, mobile, branch).</li>
+            <li>Staff can edit before saving. KYC fields optional.</li>
+            <li>On submit: creates Subscriber record, sets <code>leads.subscriber_id</code>, <code>leads.status = converted</code>, <code>leads.converted_at = today</code>.</li>
+            <li>Staff redirected to subscriber profile to enroll in a chit group.</li>
+            <li>Lead record kept (not deleted) — shows "Converted" badge with link to subscriber.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>10. Access Control</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <p>See the <a href="#access" style="color:var(--blue);">Access Control section</a> above for the full role table.</p>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>11. Follow-up Queue</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Overdue:</strong> follow_up_date &lt; today and fu_done = false → shown in red.</li>
+            <li><strong>Due today:</strong> follow_up_date = today → shown prominently.</li>
+            <li><strong>Upcoming:</strong> follow_up_date within next 7 days.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>12. Reports (Phase 4)</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li>Lead funnel by status (new / in_progress / converted / dead)</li>
+            <li>Flag distribution (green / yellow / red)</li>
+            <li>Branch-wise breakdown (total, converted, conversion rate)</li>
+            <li>Employee-wise breakdown</li>
+            <li>Follow-up compliance (completed on time vs overdue)</li>
+            <li>CSV export matching existing marketing tool format</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>13. Notifications &amp; Daily Follow-up Reminders</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <p>Decision: extend existing <code>TaskController::bubbleSummary()</code> — no new UI. CRM follow-ups due today or overdue appear in the same bubble alongside operational tasks. Daily 08:00 artisan command sends SMS digest per employee.</p>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-toggle" onclick="toggleAcc(this)">
+          <span>14. Open Items / Confirmed Decisions</span>
+          <span class="acc-icon">▾</span>
+        </button>
+        <div class="acc-body">
+          <ul>
+            <li>✅ Source column in CSV overrides default source if recognised value.</li>
+            <li>✅ Duplicate handling: skip only (no merge — keep simple for now).</li>
+            <li>⏳ Cluster heads: TBD whether they see all-branch leads or just assigned ones.</li>
+            <li>✅ follow_up_date from CSV: accept as-is; invalid dates simply won't appear in queue.</li>
+            <li>✅ GL code / financial category: enrollment level only, not lead level.</li>
+            <li>⏳ CRM follow-ups in "My Tasks" page: optional Phase 2 item (bubble confirmed).</li>
+            <li>⏳ SMS notification content: confirm with team (count + link, or individual lead names).</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div> <!-- /main -->
+</div> <!-- /layout -->
+
+<script>
+  function toggleAcc(btn) {
+    var body = btn.nextElementSibling;
+    var isOpen = body.classList.contains('open');
+    btn.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Sidebar active state on scroll
+  var sections = document.querySelectorAll('.doc-section');
+  var navLinks = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', function () {
+    var scrollY = window.scrollY + 80;
+    sections.forEach(function (sec) {
+      if (sec.offsetTop <= scrollY && sec.offsetTop + sec.offsetHeight > scrollY) {
+        navLinks.forEach(function (a) { a.classList.remove('active'); });
+        var link = document.querySelector('.nav-link[href="#' + sec.id + '"]');
+        if (link) link.classList.add('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>
