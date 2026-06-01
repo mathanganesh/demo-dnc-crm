@@ -208,6 +208,11 @@ function authCheck(){
           <i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Follow-up Calendar</span>
         </a>
       </li>
+      <li class="nav-main-item">
+        <a class="nav-main-link" id="nav-monitor" href="#" onclick="showView('monitor'); return false;">
+          <i class="nav-main-link-icon fa fa-binoculars"></i><span class="nav-main-link-name">Adoption Monitor</span>
+        </a>
+      </li>
 
       <li class="nav-main-heading">Other</li>
       <li class="nav-main-item">
@@ -481,6 +486,28 @@ function authCheck(){
             <div class="form-group col-sm-3">
               <label>Business / Visit Place</label>
               <input type="text" class="form-control" id="f-business-place" placeholder="Location or area">
+            </div>
+            <div class="form-group col-sm-12">
+              <label class="d-flex align-items-center" style="gap:8px;">
+                <i class="fa fa-map-marker-alt text-danger"></i> GPS Location
+                <small class="text-muted font-w400">(optional — capture visit coordinates)</small>
+              </label>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-sm btn-alt-danger" onclick="captureGPS('f')">
+                  <i class="fa fa-crosshairs mr-1"></i> Capture My Location
+                </button>
+                <div id="f-gps-status" style="font-size:13px;color:#6b7280;"></div>
+              </div>
+              <div id="f-gps-result" style="display:none;margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;">
+                <i class="fa fa-map-marker-alt text-success mr-1"></i>
+                <strong id="f-gps-addr"></strong>
+                <span id="f-gps-coords" style="margin-left:8px;color:#6b7280;font-size:11px;"></span>
+                <a id="f-gps-link" href="#" target="_blank" style="margin-left:8px;font-size:11px;color:#3b82f6;">View on map ↗</a>
+                <button type="button" class="btn btn-xs btn-alt-secondary ml-2" onclick="clearGPS('f')" style="font-size:11px;padding:1px 8px;">✕ Clear</button>
+              </div>
+              <input type="hidden" id="f-gps-lat">
+              <input type="hidden" id="f-gps-lng">
+              <input type="hidden" id="f-gps-address">
             </div>
             <div class="form-group col-sm-3">
               <label>Proposed Chit Value</label>
@@ -1019,6 +1046,152 @@ function authCheck(){
   </div>
 </div>
 
+<!-- ─────────────── VIEW: ADOPTION MONITOR ─────────────── -->
+<div id="view-monitor" class="view">
+  <div class="bg-primary-dark">
+    <div class="content content-full">
+      <div class="d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
+        <div>
+          <h3 class="my-2 text-white"><i class="fa fa-binoculars mr-2"></i>Adoption &amp; Conversion Monitor
+            <small class="d-block font-size-base font-w400 text-light mt-1">Product Owner View — Branch &amp; Collector Level Analysis</small>
+          </h3>
+        </div>
+        <div class="mt-2 mt-sm-0 d-flex flex-wrap" style="gap:8px;align-items:center;">
+          <label class="text-light mb-0 font-size-sm">Period:</label>
+          <select class="form-control form-control-sm" id="mon-period" onchange="monPeriodChange()" style="width:148px;">
+            <option value="0">All Time</option>
+            <option value="30" selected>Last 30 Days</option>
+            <option value="60">Last 60 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="custom">Custom Range…</option>
+          </select>
+          <div id="mon-custom-range" style="display:none;align-items:center;gap:6px;" class="d-flex">
+            <input type="date" class="form-control form-control-sm" id="mon-from" style="width:140px;" onchange="renderMonitor()">
+            <span class="text-light font-size-sm">to</span>
+            <input type="date" class="form-control form-control-sm" id="mon-to"   style="width:140px;" onchange="renderMonitor()">
+          </div>
+          <button class="btn btn-sm btn-warning font-w600" onclick="monLoadDemoData()" title="Reset and load realistic sample data across all branches for the last 30 days">
+            <i class="fa fa-magic mr-1"></i> Load Demo Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Org KPI strip ───────────────────────────────────── -->
+    <div class="row mb-3" id="mon-kpi-row"></div>
+
+    <!-- ── Overview (all branches) ────────────────────────── -->
+    <div id="mon-overview">
+
+      <!-- Branch performance table -->
+      <div class="block block-rounded mb-4">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-sitemap mr-2 text-primary"></i>Branch Performance</h3>
+          <div class="block-options"><small class="text-muted">Click a row to drill into collectors</small></div>
+        </div>
+        <div class="block-content block-content-full p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover font-size-sm mb-0">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Branch</th>
+                  <th class="text-center">Leads Captured</th>
+                  <th class="text-center">Interactions</th>
+                  <th class="text-center">Field Events</th>
+                  <th class="text-center">Converted</th>
+                  <th class="text-center" style="width:130px;">Conversion Rate</th>
+                  <th class="text-center">FU Compliance</th>
+                  <th class="text-center">Overdue</th>
+                  <th class="text-center">Last Activity</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="mon-branch-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Funnel + source breakdown side by side -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="block block-rounded">
+            <div class="block-header border-bottom">
+              <h3 class="block-title"><i class="fa fa-filter mr-2 text-warning"></i>Lead Funnel (Org-wide)</h3>
+            </div>
+            <div class="block-content" id="mon-funnel"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="block block-rounded">
+            <div class="block-header border-bottom">
+              <h3 class="block-title"><i class="fa fa-door-open mr-2 text-info"></i>Lead Sources</h3>
+            </div>
+            <div class="block-content" id="mon-sources"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /mon-overview -->
+
+    <!-- ── Drill-down (single branch) ─────────────────────── -->
+    <div id="mon-drill" style="display:none;">
+
+      <div class="d-flex align-items-center mb-3" style="gap:12px;">
+        <button class="btn btn-sm btn-alt-secondary" onclick="monBackToOverview()">
+          <i class="fa fa-arrow-left mr-1"></i> All Branches
+        </button>
+        <h4 class="mb-0" id="mon-drill-title" style="font-size:18px;font-weight:700;"></h4>
+      </div>
+
+      <!-- Branch KPIs -->
+      <div class="row mb-3" id="mon-drill-kpi"></div>
+
+      <!-- Collector table -->
+      <div class="block block-rounded mb-4">
+        <div class="block-header border-bottom">
+          <h3 class="block-title"><i class="fa fa-users mr-2 text-primary"></i>Collector Breakdown</h3>
+          <div class="block-options"><small class="text-muted">Each row = one marketing staff / field collector</small></div>
+        </div>
+        <div class="block-content block-content-full p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover font-size-sm mb-0">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Collector</th>
+                  <th class="text-center">Leads</th>
+                  <th class="text-center">Phone Calls</th>
+                  <th class="text-center">Visits</th>
+                  <th class="text-center">WhatsApp</th>
+                  <th class="text-center">Converted</th>
+                  <th class="text-center">Conv. Rate</th>
+                  <th class="text-center">Overdue FUs</th>
+                  <th class="text-center">Last Contact</th>
+                </tr>
+              </thead>
+              <tbody id="mon-drill-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Insights -->
+      <div class="block block-rounded" id="mon-insights-block">
+        <div class="block-header border-bottom" style="background:#fffbeb;">
+          <h3 class="block-title" style="color:#92400e;"><i class="fa fa-lightbulb mr-2"></i>Conversation Starters for this Branch Review</h3>
+          <div class="block-options"><small class="text-muted">Generated from data — use these to run the branch meeting</small></div>
+        </div>
+        <div class="block-content" id="mon-insights"></div>
+      </div>
+
+    </div><!-- /mon-drill -->
+
+  </div>
+</div>
+
 </main><!-- /main-container -->
 </div><!-- /page-container -->
 
@@ -1044,7 +1217,7 @@ function authCheck(){
           </div>
           <div class="form-group col-sm-4">
             <label>Type <span class="text-danger">*</span></label>
-            <select class="form-control" id="i-type">
+            <select class="form-control" id="i-type" onchange="onInteractionTypeChange()">
               <option value="phone">📞 Phone Call</option>
               <option value="inperson">🤝 In-Person Visit</option>
               <option value="whatsapp">💬 WhatsApp</option>
@@ -1054,6 +1227,28 @@ function authCheck(){
           <div class="form-group col-sm-12">
             <label>Outcome / Notes <span class="text-danger">*</span></label>
             <textarea class="form-control" id="i-notes" rows="3" placeholder="What was discussed? What was the outcome?"></textarea>
+          </div>
+          <div class="form-group col-sm-12" id="i-gps-section" style="display:none;">
+            <label class="d-flex align-items-center" style="gap:8px;">
+              <i class="fa fa-map-marker-alt text-danger"></i> Visit Location
+              <small class="text-muted font-w400">Enable GPS to capture where you met the prospect</small>
+            </label>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm btn-alt-danger" onclick="captureGPS('i')">
+                <i class="fa fa-crosshairs mr-1"></i> Capture My Location
+              </button>
+              <div id="i-gps-status" style="font-size:13px;color:#6b7280;"></div>
+            </div>
+            <div id="i-gps-result" style="display:none;margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;">
+              <i class="fa fa-map-marker-alt text-success mr-1"></i>
+              <strong id="i-gps-addr"></strong>
+              <span id="i-gps-coords" style="margin-left:8px;color:#6b7280;font-size:11px;"></span>
+              <a id="i-gps-link" href="#" target="_blank" style="margin-left:8px;font-size:11px;color:#3b82f6;">View on map ↗</a>
+              <button type="button" class="btn btn-xs btn-alt-secondary ml-2" onclick="clearGPS('i')" style="font-size:11px;padding:1px 8px;">✕ Clear</button>
+            </div>
+            <input type="hidden" id="i-gps-lat">
+            <input type="hidden" id="i-gps-lng">
+            <input type="hidden" id="i-gps-address">
           </div>
           <div class="form-group col-sm-12">
             <label class="d-block mb-2">Update Flag</label>
@@ -1165,8 +1360,28 @@ function authCheck(){
 <script src="./assets/oneui.core.min.js"></script>
 <script src="./assets/oneui.app.min.js"></script>
 <script>
-/* ─── Seed data (from CSV + enriched) ─── */
-const SEED_LEADS = [
+/* ─── Seed data (dynamic dates relative to today) ─── */
+function buildSeedLeads() {
+  // Shift all dates relative to today using the original authoring reference of 2026-06-01
+  const REF_DATE = '2026-06-01';
+  const daysDiff = Math.round((Date.now() - new Date(REF_DATE)) / 86400000);
+  function sd(s) {
+    if (!s) return s;
+    const dt = new Date(s); dt.setDate(dt.getDate() + daysDiff);
+    return dt.toISOString().split('T')[0];
+  }
+  function shiftLead(l) {
+    return Object.assign({}, l, {
+      input_date:     sd(l.input_date),
+      created_at:     sd(l.created_at),
+      follow_up_date: sd(l.follow_up_date) || '',
+      converted_at:   l.converted_at ? sd(l.converted_at) : null,
+      interactions: (l.interactions || []).map(function(i) {
+        return Object.assign({}, i, { date: sd(i.date), follow_up_date: sd(i.follow_up_date) || '' });
+      }),
+    });
+  }
+  return [
   { id:'ARN-02783', name:'Ramesh', mobile:'9443243225', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Dineshkumar M', source:'field', status:'in_progress', flag:'green', input_date:'2025-09-08', follow_up_date:'2026-06-17', follow_up_note:'Call back after salary credit', notes:'Met at field event, interested in ₹50K group', created_by:'Mathan Raj', created_at:'2025-09-08', interactions:[
     { id:1, type:'phone', date:'2026-05-13', time:'09:39', by:'TVN-Dineshkumar M', outcome:'Discussed chit scheme options. Interested in ₹50,000 group starting July. Very responsive on call.', flag_after:'green', follow_up_date:'2026-06-17', follow_up_note:'Call back after salary credit', fu_done:false },
     { id:2, type:'inperson', date:'2026-04-28', time:'11:00', by:'TVN-Dineshkumar M', outcome:'Met at Ariyalur branch. Reviewed scheme documents. Brought wife along. No objections raised.', flag_after:'green', follow_up_date:'2026-05-13', follow_up_note:'Confirm interest', fu_done:true },
@@ -1208,7 +1423,8 @@ const SEED_LEADS = [
   { id:'ARN-03725', name:'Narayanamoorthi (VAO)', mobile:'7708748025', mobile2:'', email:'', branch:'ARN', branch_label:'Ariyalur (ARN)', assigned_to:'Rajkumar S', source:'field', status:'in_progress', flag:'yellow', input_date:'2026-02-27', follow_up_date:'2026-06-03', follow_up_note:'Discuss with spouse', notes:'Needs spouse approval', created_by:'Mathan Raj', created_at:'2026-02-27', interactions:[
     { id:1, type:'inperson', date:'2026-05-13', time:'09:38', by:'Rajkumar S', outcome:'Met at office. Interested personally but says he needs to discuss with spouse first.', flag_after:'yellow', follow_up_date:'2026-06-03', follow_up_note:'Discuss with spouse', fu_done:false }
   ]}
-];
+  ].map(shiftLead);
+}
 
 /* ─── State ─── */
 let currentLeadId = null;
@@ -1240,7 +1456,7 @@ function deleteLead(id) {
 }
 function resetData() {
   if (confirm('Reset all lead data to original seed leads?')) {
-    setLeads(JSON.parse(JSON.stringify(SEED_LEADS)));
+    setLeads(buildSeedLeads());
     toast('Data reset to original seed leads.', 'success');
     showView('list');
   }
@@ -1254,69 +1470,73 @@ function loadSampleData() {
 
   const samples = [
     // ── Overdue ──────────────────────────────────────────────
-    { name:'Murugan Selvam',  mobile:'9443112233', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:d(-10), follow_up_note:'Call back — missed last time',        income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'Murugan Provision Store', business_place:'Ariyalur Market',     chit_value:'₹50,000',   ref_name:'Rajkumar S',    notes:'Interested in ₹50K group. Missed last call.',
+    { name:'Murugan Selvam',  mobile:'9443112233', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'field',   assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:d(-10), follow_up_note:'Call back — missed last time',        income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'Murugan Provision Store', business_place:'Ariyalur Market',     chit_value:'₹50,000',   ref_name:'Rajkumar S',    notes:'Interested in ₹50K group. Missed last call.',
       interactions:[
         { id:1, type:'phone',    date:d(-25), time:'10:15', by:'Dineshkumar M', outcome:'Discussed ₹50K group. Owner keen — wants to know next auction date. Scheduled visit to branch.',                                       flag_after:'green',  follow_up_date:d(-10), follow_up_note:'Call back — confirm branch visit', fu_done:false },
         { id:2, type:'inperson', date:d(-42), time:'11:30', by:'Dineshkumar M', outcome:'Visited provision store. Good turnover visible. Owner understood the scheme well. Very positive response.',                             flag_after:'green',  follow_up_date:d(-25), follow_up_note:'Follow up with scheme brochure',   fu_done:true  },
       ]},
-    { name:'Kavitha Devi',    mobile:'9842234455', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   assigned_to:'Priya R',       flag:'yellow', follow_up_date:d(-6),  follow_up_note:'Confirm after husband discussion',   income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Sendurai',            chit_value:'₹25,000',   ref_name:'',              notes:'Needs family approval before joining.',
+    { name:'Kavitha Devi',    mobile:'9842234455', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   source:'field',   assigned_to:'Priya R',       flag:'yellow', follow_up_date:d(-6),  follow_up_note:'Confirm after husband discussion',   income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Sendurai',            chit_value:'₹25,000',   ref_name:'',              notes:'Needs family approval before joining.',
       interactions:[
         { id:1, type:'phone',    date:d(-20), time:'09:30', by:'Priya R',        outcome:'Interested personally but husband is unsure. Asked to discuss at home and call back. Flagged yellow.',                                 flag_after:'yellow', follow_up_date:d(-6),  follow_up_note:'Confirm after husband discussion', fu_done:false },
         { id:2, type:'phone',    date:d(-38), time:'14:00', by:'Priya R',        outcome:'First contact via TVN field camp. Teacher at govt school. Good income. Initially seemed very interested.',                             flag_after:'green',  follow_up_date:d(-20), follow_up_note:'Call back for final answer',        fu_done:true  },
       ]},
-    { name:'Aravind Kumar',   mobile:'8124778899', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Rajkumar S',    flag:'yellow', follow_up_date:d(-3),  follow_up_note:'Check on loan closure',               income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'AK Printing Press',       business_place:'Ariyalur Bus Stand',  chit_value:'₹50,000',   ref_name:'Suresh V',      notes:'Has ongoing loan, may join after closure.',
+    { name:'Aravind Kumar',   mobile:'8124778899', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'walkin',  assigned_to:'Rajkumar S',    flag:'yellow', follow_up_date:d(-3),  follow_up_note:'Check on loan closure',               income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'AK Printing Press',       business_place:'Ariyalur Bus Stand',  chit_value:'₹50,000',   ref_name:'Suresh V',      notes:'Has ongoing loan, may join after closure.',
       interactions:[
         { id:1, type:'phone',    date:d(-18), time:'11:00', by:'Rajkumar S',     outcome:'Loan from KVB bank ongoing — EMI ₹8,500/month. Will close in 2 months. Wants to join ₹50K group after that.',                       flag_after:'yellow', follow_up_date:d(-3),  follow_up_note:'Check on loan closure status',     fu_done:false },
         { id:2, type:'inperson', date:d(-35), time:'10:00', by:'Rajkumar S',     outcome:'Visited printing press. Business steady. Showed interest in scheme. Flagged green initially.',                                         flag_after:'green',  follow_up_date:d(-18), follow_up_note:'Discuss scheme after seeing income', fu_done:true  },
         { id:3, type:'phone',    date:d(-50), time:'16:00', by:'Rajkumar S',     outcome:'First contact via referral by Suresh V. Printing business owner. Keen to save. Agreed to in-person meeting.',                         flag_after:'green',  follow_up_date:d(-35), follow_up_note:'Visit business and assess',         fu_done:true  },
       ]},
-    { name:'Bhuvaneswari K',  mobile:'9843667788', branch:'ABH', branch_label:'Abhiram (ABH)',          assigned_to:'Mathan Raj',    flag:'red',    follow_up_date:d(-1),  follow_up_note:'Try again — agriculture season',      income_source:'Agriculture',   monthly_income:'Below ₹10,000',      business_name:'',                        business_place:'Andimadam',           chit_value:'₹25,000',   ref_name:'',              notes:'Seasonal income only. Revisit after harvest.',
+    { name:'Bhuvaneswari K',  mobile:'9843667788', branch:'ABH', branch_label:'Abhiram (ABH)',          source:'walkin',  assigned_to:'Mathan Raj',    flag:'red',    follow_up_date:d(-1),  follow_up_note:'Try again — agriculture season',      income_source:'Agriculture',   monthly_income:'Below ₹10,000',      business_name:'',                        business_place:'Andimadam',           chit_value:'₹25,000',   ref_name:'',              notes:'Seasonal income only. Revisit after harvest.',
       interactions:[
         { id:1, type:'phone',    date:d(-15), time:'08:45', by:'Mathan Raj',     outcome:'Income very low currently. Paddy crop failed this season. Not in a position to commit. Revisit after harvest in 3 months. Flagged red.',flag_after:'red',   follow_up_date:d(-1),  follow_up_note:'Try again after harvest season',   fu_done:false },
         { id:2, type:'phone',    date:d(-45), time:'10:30', by:'Mathan Raj',     outcome:'Walked into ABH branch enquiring about savings. Explained chit scheme. She was interested but income is seasonal.',                    flag_after:'green',  follow_up_date:d(-15), follow_up_note:'Check on income situation',         fu_done:true  },
       ]},
     // ── Due today ────────────────────────────────────────────
-    { name:'Senthilkumar R',  mobile:'7904556677', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:today,  follow_up_note:'Final scheme decision today',         income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Senthil Hardware',        business_place:'T.Palur Road',        chit_value:'₹1,00,000', ref_name:'Dineshkumar M', notes:'Hardware shop owner, solid income. Ready to decide.',
+    { name:'Senthilkumar R',  mobile:'7904556677', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'field',   assigned_to:'Dineshkumar M', flag:'green',  follow_up_date:today,  follow_up_note:'Final scheme decision today',         income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Senthil Hardware',        business_place:'T.Palur Road',        chit_value:'₹1,00,000', ref_name:'Dineshkumar M', notes:'Hardware shop owner, solid income. Ready to decide.',
       interactions:[
         { id:1, type:'inperson', date:d(-14), time:'10:00', by:'Dineshkumar M', outcome:'Visited hardware shop. Daily sales around ₹15K. Owner ready to commit to ₹1L group. Asked to call today for final confirmation.',      flag_after:'green',  follow_up_date:today,  follow_up_note:'Final confirmation call',           fu_done:false },
         { id:2, type:'phone',    date:d(-28), time:'09:00', by:'Dineshkumar M', outcome:'Follow-up from field event. Understood scheme well. Wants ₹1L group. Agreed to branch visit.',                                          flag_after:'green',  follow_up_date:d(-14), follow_up_note:'Arrange branch visit',              fu_done:true  },
         { id:3, type:'phone',    date:d(-30), time:'11:15', by:'Dineshkumar M', outcome:'First contact at ARN field marketing event. Hardware business owner. Showed strong interest in chit savings.',                           flag_after:'green',  follow_up_date:d(-28), follow_up_note:'Send scheme details on WhatsApp',   fu_done:true  },
       ]},
-    { name:'Deepa Lakshmi',   mobile:'9994889900', branch:'BCE', branch_label:'Bengaluru Central (BCE)',assigned_to:'Suresh V',      flag:'green',  follow_up_date:today,  follow_up_note:'Confirm joining before month end',    income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Bengaluru',           chit_value:'₹25,000',   ref_name:'',              notes:'School teacher, interested and ready.',
+    { name:'Deepa Lakshmi',   mobile:'9994889900', branch:'BCE', branch_label:'Bengaluru Central (BCE)',source:'online',  assigned_to:'Suresh V',      flag:'green',  follow_up_date:today,  follow_up_note:'Confirm joining before month end',    income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                        business_place:'Bengaluru',           chit_value:'₹25,000',   ref_name:'',              notes:'School teacher, interested and ready.',
       interactions:[
         { id:1, type:'whatsapp', date:d(-10), time:'18:30', by:'Suresh V',      outcome:'Sent scheme PDF. She confirmed reading it. Very positive — said will join ₹25K group. Asked to call today to confirm.',                  flag_after:'green',  follow_up_date:today,  follow_up_note:'Confirm joining before month end',  fu_done:false },
         { id:2, type:'phone',    date:d(-30), time:'13:00', by:'Suresh V',      outcome:'School teacher at govt school. Salary ₹22K/month. Interested in saving via chit. Good candidate for ₹25K group.',                      flag_after:'green',  follow_up_date:d(-10), follow_up_note:'Share scheme brochure on WhatsApp',  fu_done:true  },
       ]},
     // ── Upcoming ─────────────────────────────────────────────
-    { name:'Thirumaran V',    mobile:'9443990011', branch:'ARN', branch_label:'Ariyalur (ARN)',         assigned_to:'Rajkumar S',    flag:'green',  follow_up_date:d(3),   follow_up_note:'Ready to join next auction cycle',    income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Thirumaran Cement Agency',business_place:'Kiliyur',             chit_value:'₹2,00,000', ref_name:'',              notes:'Cement dealer, high turnover. Very positive.',
+    { name:'Thirumaran V',    mobile:'9443990011', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'walkin',  assigned_to:'Rajkumar S',    flag:'green',  follow_up_date:d(3),   follow_up_note:'Ready to join next auction cycle',    income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'Thirumaran Cement Agency',business_place:'Kiliyur',             chit_value:'₹2,00,000', ref_name:'',              notes:'Cement dealer, high turnover. Very positive.',
       interactions:[
         { id:1, type:'inperson', date:d(-12), time:'11:00', by:'Rajkumar S',    outcome:'Visited cement agency. Confirmed he wants ₹2L group. Waiting for current auction slot to open. Very confident lead.',                   flag_after:'green',  follow_up_date:d(3),   follow_up_note:'Call when slot opens',              fu_done:false },
         { id:2, type:'phone',    date:d(-25), time:'10:00', by:'Rajkumar S',    outcome:'Discussed scheme structure. High cash flow from cement business. Interested in large scheme.',                                            flag_after:'green',  follow_up_date:d(-12), follow_up_note:'Arrange in-person to finalise',     fu_done:true  },
         { id:3, type:'phone',    date:d(-45), time:'09:15', by:'Rajkumar S',    outcome:'First contact via referral. Cement dealer in Kiliyur. Has good savings capacity. Scheduled initial discussion.',                         flag_after:'green',  follow_up_date:d(-25), follow_up_note:'Explain scheme options',            fu_done:true  },
       ]},
-    { name:'Suganya Priya',   mobile:'8056001122', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   assigned_to:'Priya R',       flag:'green',  follow_up_date:d(7),   follow_up_note:'Confirm property income details',     income_source:'Rental Income', monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Ariyalur Town',       chit_value:'₹50,000',   ref_name:'Mathan Raj',    notes:'Has rental flats, stable monthly income.',
+    { name:'Suganya Priya',   mobile:'8056001122', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   source:'online',  assigned_to:'Priya R',       flag:'green',  follow_up_date:d(7),   follow_up_note:'Confirm property income details',     income_source:'Rental Income', monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Ariyalur Town',       chit_value:'₹50,000',   ref_name:'Mathan Raj',    notes:'Has rental flats, stable monthly income.',
       interactions:[
         { id:1, type:'phone',    date:d(-8),  time:'12:00', by:'Priya R',       outcome:'Confirmed she has 2 rental properties. Monthly rental income ₹28K stable. Happy to join ₹50K group next month.',                       flag_after:'green',  follow_up_date:d(7),   follow_up_note:'Confirm property income documents', fu_done:false },
         { id:2, type:'inperson', date:d(-30), time:'10:30', by:'Priya R',       outcome:'Referred by Mathan Raj. Met at TVN branch. Explained scheme. Rental income is her primary income — good stability.',                    flag_after:'green',  follow_up_date:d(-8),  follow_up_note:'Call to get income details',        fu_done:true  },
       ]},
-    { name:'Palaniappan S',   mobile:'9751223344', branch:'ABH', branch_label:'Abhiram (ABH)',          assigned_to:'Mathan Raj',    flag:'yellow', follow_up_date:d(12),  follow_up_note:'Call after salary date',               income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Abhiram',             chit_value:'₹50,000',   ref_name:'',              notes:'Govt employee, interested but cautious.',
+    { name:'Palaniappan S',   mobile:'9751223344', branch:'ABH', branch_label:'Abhiram (ABH)',          source:'field',   assigned_to:'Mathan Raj',    flag:'yellow', follow_up_date:d(12),  follow_up_note:'Call after salary date',               income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                        business_place:'Abhiram',             chit_value:'₹50,000',   ref_name:'',              notes:'Govt employee, interested but cautious.',
       interactions:[
         { id:1, type:'phone',    date:d(-5),  time:'15:00', by:'Mathan Raj',    outcome:'Cautious about monthly commitment. Asked about penalty for missed month. Needs reassurance. Salary hits 10th so call after that.',       flag_after:'yellow', follow_up_date:d(12),  follow_up_note:'Call after salary — address concerns',fu_done:false },
         { id:2, type:'phone',    date:d(-30), time:'10:00', by:'Mathan Raj',    outcome:'Govt clerk at ABH panchayat office. Stable income. Initially eager to join — flagged green. Will reconsider after more info.',           flag_after:'green',  follow_up_date:d(-5),  follow_up_note:'Address questions about scheme',    fu_done:true  },
       ]},
-    { name:'Nithyakalyani M', mobile:'9600334455', branch:'BCE', branch_label:'Bengaluru Central (BCE)',assigned_to:'Suresh V',      flag:'red',    follow_up_date:d(21),  follow_up_note:'Long follow-up — revisit in 3 weeks', income_source:'Own Business',  monthly_income:'₹10,000 – ₹25,000', business_name:'NK Boutique',             business_place:'Jayanagar',           chit_value:'₹25,000',   ref_name:'',              notes:'New business, not stable yet. Revisit in 3 weeks.',
+    { name:'Nithyakalyani M', mobile:'9600334455', branch:'BCE', branch_label:'Bengaluru Central (BCE)',source:'online',  assigned_to:'Suresh V',      flag:'red',    follow_up_date:d(21),  follow_up_note:'Long follow-up — revisit in 3 weeks', income_source:'Own Business',  monthly_income:'₹10,000 – ₹25,000', business_name:'NK Boutique',             business_place:'Jayanagar',           chit_value:'₹25,000',   ref_name:'',              notes:'New business, not stable yet. Revisit in 3 weeks.',
       interactions:[
         { id:1, type:'whatsapp', date:d(-9),  time:'19:00', by:'Suresh V',      outcome:'Boutique launched only 4 months ago. Income not yet stable. Not in a position to commit ₹25K/month. Revisit in 3 weeks. Flagged red.',  flag_after:'red',    follow_up_date:d(21),  follow_up_note:'Check if business stabilised',      fu_done:false },
         { id:2, type:'phone',    date:d(-30), time:'11:00', by:'Suresh V',      outcome:'Contacted via Facebook ad. New boutique in Jayanagar. Keen on saving but unsure about monthly cash flow. Flagged yellow at first.',      flag_after:'yellow', follow_up_date:d(-9),  follow_up_note:'WhatsApp to check business progress',fu_done:true  },
       ]},
   ];
 
+  // Assign each sample a distinct input_date offset so they spread across last 30 days
+  const inputOffsets = [-28, -22, -18, -14, -12, -10, -8, -5, -3, -1];
+
   const existing = getLeads();
   const existingMobiles = new Set(existing.map(l => l.mobile));
   let added = 0;
 
-  samples.forEach(s => {
+  samples.forEach((s, idx) => {
     if (existingMobiles.has(s.mobile)) return; // skip if already present
+    const inputOffset = inputOffsets[idx] || -1;
     const lead = {
       id:             nextLeadNo(s.branch),
       name:           s.name,
@@ -1326,10 +1546,10 @@ function loadSampleData() {
       branch:         s.branch,
       branch_label:   s.branch_label,
       assigned_to:    s.assigned_to,
-      source:         'import',
+      source:         s.source || 'field',
       flag:           s.flag,
       status:         'in_progress',
-      input_date:     addDays(today, -30),
+      input_date:     addDays(today, inputOffset),
       follow_up_date: s.follow_up_date,
       follow_up_note: s.follow_up_note,
       notes:          s.notes,
@@ -1340,7 +1560,7 @@ function loadSampleData() {
       chit_value:     s.chit_value,
       ref_name:       s.ref_name,
       created_by:     'Mathan Raj',
-      created_at:     addDays(today, -30),
+      created_at:     addDays(today, inputOffset),
       updated_at:     today,
       interactions:   s.interactions || [],
       subscriber_id:  null,
@@ -1381,6 +1601,7 @@ function showView(name, data) {
   if (name === 'import')  { impReset(); }
   if (name === 'calendar'){ renderCalendar(); }
   if (name === 'mytasks') { renderMyTasks(); }
+  if (name === 'monitor') { renderMonitor(); }
 
   window.scrollTo(0, 0);
 }
@@ -1540,6 +1761,18 @@ function initNewForm(editId) {
     document.getElementById('f-chit-value').value = l.chit_value || '';
     document.getElementById('f-ref-name').value = l.ref_name || '';
     selectFlag(l.flag || 'green');
+    // Restore captured GPS if editing
+    document.getElementById('f-gps-lat').value = l.gps_lat || '';
+    document.getElementById('f-gps-lng').value = l.gps_lng || '';
+    document.getElementById('f-gps-address').value = l.gps_address || '';
+    if (l.gps_lat && l.gps_lng) {
+      document.getElementById('f-gps-coords').textContent = l.gps_lat + ', ' + l.gps_lng;
+      document.getElementById('f-gps-addr').textContent = l.gps_address || (l.gps_lat + ', ' + l.gps_lng);
+      document.getElementById('f-gps-link').href = 'https://www.google.com/maps?q=' + l.gps_lat + ',' + l.gps_lng;
+      document.getElementById('f-gps-result').style.display = '';
+    } else {
+      clearGPS('f');
+    }
   }
 }
 
@@ -1571,6 +1804,9 @@ function saveLead(e) {
     business_place:  document.getElementById('f-business-place').value.trim(),
     chit_value:      document.getElementById('f-chit-value').value,
     ref_name:        document.getElementById('f-ref-name').value.trim(),
+    gps_lat:         document.getElementById('f-gps-lat').value,
+    gps_lng:         document.getElementById('f-gps-lng').value,
+    gps_address:     document.getElementById('f-gps-address').value,
     created_by:      'Mathan Raj',
     created_at:      editId ? getLead(editId).created_at : new Date().toISOString().split('T')[0],
     updated_at:      new Date().toISOString().split('T')[0],
@@ -1634,6 +1870,7 @@ function renderDetail(id) {
         ${l.monthly_income ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Monthly Income</td><td>${l.monthly_income}</td></tr>` : ''}
         ${l.business_name ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Business Name</td><td>${l.business_name}</td></tr>` : ''}
         ${l.business_place ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Business / Visit Place</td><td>${l.business_place}</td></tr>` : ''}
+        ${l.gps_lat ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">📍 GPS Location</td><td style="font-size:12.5px;"><span>${l.gps_address || (l.gps_lat+', '+l.gps_lng)}</span> <a href="https://www.google.com/maps?q=${l.gps_lat},${l.gps_lng}" target="_blank" style="font-size:11px;color:#3b82f6;margin-left:6px;">View on map ↗</a><div style="font-size:11px;color:#9ca3af;margin-top:2px;">${l.gps_lat}, ${l.gps_lng}</div></td></tr>` : ''}
         ${l.chit_value ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Proposed Chit Value</td><td><strong>${l.chit_value}</strong></td></tr>` : ''}
         ${l.ref_name ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Reference</td><td>${l.ref_name}</td></tr>` : ''}
         ${l.subscriber_id ? `<tr><td style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;">Subscriber ID</td><td><code class="text-success">${l.subscriber_id}</code></td></tr>` : ''}
@@ -1679,6 +1916,10 @@ function renderDetail(id) {
         <i class="fa fa-${i.fu_done ? 'check-circle' : 'calendar-check'} mr-1"></i>
         <strong>Follow-up: ${i.follow_up_date}</strong>${i.follow_up_note ? ' — ' + i.follow_up_note : ''}${i.fu_done ? ' <strong>✅ Done</strong>' : ''}
       </div>` : ''}
+      ${i.gps_lat ? `<div style="font-size:12px;color:#6b7280;margin-top:4px;">
+        <i class="fa fa-map-marker-alt text-danger mr-1"></i>
+        <a href="https://www.google.com/maps?q=${i.gps_lat},${i.gps_lng}" target="_blank" style="color:#3b82f6;">${i.gps_address || (i.gps_lat+', '+i.gps_lng)}</a>
+      </div>` : ''}
     </div>
   `).join('') + '</div>';
 }
@@ -1693,8 +1934,11 @@ function openLogModal() {
   document.getElementById('i-fudate').value = '';
   document.getElementById('i-funote').value = '';
   document.getElementById('i-hasfollowup').checked = true;
+  document.getElementById('i-type').value = 'phone';
   toggleFollowup();
   setIFlag(l.flag);
+  clearGPS('i');
+  document.getElementById('i-gps-section').style.display = 'none';
   $('#modal-interaction').modal('show');
 }
 
@@ -1714,6 +1958,85 @@ function setIFlag(f) {
 function toggleFollowup() {
   const show = document.getElementById('i-hasfollowup').checked;
   document.getElementById('followup-section').style.display = show ? '' : 'none';
+}
+
+function onInteractionTypeChange() {
+  const type = document.getElementById('i-type').value;
+  document.getElementById('i-gps-section').style.display = type === 'inperson' ? '' : 'none';
+  if (type !== 'inperson') clearGPS('i');
+}
+
+/* ─── GPS Capture ─── */
+function captureGPS(prefix) {
+  const statusEl = document.getElementById(prefix + '-gps-status');
+  const resultEl = document.getElementById(prefix + '-gps-result');
+
+  if (!navigator.geolocation) {
+    statusEl.innerHTML = '<span style="color:#ef4444;"><i class="fa fa-times-circle mr-1"></i>GPS not supported in this browser.</span>';
+    return;
+  }
+
+  statusEl.innerHTML = '<i class="fa fa-circle-notch fa-spin mr-1 text-primary"></i>Detecting location…';
+  resultEl.style.display = 'none';
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+
+      document.getElementById(prefix + '-gps-lat').value = lat;
+      document.getElementById(prefix + '-gps-lng').value = lng;
+      document.getElementById(prefix + '-gps-coords').textContent = lat + ', ' + lng;
+      document.getElementById(prefix + '-gps-link').href =
+        'https://www.google.com/maps?q=' + lat + ',' + lng;
+
+      statusEl.innerHTML = '';
+      document.getElementById(prefix + '-gps-addr').textContent = 'Fetching address…';
+      resultEl.style.display = '';
+
+      // Reverse geocode via Nominatim (free, no API key)
+      fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json', {
+        headers: { 'Accept-Language': 'en' }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        const addr = data.display_name || (lat + ', ' + lng);
+        document.getElementById(prefix + '-gps-addr').textContent = addr;
+        document.getElementById(prefix + '-gps-address').value = addr;
+
+        // Auto-fill Business Place field if this is the lead form and it's empty
+        if (prefix === 'f') {
+          const bp = document.getElementById('f-business-place');
+          if (!bp.value.trim()) {
+            const short = (data.address && (data.address.village || data.address.town || data.address.city || data.address.suburb || data.address.county)) || addr;
+            bp.value = short;
+          }
+        }
+      })
+      .catch(function() {
+        const coords = lat + ', ' + lng;
+        document.getElementById(prefix + '-gps-addr').textContent = coords;
+        document.getElementById(prefix + '-gps-address').value = coords;
+      });
+    },
+    function(err) {
+      const msgs = {
+        1: 'Permission denied — please allow location access in your browser.',
+        2: 'Location unavailable. Check that GPS is enabled on your device.',
+        3: 'Request timed out. Try again.',
+      };
+      statusEl.innerHTML = '<span style="color:#ef4444;"><i class="fa fa-exclamation-triangle mr-1"></i>' + (msgs[err.code] || 'Unknown error.') + '</span>';
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+function clearGPS(prefix) {
+  ['gps-lat','gps-lng','gps-address'].forEach(function(k) {
+    document.getElementById(prefix + '-' + k).value = '';
+  });
+  document.getElementById(prefix + '-gps-status').innerHTML = '';
+  document.getElementById(prefix + '-gps-result').style.display = 'none';
 }
 
 function saveInteraction() {
@@ -1739,6 +2062,9 @@ function saveInteraction() {
     follow_up_date: fuDate,
     follow_up_note: fuNote,
     fu_done:        false,
+    gps_lat:        document.getElementById('i-gps-lat').value,
+    gps_lng:        document.getElementById('i-gps-lng').value,
+    gps_address:    document.getElementById('i-gps-address').value,
   };
 
   lead.interactions = [interaction, ...(lead.interactions || [])];
@@ -1964,7 +2290,7 @@ function toast(msg, type) {
 (function init() {
   // Seed data if first visit
   if (!localStorage.getItem(LS_KEY)) {
-    setLeads(JSON.parse(JSON.stringify(SEED_LEADS)));
+    setLeads(buildSeedLeads());
   }
   populateBranchFilter();
   showView('list');
@@ -2328,6 +2654,381 @@ function renderTaskRows(tasks) {
       <td class="text-center">${overdueCell}</td>
     </tr>`;
   }).join('');
+}
+
+/* ─── Adoption Monitor ─── */
+const MON_BRANCHES = [
+  { code:'ARN', label:'Ariyalur (ARN)' },
+  { code:'TVN', label:'Tiruvannamalai (TVN)' },
+  { code:'BCE', label:'Bengaluru Central (BCE)' },
+  { code:'ABH', label:'Abhiram (ABH)' },
+];
+
+let monDrillBranch = null;
+
+function monPeriodChange() {
+  const val = document.getElementById('mon-period').value;
+  const customEl = document.getElementById('mon-custom-range');
+  if (val === 'custom') {
+    customEl.style.display = 'flex';
+    // default from = 30 days ago, to = today if blank
+    const today = new Date().toISOString().split('T')[0];
+    if (!document.getElementById('mon-from').value) {
+      const d30 = new Date(); d30.setDate(d30.getDate() - 30);
+      document.getElementById('mon-from').value = d30.toISOString().split('T')[0];
+    }
+    if (!document.getElementById('mon-to').value) {
+      document.getElementById('mon-to').value = today;
+    }
+  } else {
+    customEl.style.display = 'none';
+  }
+  renderMonitor();
+}
+
+function monGetLeads() {
+  const all  = getLeads();
+  const val  = document.getElementById('mon-period').value;
+  if (val === 'custom') {
+    const from = document.getElementById('mon-from').value;
+    const to   = document.getElementById('mon-to').value;
+    if (!from && !to) return all;
+    return all.filter(l => {
+      const d = l.input_date || '';
+      return (!from || d >= from) && (!to || d <= to);
+    });
+  }
+  const days = parseInt(val);
+  if (!days) return all;
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  return all.filter(l => (l.input_date || '') >= cutoffStr);
+}
+
+function monBar(pct, color) {
+  const w = Math.min(100, Math.max(0, pct));
+  const bg = color || (w >= 20 ? '#22c55e' : w >= 10 ? '#f59e0b' : '#ef4444');
+  return `<div style="display:flex;align-items:center;gap:6px;">
+    <div style="flex:1;height:7px;background:#e2e8f0;border-radius:4px;min-width:60px;">
+      <div style="width:${w}%;height:100%;background:${bg};border-radius:4px;"></div>
+    </div>
+    <span style="font-size:12px;font-weight:700;min-width:36px;">${Math.round(pct)}%</span>
+  </div>`;
+}
+
+function monKpiCard(icon, label, value, color) {
+  return `<div class="col-6 col-md-2">
+    <div class="block block-rounded mb-0">
+      <div class="block-content text-center py-3">
+        <div style="font-size:28px;font-weight:800;color:${color||'#1e293b'};">${value}</div>
+        <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">${label}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function monDaysSince(dateStr) {
+  if (!dateStr) return null;
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+  return diff;
+}
+
+function renderMonitor() {
+  monDrillBranch = null;
+  document.getElementById('mon-overview').style.display = '';
+  document.getElementById('mon-drill').style.display = 'none';
+
+  const leads  = monGetLeads();
+  const today  = new Date().toISOString().split('T')[0];
+  const allInts = leads.flatMap(l => l.interactions || []);
+  const conv   = leads.filter(l => l.status === 'converted').length;
+  const inProg = leads.filter(l => l.status === 'in_progress').length;
+  const isNew  = leads.filter(l => l.status === 'new').length;
+  const dead   = leads.filter(l => l.status === 'dead').length;
+  const rate   = leads.length ? (conv / leads.length * 100).toFixed(1) : 0;
+  const avgInt = leads.length ? (allInts.length / leads.length).toFixed(1) : 0;
+  const overdue = leads.filter(l => l.follow_up_date && l.follow_up_date < today && !['converted','dead'].includes(l.status)).length;
+
+  // Org KPI strip
+  document.getElementById('mon-kpi-row').innerHTML =
+    monKpiCard('fa-address-card', 'Total Leads',    leads.length,       '#3b82f6') +
+    monKpiCard('fa-comments',     'Interactions',   allInts.length,     '#8b5cf6') +
+    monKpiCard('fa-user-check',   'Converted',      conv,               '#22c55e') +
+    monKpiCard('fa-percentage',   'Conv. Rate',     rate + '%',         rate >= 15 ? '#22c55e' : rate >= 8 ? '#f59e0b' : '#ef4444') +
+    monKpiCard('fa-exclamation',  'Overdue FUs',    overdue,            overdue > 3 ? '#ef4444' : '#f59e0b') +
+    monKpiCard('fa-redo',         'Avg Touches',    avgInt,             '#0ea5e9');
+
+  // Branch rows
+  const tbody = document.getElementById('mon-branch-tbody');
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">No lead data. Load sample data first.</td></tr>';
+  } else {
+    tbody.innerHTML = MON_BRANCHES.map(b => {
+      const bl   = leads.filter(l => l.branch === b.code);
+      if (!bl.length) return `<tr><td class="font-w600">${b.label}</td><td colspan="9" class="text-muted text-center font-size-sm">No leads in this period</td></tr>`;
+      const bi   = bl.flatMap(l => l.interactions || []);
+      const bConv = bl.filter(l => l.status === 'converted').length;
+      const bRate = (bConv / bl.length * 100);
+      const bField = bl.filter(l => l.source === 'field').length;
+      const bOver  = bl.filter(l => l.follow_up_date && l.follow_up_date < today && !['converted','dead'].includes(l.status)).length;
+      const pastFUs = bi.filter(i => i.follow_up_date && i.follow_up_date < today);
+      const doneFUs = pastFUs.filter(i => i.fu_done).length;
+      const comp = pastFUs.length ? Math.round(doneFUs / pastFUs.length * 100) : null;
+      const dates = bi.map(i => i.date).filter(Boolean).sort().reverse();
+      const lastAct = dates[0] || null;
+      const dSince = monDaysSince(lastAct);
+      const staleCls = dSince !== null && dSince > 14 ? 'text-danger font-w600' : 'text-muted';
+
+      return `<tr style="cursor:pointer;" onclick="monDrill('${b.code}')" title="Click to drill into collectors">
+        <td class="font-w600"><i class="fa fa-store mr-1 text-primary"></i>${b.label}</td>
+        <td class="text-center"><strong>${bl.length}</strong></td>
+        <td class="text-center">${bi.length} <small class="text-muted">(${bl.length ? (bi.length/bl.length).toFixed(1) : 0} avg)</small></td>
+        <td class="text-center">${bField > 0 ? `<span class="badge badge-info">${bField} field</span>` : '<span class="text-muted">—</span>'}</td>
+        <td class="text-center"><strong class="${bConv > 0 ? 'text-success' : 'text-muted'}">${bConv}</strong></td>
+        <td>${monBar(bRate)}</td>
+        <td class="text-center">${comp !== null ? monBar(comp, comp >= 70 ? '#22c55e' : comp >= 40 ? '#f59e0b' : '#ef4444') : '<span class="text-muted font-size-sm">No FUs set</span>'}</td>
+        <td class="text-center">${bOver > 0 ? `<span class="badge badge-danger">${bOver}</span>` : '<span class="text-muted">—</span>'}</td>
+        <td class="text-center ${staleCls}">${lastAct ? (dSince === 0 ? 'Today' : dSince + 'd ago') : '—'}</td>
+        <td class="text-center"><span class="text-primary font-size-sm">Drill in →</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Funnel
+  const total = leads.length || 1;
+  document.getElementById('mon-funnel').innerHTML = [
+    ['new',          'New',         isNew,  '#94a3b8'],
+    ['in_progress',  'In Progress', inProg, '#3b82f6'],
+    ['converted',    'Converted',   conv,   '#22c55e'],
+    ['dead',         'Dead',        dead,   '#ef4444'],
+  ].map(([,lbl,ct,col]) => `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px;">
+        <span>${lbl}</span><span>${ct}</span>
+      </div>
+      <div style="height:12px;background:#f1f5f9;border-radius:6px;overflow:hidden;">
+        <div style="width:${(ct/total*100).toFixed(1)}%;height:100%;background:${col};border-radius:6px;transition:width .4s;"></div>
+      </div>
+    </div>`).join('');
+
+  // Sources
+  const srcMap = { walkin:'Walk-in / Referral', field:'Field Marketing', online:'Online / Social', import:'CSV Import' };
+  const srcColors = { walkin:'#3b82f6', field:'#22c55e', online:'#8b5cf6', import:'#f59e0b' };
+  const srcCounts = {};
+  leads.forEach(l => { srcCounts[l.source] = (srcCounts[l.source] || 0) + 1; });
+  document.getElementById('mon-sources').innerHTML = Object.entries(srcCounts).sort((a,b) => b[1]-a[1]).map(([src, ct]) => `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px;">
+        <span>${srcMap[src] || src}</span><span>${ct}</span>
+      </div>
+      <div style="height:12px;background:#f1f5f9;border-radius:6px;overflow:hidden;">
+        <div style="width:${(ct/total*100).toFixed(1)}%;height:100%;background:${srcColors[src]||'#94a3b8'};border-radius:6px;"></div>
+      </div>
+    </div>`).join('') || '<p class="text-muted">No data</p>';
+}
+
+function monDrill(branchCode) {
+  monDrillBranch = branchCode;
+  document.getElementById('mon-overview').style.display = 'none';
+  document.getElementById('mon-drill').style.display = '';
+
+  const branch = MON_BRANCHES.find(b => b.code === branchCode);
+  const leads  = monGetLeads().filter(l => l.branch === branchCode);
+  const today  = new Date().toISOString().split('T')[0];
+  const allInts = leads.flatMap(l => l.interactions || []);
+  const conv   = leads.filter(l => l.status === 'converted').length;
+  const rate   = leads.length ? (conv / leads.length * 100).toFixed(1) : 0;
+  const overdue = leads.filter(l => l.follow_up_date && l.follow_up_date < today && !['converted','dead'].includes(l.status)).length;
+  const pastFUs = allInts.filter(i => i.follow_up_date && i.follow_up_date < today);
+  const comp = pastFUs.length ? Math.round(pastFUs.filter(i => i.fu_done).length / pastFUs.length * 100) : null;
+
+  document.getElementById('mon-drill-title').innerHTML =
+    `<i class="fa fa-store mr-2 text-primary"></i>${branch ? branch.label : branchCode}`;
+
+  // Branch KPI strip
+  document.getElementById('mon-drill-kpi').innerHTML =
+    monKpiCard('fa-address-card', 'Leads',        leads.length,       '#3b82f6') +
+    monKpiCard('fa-comments',     'Interactions', allInts.length,     '#8b5cf6') +
+    monKpiCard('fa-user-check',   'Converted',    conv,               '#22c55e') +
+    monKpiCard('fa-percentage',   'Conv. Rate',   rate + '%',         rate >= 15 ? '#22c55e' : rate >= 8 ? '#f59e0b' : '#ef4444') +
+    monKpiCard('fa-exclamation',  'Overdue FUs',  overdue,            overdue > 2 ? '#ef4444' : '#f59e0b') +
+    monKpiCard('fa-check-circle', 'FU Compliance',comp !== null ? comp + '%' : '—', comp >= 70 ? '#22c55e' : '#f59e0b');
+
+  // Collector breakdown
+  const colMap = {};
+  leads.forEach(l => {
+    const emp = l.assigned_to || 'Unassigned';
+    if (!colMap[emp]) colMap[emp] = { leads:[], calls:0, visits:0, whatsapp:0, conv:0, overdue:0, dates:[] };
+    colMap[emp].leads.push(l);
+    (l.interactions || []).forEach(i => {
+      if (i.type === 'phone')    colMap[emp].calls++;
+      if (i.type === 'inperson') colMap[emp].visits++;
+      if (i.type === 'whatsapp') colMap[emp].whatsapp++;
+      if (i.date) colMap[emp].dates.push(i.date);
+    });
+    if (l.status === 'converted') colMap[emp].conv++;
+    if (l.follow_up_date && l.follow_up_date < today && !['converted','dead'].includes(l.status)) colMap[emp].overdue++;
+  });
+
+  const colRows = Object.entries(colMap).sort((a,b) => b[1].conv - a[1].conv || b[1].leads.length - a[1].leads.length);
+  const tbody = document.getElementById('mon-drill-tbody');
+  if (!colRows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No leads in this branch for the selected period.</td></tr>';
+  } else {
+    tbody.innerHTML = colRows.map(([name, d]) => {
+      const cr = d.leads.length ? (d.conv / d.leads.length * 100).toFixed(0) : 0;
+      const lastDate = d.dates.sort().reverse()[0] || null;
+      const dSince = monDaysSince(lastDate);
+      const staleCls = dSince !== null && dSince > 14 ? 'text-danger font-w600' : 'text-muted';
+      return `<tr>
+        <td class="font-w600"><i class="fa fa-user-circle mr-1 text-muted"></i>${escH(name)}</td>
+        <td class="text-center"><strong>${d.leads.length}</strong></td>
+        <td class="text-center">${d.calls || '—'}</td>
+        <td class="text-center">${d.visits || '—'}</td>
+        <td class="text-center">${d.whatsapp || '—'}</td>
+        <td class="text-center"><strong class="${d.conv > 0 ? 'text-success' : 'text-muted'}">${d.conv}</strong></td>
+        <td class="text-center">${monBar(cr)}</td>
+        <td class="text-center">${d.overdue > 0 ? `<span class="badge badge-danger">${d.overdue}</span>` : '<span class="text-muted">—</span>'}</td>
+        <td class="text-center ${staleCls}">${lastDate ? (dSince === 0 ? 'Today' : dSince + 'd ago') : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Smart insights
+  const insights = [];
+  const fieldLeads = leads.filter(l => l.source === 'field');
+  const avgTouches = leads.length ? (allInts.length / leads.length).toFixed(1) : 0;
+  const dSinceLast = monDaysSince(allInts.map(i => i.date).filter(Boolean).sort().reverse()[0] || null);
+  const topCollector = colRows[0];
+
+  if (conv === 0 && leads.length > 0)
+    insights.push({ type:'red',    icon:'🔴', text:`<strong>No conversions yet</strong> — ask: Are leads being followed up enough before closing? Average touches per lead is ${avgTouches}.` });
+  else if (parseFloat(rate) < 10)
+    insights.push({ type:'amber',  icon:'🟡', text:`<strong>Conversion rate is ${rate}%</strong> — ask: Are leads being sourced from the right events and places? Which type of prospect converts best?` });
+  else
+    insights.push({ type:'green',  icon:'🟢', text:`<strong>Conversion rate is ${rate}%</strong> — commend the team. Ask: What is working? Can we scale this approach to other branches?` });
+
+  if (overdue > 2)
+    insights.push({ type:'red',    icon:'🔴', text:`<strong>${overdue} overdue follow-ups</strong> — ask: Why weren't these followed up? Is the team using the system daily? Check the calendar view with them.` });
+  else if (overdue > 0)
+    insights.push({ type:'amber',  icon:'🟡', text:`<strong>${overdue} overdue follow-up${overdue > 1 ? 's' : ''}</strong> — ask the branch head to clear these in the next 2 days.` });
+
+  if (fieldLeads.length === 0)
+    insights.push({ type:'amber',  icon:'📋', text:`<strong>No field marketing leads</strong> in this period — ask: When was your last event? Do you have one planned this month?` });
+  else
+    insights.push({ type:'info',   icon:'🎪', text:`<strong>${fieldLeads.length} leads from field events</strong> — ask: Which event produced the best quality leads? Plan the next one accordingly.` });
+
+  if (dSinceLast !== null && dSinceLast > 14)
+    insights.push({ type:'red',    icon:'💤', text:`<strong>No interactions logged in ${dSinceLast} days</strong> — the team may not be using the app. Review with the branch head and check if there are login issues.` });
+
+  if (comp !== null && comp < 50)
+    insights.push({ type:'amber',  icon:'📅', text:`<strong>Follow-up compliance is only ${comp}%</strong> — ask: Are follow-up reminders being seen? Is the task bubble visible on their devices?` });
+  else if (comp !== null && comp >= 80)
+    insights.push({ type:'green',  icon:'✅', text:`<strong>${comp}% follow-up compliance</strong> — excellent discipline. Highlight this in the team review.` });
+
+  if (topCollector && colRows.length > 1) {
+    const [tName, tData] = topCollector;
+    const tRate = tData.leads.length ? (tData.conv / tData.leads.length * 100).toFixed(0) : 0;
+    insights.push({ type:'info',   icon:'⭐', text:`<strong>${escH(tName)}</strong> is the top performer (${tData.leads.length} leads, ${tData.conv} converted, ${tRate}% rate) — ask them to share what's working with the rest of the team.` });
+  }
+
+  if (avgTouches < 2 && leads.length > 0)
+    insights.push({ type:'amber',  icon:'📞', text:`<strong>Average ${avgTouches} interactions per lead</strong> — industry practice suggests 4–6 touches before a decision. Ask the team to be more persistent.` });
+
+  const bgMap = { red:'#fef2f2', amber:'#fffbeb', green:'#f0fdf4', info:'#eff6ff' };
+  const bdMap = { red:'#fca5a5', amber:'#fde68a', green:'#86efac', info:'#93c5fd' };
+  document.getElementById('mon-insights').innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0;">` +
+    insights.map(ins => `
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:${bgMap[ins.type]};border:1px solid ${bdMap[ins.type]};border-radius:8px;">
+        <span style="font-size:20px;flex-shrink:0;">${ins.icon}</span>
+        <div style="font-size:13.5px;color:#1e293b;line-height:1.6;">${ins.text}</div>
+      </div>`).join('') + '</div>';
+}
+
+function monBackToOverview() {
+  monDrillBranch = null;
+  document.getElementById('mon-overview').style.display = '';
+  document.getElementById('mon-drill').style.display = 'none';
+}
+
+function monLoadDemoData() {
+  // Reset to fresh seed (with dynamic dates), then silently add sample leads
+  setLeads(buildSeedLeads());
+
+  const today = new Date().toISOString().split('T')[0];
+  const _d = n => addDays(today, n);
+
+  const extra = [
+    // ARN — field event + walkin leads, last 30 days
+    { name:'Ramachandran S',  mobile:'9500112233', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'field',   assigned_to:'Dineshkumar M', flag:'green',  status:'in_progress', input_date:_d(-26), follow_up_date:_d(4),  follow_up_note:'Discuss ₹1L group', income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'RC Tiles',          business_place:'Ariyalur',   chit_value:'₹1,00,000', ref_name:'', notes:'Tile business owner, solid income.', interactions:[
+      { id:1, type:'inperson', date:_d(-26), time:'11:00', by:'Dineshkumar M', outcome:'Met at ARN field camp. Tile shop with high daily sales. Very interested in ₹1L group.',           flag_after:'green',  follow_up_date:_d(4),  follow_up_note:'Discuss ₹1L group',   fu_done:false },
+    ]},
+    { name:'Karthikeyan M',   mobile:'9500223344', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'walkin',  assigned_to:'Rajkumar S',    flag:'green',  status:'in_progress', input_date:_d(-20), follow_up_date:_d(6),  follow_up_note:'Confirm group', income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                  business_place:'Ariyalur',   chit_value:'₹50,000',   ref_name:'', notes:'Bank employee, walked in to enquire.', interactions:[
+      { id:1, type:'phone',    date:_d(-8),  time:'10:30', by:'Rajkumar S',    outcome:'Follow-up call. Ready to join ₹50K group next month.',                                            flag_after:'green',  follow_up_date:_d(6),  follow_up_note:'Confirm joining',     fu_done:false },
+      { id:2, type:'inperson', date:_d(-20), time:'09:30', by:'Rajkumar S',    outcome:'Walk-in at ARN branch. Bank employee. Explained scheme. Interested.',                             flag_after:'green',  follow_up_date:_d(-8), follow_up_note:'Call back to confirm', fu_done:true  },
+    ]},
+    { name:'Gowri Shankar',   mobile:'9500334455', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'field',   assigned_to:'Dineshkumar M', flag:'yellow', status:'in_progress', input_date:_d(-14), follow_up_date:_d(-2), follow_up_note:'Check decision', income_source:'Agriculture',   monthly_income:'₹10,000 – ₹25,000', business_name:'',                  business_place:'Sendurai',   chit_value:'₹25,000',   ref_name:'', notes:'Seasonal income — cautious.', interactions:[
+      { id:1, type:'phone',    date:_d(-5),  time:'14:00', by:'Dineshkumar M', outcome:'Worried about peak season. Will decide after harvest. Flagged yellow.',                            flag_after:'yellow', follow_up_date:_d(-2), follow_up_note:'Check decision',      fu_done:false },
+      { id:2, type:'inperson', date:_d(-14), time:'10:00', by:'Dineshkumar M', outcome:'Field camp visit. Interested but income is seasonal. Scheduled call.',                             flag_after:'green',  follow_up_date:_d(-5), follow_up_note:'Call back',           fu_done:true  },
+    ]},
+    // ARN — converted this month
+    { name:'Selvi Devi',      mobile:'9500445566', branch:'ARN', branch_label:'Ariyalur (ARN)',         source:'walkin',  assigned_to:'Rajkumar S',    flag:'green',  status:'converted',   input_date:_d(-22), follow_up_date:'',     follow_up_note:'', income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                  business_place:'Ariyalur',   chit_value:'₹50,000',   ref_name:'', notes:'Nurse at govt hospital. Converted smoothly.', subscriber_id:'SUB-4890', converted_at:_d(-5), interactions:[
+      { id:1, type:'inperson', date:_d(-5),  time:'11:00', by:'Rajkumar S',    outcome:'KYC complete. Enrolled in ARN-G-081 ₹50K group. Converted.',                                     flag_after:'green',  follow_up_date:'',     follow_up_note:'',            fu_done:true  },
+      { id:2, type:'phone',    date:_d(-15), time:'10:00', by:'Rajkumar S',    outcome:'Salary confirmed at ₹32K. Ready to join. Asked to come with documents.',                         flag_after:'green',  follow_up_date:_d(-5), follow_up_note:'Bring KYC docs', fu_done:true  },
+      { id:3, type:'inperson', date:_d(-22), time:'09:00', by:'Rajkumar S',    outcome:'Walk-in. Nurse at PHC Ariyalur. Steady income. Interested in ₹50K group.',                       flag_after:'green',  follow_up_date:_d(-15),follow_up_note:'Verify income',  fu_done:true  },
+    ]},
+    // TVN — field event + online
+    { name:'Muthu Lakshmi',   mobile:'9600112233', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   source:'field',   assigned_to:'Priya R',       flag:'green',  status:'in_progress', input_date:_d(-24), follow_up_date:_d(3),  follow_up_note:'Final decision', income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'ML Sarees',         business_place:'TVN Town',   chit_value:'₹50,000',   ref_name:'', notes:'Saree shop, good footfall.', interactions:[
+      { id:1, type:'whatsapp', date:_d(-6),  time:'18:00', by:'Priya R',       outcome:'Sent scheme PDF. Owner confirmed interest. Will join next cycle.',                                flag_after:'green',  follow_up_date:_d(3),  follow_up_note:'Confirm joining', fu_done:false },
+      { id:2, type:'inperson', date:_d(-24), time:'10:30', by:'Priya R',       outcome:'TVN field camp. Saree shop owner. High sales volume. Interested in ₹50K.',                       flag_after:'green',  follow_up_date:_d(-6), follow_up_note:'WhatsApp brochure',fu_done:true  },
+    ]},
+    { name:'Balasubramanian', mobile:'9600223344', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   source:'online',  assigned_to:'Priya R',       flag:'yellow', status:'in_progress', input_date:_d(-11), follow_up_date:_d(5),  follow_up_note:'Address concerns', income_source:'Salary / Job',  monthly_income:'₹10,000 – ₹25,000', business_name:'',                  business_place:'Vellore Rd', chit_value:'₹25,000',   ref_name:'', notes:'Online enquiry from Instagram.', interactions:[
+      { id:1, type:'phone',    date:_d(-3),  time:'11:30', by:'Priya R',       outcome:'Has questions about penalty clauses. Will join if satisfied. Scheduled callback.',                flag_after:'yellow', follow_up_date:_d(5),  follow_up_note:'Address concerns',fu_done:false },
+      { id:2, type:'phone',    date:_d(-11), time:'14:00', by:'Priya R',       outcome:'Instagram ad lead. Interested in small scheme. Explained ₹25K group.',                            flag_after:'green',  follow_up_date:_d(-3), follow_up_note:'Answer penalty Q', fu_done:true  },
+    ]},
+    // TVN — converted
+    { name:'Anbuselvan K',    mobile:'9600334455', branch:'TVN', branch_label:'Tiruvannamalai (TVN)',   source:'field',   assigned_to:'Priya R',       flag:'green',  status:'converted',   input_date:_d(-28), follow_up_date:'',     follow_up_note:'', income_source:'Own Business',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'AK Hardware',       business_place:'TVN Market', chit_value:'₹1,00,000', ref_name:'', notes:'Hardware dealer, converted after 2 meetings.', subscriber_id:'SUB-4891', converted_at:_d(-10), interactions:[
+      { id:1, type:'inperson', date:_d(-10), time:'10:00', by:'Priya R',       outcome:'Enrolled in TVN-G-034 ₹1L group. KYC done. Converted.',                                          flag_after:'green',  follow_up_date:'',     follow_up_note:'',             fu_done:true  },
+      { id:2, type:'inperson', date:_d(-28), time:'11:00', by:'Priya R',       outcome:'TVN field event. Hardware dealer with high daily turnover. Very positive.',                       flag_after:'green',  follow_up_date:_d(-10),follow_up_note:'Branch visit',   fu_done:true  },
+    ]},
+    // BCE — leads
+    { name:'Preethi Narayanan',mobile:'9700112233', branch:'BCE', branch_label:'Bengaluru Central (BCE)',source:'online', assigned_to:'Suresh V',      flag:'green',  status:'in_progress', input_date:_d(-17), follow_up_date:_d(7),  follow_up_note:'Confirm joining', income_source:'Salary / Job',  monthly_income:'₹50,000 – ₹1 Lakh', business_name:'',                  business_place:'Koramangala', chit_value:'₹1,00,000', ref_name:'', notes:'IT professional, high income.', interactions:[
+      { id:1, type:'phone',    date:_d(-4),  time:'17:30', by:'Suresh V',      outcome:'IT professional. Monthly ₹80K take home. Interested in ₹1L group. Wants to see contract.',      flag_after:'green',  follow_up_date:_d(7),  follow_up_note:'Share agreement', fu_done:false },
+      { id:2, type:'phone',    date:_d(-17), time:'12:00', by:'Suresh V',      outcome:'Google Ads lead. Explained scheme over call. Very interested.',                                   flag_after:'green',  follow_up_date:_d(-4), follow_up_note:'Detailed call',  fu_done:true  },
+    ]},
+    { name:'Venkatesh Iyer',  mobile:'9700223344', branch:'BCE', branch_label:'Bengaluru Central (BCE)',source:'walkin', assigned_to:'Suresh V',      flag:'yellow', status:'in_progress', input_date:_d(-9),  follow_up_date:_d(-1), follow_up_note:'Final answer', income_source:'Rental Income', monthly_income:'₹25,000 – ₹50,000', business_name:'',                  business_place:'Indiranagar', chit_value:'₹50,000',   ref_name:'', notes:'Retired, rental income. Cautious about locking funds.', interactions:[
+      { id:1, type:'inperson', date:_d(-2),  time:'10:00', by:'Suresh V',      outcome:'Wants written confirmation of exit clauses. Cautious but interested.',                            flag_after:'yellow', follow_up_date:_d(-1), follow_up_note:'Final answer',   fu_done:false },
+      { id:2, type:'inperson', date:_d(-9),  time:'11:00', by:'Suresh V',      outcome:'Walk-in at BCE branch. Retired. Interested in ₹50K. Concerned about liquidity.',                flag_after:'green',  follow_up_date:_d(-2), follow_up_note:'Answer queries', fu_done:true  },
+    ]},
+    // ABH — leads + converted
+    { name:'Murugeswari A',   mobile:'9800112233', branch:'ABH', branch_label:'Abhiram (ABH)',          source:'field',   assigned_to:'Mathan Raj',    flag:'green',  status:'in_progress', input_date:_d(-19), follow_up_date:_d(8),  follow_up_note:'Bring husband to branch', income_source:'Salary / Job',  monthly_income:'₹25,000 – ₹50,000', business_name:'',                  business_place:'Abhiram',    chit_value:'₹50,000',   ref_name:'', notes:'Teacher, spouse also interested.', interactions:[
+      { id:1, type:'phone',    date:_d(-4),  time:'09:00', by:'Mathan Raj',    outcome:'Spouse also keen. Will bring him to branch next week to sign up together.',                      flag_after:'green',  follow_up_date:_d(8),  follow_up_note:'Bring husband',  fu_done:false },
+      { id:2, type:'inperson', date:_d(-19), time:'11:00', by:'Mathan Raj',    outcome:'ABH field camp. Teacher with stable income. Interested in joining as couple.',                   flag_after:'green',  follow_up_date:_d(-4), follow_up_note:'Callback',       fu_done:true  },
+    ]},
+    { name:'Chandrakumar T',  mobile:'9800223344', branch:'ABH', branch_label:'Abhiram (ABH)',          source:'walkin',  assigned_to:'Mathan Raj',    flag:'green',  status:'converted',   input_date:_d(-25), follow_up_date:'',     follow_up_note:'', income_source:'Own Business',  monthly_income:'₹25,000 – ₹50,000', business_name:'CT Provisions',    business_place:'Abhiram',    chit_value:'₹50,000',   ref_name:'', notes:'Provision store owner. Converted after 1 meeting.', subscriber_id:'SUB-4892', converted_at:_d(-8), interactions:[
+      { id:1, type:'inperson', date:_d(-8),  time:'10:30', by:'Mathan Raj',    outcome:'KYC done. Enrolled in ABH-G-011 ₹50K group. Converted.',                                        flag_after:'green',  follow_up_date:'',     follow_up_note:'',             fu_done:true  },
+      { id:2, type:'inperson', date:_d(-25), time:'09:30', by:'Mathan Raj',    outcome:'Walk-in. Provision store. Good daily sales. Very open to joining. Came with documents.',         flag_after:'green',  follow_up_date:_d(-8), follow_up_note:'Final visit',    fu_done:true  },
+    ]},
+  ];
+
+  const existingMobiles = new Set(getLeads().map(l => l.mobile));
+  extra.forEach(s => {
+    if (existingMobiles.has(s.mobile)) return;
+    updateLead(Object.assign({
+      id: nextLeadNo(s.branch),
+      mobile2:'', email:'', created_by:'Mathan Raj',
+      updated_at: today, subscriber_id: s.subscriber_id || null, converted_at: s.converted_at || null,
+      income_source:'', monthly_income:'', business_name:'', business_place:'',
+      chit_value:'', ref_name:'', gps_lat:'', gps_lng:'', gps_address:'',
+    }, s));
+    existingMobiles.add(s.mobile);
+  });
+
+  // Reset period to Last 30 Days so data is visible immediately
+  document.getElementById('mon-period').value = '30';
+  document.getElementById('mon-custom-range').style.display = 'none';
+  renderMonitor();
+  toast('Demo data loaded — showing last 30 days across all branches.', 'success');
 }
 
 function impReset() {

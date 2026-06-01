@@ -666,6 +666,7 @@ function authCheck(){
     <a href="#notifications" class="nav-link"><span class="nav-icon">🔔</span> Notifications</a>
     <a href="#csv" class="nav-link"><span class="nav-icon">📥</span> CSV Import Rules</a>
     <a href="#requirements" class="nav-link"><span class="nav-icon">📄</span> Functional Requirements</a>
+    <a href="#devplan" class="nav-link"><span class="nav-icon">👨‍💻</span> 2-Week Dev Plan</a>
   </nav>
 </div>
 
@@ -1539,6 +1540,197 @@ entity_type = 'Lead', entity_id = lead->id</code>
       </div>
 
     </div>
+  </div>
+
+  <!-- 11. 2-WEEK DEV PLAN -->
+  <div class="doc-section" id="devplan">
+    <div class="section-header">
+      <span class="section-icon">👨‍💻</span>
+      <h2>2-Week Developer Plan</h2>
+    </div>
+
+    <p>The CRM module can be completed in <strong>2 weeks by 2 developers working in parallel</strong>. The work splits cleanly into two bounded domains with a single well-defined integration point at the end of Week 1.</p>
+
+    <!-- Developer cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0;">
+
+      <!-- Dev A -->
+      <div style="background:#eff6ff;border:2px solid #93c5fd;border-radius:14px;padding:24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;">A</div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#1e3a5f;">Developer A</div>
+            <div style="font-size:12px;color:#3b82f6;font-weight:600;">Lead Capture &amp; Reporting</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#1e293b;line-height:1.8;">
+          <div style="font-weight:700;margin-bottom:6px;color:#1d4ed8;">Week 1</div>
+          <ul style="padding-left:18px;margin-bottom:14px;">
+            <li><code>leads</code> table migration + Lead model</li>
+            <li>LeadsController — index, create, store, show, edit, update</li>
+            <li>Lead number auto-generation per branch (<code>ARN-00001</code>)</li>
+            <li>Blade views: lead list, create/edit form, lead detail shell</li>
+            <li>New <code>MARKETING_STAFF</code> role + policy gates</li>
+          </ul>
+          <div style="font-weight:700;margin-bottom:6px;color:#1d4ed8;">Week 2</div>
+          <ul style="padding-left:18px;">
+            <li>CSV import wizard (upload → preview → confirm)</li>
+            <li>Column auto-detection, duplicate handling</li>
+            <li>Reports: branch-wise, employee-wise, funnel</li>
+            <li>CSV export matching old marketing tool format</li>
+            <li>Adoption Monitor screen (branch → collector drill-down)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Dev B -->
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#22c55e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;">B</div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#14532d;">Developer B</div>
+            <div style="font-size:12px;color:#22c55e;font-weight:600;">Interactions &amp; rosca-digital Integration</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#1e293b;line-height:1.8;">
+          <div style="font-weight:700;margin-bottom:6px;color:#15803d;">Week 1</div>
+          <ul style="padding-left:18px;margin-bottom:14px;">
+            <li><code>lead_interactions</code> table migration + LeadInteraction model</li>
+            <li>LeadInteractionsController — store, flag update, follow-up scheduling</li>
+            <li>Interaction timeline partial (<code>leads/_interactions.blade.php</code>)</li>
+            <li>Log Interaction modal + flag update + follow-up scheduling</li>
+            <li>Follow-up calendar view</li>
+          </ul>
+          <div style="font-weight:700;margin-bottom:6px;color:#15803d;">Week 2</div>
+          <ul style="padding-left:18px;">
+            <li>Conversion flow — "Convert to Subscriber" + Subscriber creation</li>
+            <li>Seed "CRM Follow-up" Process &amp; stages in task system</li>
+            <li>LeadInteraction observer → auto-create <code>tasks</code> record</li>
+            <li><code>crm:advance-followup-stages</code> artisan command</li>
+            <li><code>TaskController::bubbleSummary()</code> extension</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Timeline -->
+    <h3>Week-by-Week Timeline</h3>
+    <div style="position:relative;margin:16px 0 28px;">
+
+      <!-- Week 1 row -->
+      <div style="display:flex;gap:16px;margin-bottom:12px;align-items:stretch;">
+        <div style="width:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <div style="background:#0f172a;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;text-align:center;">Week<br>1</div>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:800;color:#3b82f6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Dev A</div>
+            <div style="font-size:13px;color:#1e293b;line-height:1.6;">Lead CRUD — list, create, edit, detail page shell. Lead number generator. MARKETING_STAFF role.</div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:800;color:#22c55e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Dev B</div>
+            <div style="font-size:13px;color:#1e293b;line-height:1.6;">Interactions — log modal, timeline partial, follow-up scheduling, calendar view.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync point -->
+      <div style="display:flex;gap:16px;margin-bottom:12px;align-items:center;">
+        <div style="width:72px;flex-shrink:0;"></div>
+        <div style="flex:1;background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🤝</span>
+          <div style="font-size:13px;color:#92400e;">
+            <strong>End of Week 1 — Sync Point.</strong> Both run migrations on shared dev DB. Dev A creates lead detail shell with <code>@include('leads._interactions')</code>. Dev B plugs in the timeline partial. Verify <code>assigned_to</code> stores <code>user_id</code>.
+          </div>
+        </div>
+      </div>
+
+      <!-- Week 2 row -->
+      <div style="display:flex;gap:16px;margin-bottom:12px;align-items:stretch;">
+        <div style="width:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <div style="background:#0f172a;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;text-align:center;">Week<br>2</div>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:800;color:#3b82f6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Dev A</div>
+            <div style="font-size:13px;color:#1e293b;line-height:1.6;">CSV import wizard. Reports, CSV export. Adoption Monitor (branch → collector view).</div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:800;color:#22c55e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Dev B</div>
+            <div style="font-size:13px;color:#1e293b;line-height:1.6;">Conversion flow. Task system integration — observer, stages, scheduler command, bubble extension.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final sync -->
+      <div style="display:flex;gap:16px;align-items:center;">
+        <div style="width:72px;flex-shrink:0;"></div>
+        <div style="flex:1;background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">✅</span>
+          <div style="font-size:13px;color:#14532d;"><strong>End of Week 2 — Integration Testing.</strong> Both test together: lead → interaction → follow-up → task bubble → conversion → subscriber enrollment. Run verification checklist.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Shared contract -->
+    <h3>The One Thing They Must Agree On Before Day 1</h3>
+    <div class="info-box info-red" style="margin-bottom:20px;">
+      <strong>Critical constraint — do not change this once decided:</strong><br>
+      <code>leads.assigned_to</code> must store <code>user_id</code> (integer FK → <code>users.id</code>), the same column type as <code>tasks.assigned_to</code>. If Dev A stores an employee name string instead, Dev B's task auto-creation and the bubble query will both fail.
+    </div>
+
+    <!-- File ownership -->
+    <h3>File Ownership</h3>
+    <table class="doc-table">
+      <thead><tr><th>File / Area</th><th>Owner</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>database/migrations/*_create_leads_table.php</code></td><td><span class="role-badge role-marketing">Dev A</span></td><td>Run on shared DB Day 1</td></tr>
+        <tr><td><code>database/migrations/*_create_lead_interactions_table.php</code></td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td>Run on shared DB Day 1</td></tr>
+        <tr><td><code>app/Lead.php</code></td><td><span class="role-badge role-marketing">Dev A</span></td><td>Dev B adds one line: <code>hasMany(LeadInteraction)</code> via PR</td></tr>
+        <tr><td><code>app/LeadInteraction.php</code></td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td></td></tr>
+        <tr><td><code>resources/views/leads/show.blade.php</code></td><td><span class="role-badge role-marketing">Dev A</span></td><td>Shell only — includes Dev B's partial</td></tr>
+        <tr><td><code>resources/views/leads/_interactions.blade.php</code></td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td>Included into Dev A's show view</td></tr>
+        <tr><td><code>routes/web.php</code></td><td>Both</td><td>Different route groups — minimal conflict</td></tr>
+        <tr><td><code>app/Http/Controllers/TaskController.php</code></td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td>Dev A never touches this</td></tr>
+        <tr><td><code>app/Console/Kernel.php</code></td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td>Scheduler registration only</td></tr>
+        <tr><td>All report views + CSV export</td><td><span class="role-badge role-marketing">Dev A</span></td><td></td></tr>
+        <tr><td>Conversion flow views + modals</td><td><span class="role-badge role-branch" style="background:#dcfce7;color:#15803d;">Dev B</span></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <!-- Git strategy -->
+    <h3>Recommended Git Branch Strategy</h3>
+    <div class="code-block"><span class="code-comment">main</span>
+├── <span class="code-keyword">feature/dev-a-lead-crud</span>         <span class="code-comment">← Dev A, Week 1</span>
+├── <span class="code-keyword">feature/dev-a-import-reports</span>    <span class="code-comment">← Dev A, Week 2</span>
+│
+├── <span class="code-keyword">feature/dev-b-interactions</span>      <span class="code-comment">← Dev B, Week 1</span>
+└── <span class="code-keyword">feature/dev-b-task-integration</span>  <span class="code-comment">← Dev B, Week 2</span>
+
+<span class="code-comment">Both branch off main on Day 1.</span>
+<span class="code-comment">Both merge into main at End-of-Week-1 sync before starting Week 2 branches.</span></div>
+
+    <!-- Verification checklist -->
+    <h3>End-of-Sprint Verification Checklist</h3>
+    <div class="acc-body open" style="padding:0;">
+      <ul style="padding-left:20px;font-size:13.5px;line-height:2;color:#475569;">
+        <li>Create a lead via the UI → <code>lead_no</code> auto-generates correctly for the branch</li>
+        <li>Log two interactions → timeline appears on lead detail with correct chronology</li>
+        <li>Change flag green → yellow → red → verify audit trail in interaction history</li>
+        <li>Set a follow-up date → confirm task record created in <code>tasks</code> table with correct <code>assigned_to</code></li>
+        <li>Advance date past follow-up → confirm task stage moves to Overdue via scheduler command</li>
+        <li>Task bubble shows CRM follow-up alongside operational tasks within 5 minutes</li>
+        <li>Click "Convert to Subscriber" → Subscriber record created, lead shows Converted badge + link</li>
+        <li>Enroll that subscriber in a chit group → standard rosca-digital enrollment works normally</li>
+        <li>Import a CSV with 10 rows including 1 duplicate → 9 imported, 1 skipped with warning shown</li>
+        <li>Run CSV export → open in Excel, columns match old marketing tool format exactly</li>
+        <li>Adoption Monitor → branch table shows correct lead count, conversion rate, last activity date</li>
+        <li>Drill into a branch → collector breakdown shows correct per-person stats</li>
+      </ul>
+    </div>
+
   </div>
 
 </div> <!-- /main -->
