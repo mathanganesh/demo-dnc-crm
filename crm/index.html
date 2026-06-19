@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNC CHITS — CRM Lead Management</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+    color: #fff;
+    padding: 72px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 40%, rgba(59,130,246,.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(59,130,246,.2);
+    border: 1px solid rgba(59,130,246,.4);
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: #60a5fa; }
+  .hero p {
+    font-size: 17px;
+    color: #94a3b8;
+    max-width: 520px;
+    margin: 0 auto 48px;
+    line-height: 1.6;
+  }
+
+  /* ── CTA Cards ────────────────────────────────────────────── */
+  .cta-row {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-card {
+    background: rgba(255,255,255,.06);
+    border: 1.5px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    padding: 32px 36px 28px;
+    width: 300px;
+    text-decoration: none;
+    color: #fff;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+  .cta-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.25);
+  }
+  .cta-card.primary { border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.12); }
+  .cta-card.primary:hover { background: rgba(59,130,246,.2); border-color: #3b82f6; }
+  .cta-icon { font-size: 36px; line-height: 1; }
+  .cta-card h2 { font-size: 20px; font-weight: 700; }
+  .cta-card p { font-size: 13.5px; color: #94a3b8; line-height: 1.5; }
+  .cta-card.primary p { color: #bfdbfe; }
+  .cta-arrow {
+    margin-top: auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .cta-card:not(.primary) .cta-arrow { color: #94a3b8; }
+
+  /* ── Phase Strip ──────────────────────────────────────────── */
+  .phase-strip {
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .phase-strip h3 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+  .phase-chips {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .phase-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .phase-chip-inner {
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+  }
+  .phase-chip-inner:hover { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; }
+  .phase-label { font-size: 11px; color: #94a3b8; font-weight: 500; }
+  .phase-arrow { color: #cbd5e1; font-size: 18px; padding: 0 6px; margin-bottom: 20px; }
+
+  /* ── Stats Row ────────────────────────────────────────────── */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    padding: 48px 24px;
+    background: #f8fafc;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 40px;
+    border-right: 1px solid #e2e8f0;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-number {
+    font-size: 40px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 6px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .stat-number.blue  { color: #3b82f6; }
+  .stat-number.green { color: #22c55e; }
+  .stat-number.amber { color: #f59e0b; }
+
+  /* ── Feature Cards ────────────────────────────────────────── */
+  .features {
+    padding: 48px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .features h2 {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 32px;
+    color: #1e293b;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .feature-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .feature-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .feature-card p  { font-size: 12.5px; color: #64748b; line-height: 1.5; }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  footer {
+    margin-top: auto;
+    background: #0f172a;
+    color: #475569;
+    text-align: center;
+    font-size: 13px;
+    padding: 20px 24px;
+    line-height: 1.6;
+  }
+  footer a { color: #60a5fa; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .cta-card { width: 100%; max-width: 380px; }
+    .stat { padding: 16px 24px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+    .stat:last-child { border-bottom: none; }
+    .phase-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Auth Wall ──────────────────────────────────────────────────────────── -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS CRM</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · CRM Initiative · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-badge">CRM Initiative · 2026</div>
+  <h1>Lead Management for<br><span>DNC CHITS</span></h1>
+  <p>A purpose-built CRM to capture, track, and convert prospects into chit fund subscribers — integrated with rosca-digital.</p>
+
+  <div class="cta-row">
+    <a href="docs.html" class="cta-card primary">
+      <div class="cta-icon">📄</div>
+      <h2>View Documentation</h2>
+      <p>System design, data model, UI screens &amp; implementation phases</p>
+      <div class="cta-arrow">Read the docs →</div>
+    </a>
+    <a href="prototype.html" class="cta-card">
+      <div class="cta-icon">🚀</div>
+      <h2>Interactive Preview</h2>
+      <p>Explore the working prototype — full lead lifecycle, calendar &amp; import demo</p>
+      <div class="cta-arrow">Launch prototype →</div>
+    </a>
+  </div>
+</div>
+
+<!-- ── Phase Timeline ────────────────────────────────────────────────────── -->
+<div class="phase-strip">
+  <h3>Implementation Roadmap</h3>
+  <div class="phase-chips">
+    <div class="phase-chip">
+      <div class="phase-chip-inner">Phase 1</div>
+      <div class="phase-label">Lead CRUD</div>
+    </div>
+    <div class="phase-arrow">›</div>
+    <div class="phase-chip">
+      <div class="phase-chip-inner">Phase 2</div>
+      <div class="phase-label">Interactions</div>
+    </div>
+    <div class="phase-arrow">›</div>
+    <div class="phase-chip">
+      <div class="phase-chip-inner">Phase 3</div>
+      <div class="phase-label">Conversion</div>
+    </div>
+    <div class="phase-arrow">›</div>
+    <div class="phase-chip">
+      <div class="phase-chip-inner">Phase 4</div>
+      <div class="phase-label">Reports</div>
+    </div>
+    <div class="phase-arrow">›</div>
+    <div class="phase-chip">
+      <div class="phase-chip-inner">Phase 5</div>
+      <div class="phase-label">CSV Import</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats ─────────────────────────────────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat">
+    <div class="stat-number blue">5</div>
+    <div class="stat-label">Implementation<br>Phases</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number green">8</div>
+    <div class="stat-label">UI Screens<br>Designed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number amber">14</div>
+    <div class="stat-label">Business Rules<br>Documented</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number" style="color:#8b5cf6;">4</div>
+    <div class="stat-label">Lead Sources<br>Tracked</div>
+  </div>
+</div>
+
+<!-- ── Feature Cards ─────────────────────────────────────────────────────── -->
+<div class="features">
+  <h2>What this CRM delivers</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div>
+        <h3>Lead Tracking</h3>
+        <p>Capture leads from walk-ins, field events, online, and CSV imports with auto-generated lead numbers per branch.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <div>
+        <h3>Interaction Timeline</h3>
+        <p>Log every call, visit, and WhatsApp touchpoint with outcome notes and scheduled follow-ups.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <div>
+        <h3>Follow-up Calendar</h3>
+        <p>Monthly calendar view showing follow-up density per day. Overdue items surface in red in the task bubble.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div>
+        <h3>One-Click Conversion</h3>
+        <p>Convert a lead into a rosca-digital Subscriber directly from the lead detail page — pre-filled from lead data.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div>
+        <h3>Reports &amp; CSV Export</h3>
+        <p>Branch-wise and employee-wise conversion rates. CSV export matches the existing marketing tool format exactly.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <div>
+        <h3>Smart Notifications</h3>
+        <p>CRM follow-ups appear in the existing task bubble. Daily 08:00 SMS digest for each employee's due leads.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  DNC CHITS · CRM Initiative · 2026 &nbsp;·&nbsp;
+  <a href="docs.html">Documentation</a> &nbsp;·&nbsp;
+  <a href="prototype.html">Interactive Prototype</a>
+</footer>
+
+</body>
+</html>
