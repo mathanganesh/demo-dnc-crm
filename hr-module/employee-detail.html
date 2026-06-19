@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee — 6741 · SUBHASH JAYACHANDRAN</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    /* Avatar / initials */
+    .emp-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2196F3 0%, #1565C0 100%);
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 16px rgba(33,150,243,0.3);
+    }
+    .emp-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #2d3748;
+      text-align: center;
+    }
+    .emp-code {
+      text-align: center;
+      color: #718096;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+    .emp-meta-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #a0aec0;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+    .emp-meta-value {
+      font-size: 0.88rem;
+      color: #2d3748;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+    .profile-card {
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .profile-divider {
+      border-top: 1px solid #e8ecf0;
+      margin: 0.75rem 0;
+    }
+    /* Tab styling */
+    .nav-tabs .nav-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #718096;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 0.65rem 1rem;
+      border-radius: 0;
+    }
+    .nav-tabs .nav-link.active {
+      color: #2196F3;
+      border-bottom: 2px solid #2196F3;
+      background: transparent;
+    }
+    .nav-tabs {
+      border-bottom: 2px solid #e8ecf0;
+      margin-bottom: 1.25rem;
+    }
+    /* Section labels in tabs */
+    .section-heading {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a0aec0;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      margin-top: 1.25rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .section-heading:first-child {
+      margin-top: 0;
+    }
+    /* Info row */
+    .info-row {
+      display: flex;
+      margin-bottom: 0.7rem;
+      align-items: flex-start;
+    }
+    .info-row .lbl {
+      min-width: 180px;
+      font-size: 0.82rem;
+      color: #a0aec0;
+      font-weight: 600;
+    }
+    .info-row .val {
+      font-size: 0.88rem;
+      color: #2d3748;
+      font-weight: 500;
+    }
+    /* Attendance calendar */
+    .att-calendar {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e8ecf0;
+    }
+    .att-calendar .cal-header {
+      background: #2196F3;
+      color: #fff;
+      padding: 0.6rem 1rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .att-calendar .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #fff;
+    }
+    .att-calendar .day-name {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #a0aec0;
+      padding: 0.5rem 0;
+      background: #f7fafc;
+      border-bottom: 1px solid #e8ecf0;
+    }
+    .att-calendar .cal-cell {
+      text-align: center;
+      padding: 0.55rem 0.2rem;
+      font-size: 0.8rem;
+      border-bottom: 1px solid #f0f4f8;
+      border-right: 1px solid #f0f4f8;
+      position: relative;
+    }
+    .att-calendar .cal-cell .day-num {
+      display: block;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.15rem;
+    }
+    .att-calendar .cal-cell .status-dot {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+    .status-P { background: #c6f6d5; color: #276749; }
+    .status-A { background: #fed7d7; color: #9b2c2c; }
+    .status-W { background: #e9d8fd; color: #553c9a; }
+    .status-H { background: #feebc8; color: #7b341e; }
+    .status-L { background: #bee3f8; color: #2a69ac; }
+    .status-F { background: #f0f0f0; color: #999; }
+    .att-calendar .cal-cell.today .day-num {
+      background: #2196F3;
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    .att-stat-card {
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .att-stat-card .stat-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .att-stat-card .stat-lbl {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    /* Leave balance */
+    .leave-badge {
+      min-width: 36px;
+      text-align: center;
+    }
+    /* Page title area */
+    .page-title-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .page-title-area .breadcrumb-nav {
+      font-size: 0.8rem;
+      color: #a0aec0;
+    }
+    .page-title-area .breadcrumb-nav a {
+      color: #2196F3;
+      text-decoration: none;
+    }
+    .tab-content .tab-pane {
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main Content -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page title / breadcrumb -->
+      <div class="page-title-area">
+        <a href="employee-list.html" class="btn btn-sm btn-light border">
+          <i class="fa fa-arrow-left mr-1"></i> Back
+        </a>
+        <div>
+          <div class="breadcrumb-nav">
+            <a href="#">HR Module</a> <i class="fa fa-angle-right mx-1" style="font-size:0.7rem;"></i>
+            <a href="employee-list.html">Employees</a> <i class="fa fa-angle-right mx-1" style="font-size:0.7rem;"></i>
+            <span class="text-dark font-weight-600">6741 · SUBHASH JAYACHANDRAN</span>
+          </div>
+        </div>
+        <div class="ml-auto d-flex gap-2" style="gap:0.5rem;">
+          <button class="btn btn-sm btn-light border" data-toggle="modal" data-target="#editModal">
+            <i class="fa fa-edit mr-1"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger">
+            <i class="fa fa-ban mr-1"></i> Deactivate
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+
+        <!-- LEFT: Profile card -->
+        <div class="col-lg-4 col-xl-3">
+          <div class="block profile-card mb-4">
+            <div class="block-content py-4 px-3 text-center">
+              <div class="emp-avatar">SJ</div>
+              <div class="emp-name">SUBHASH JAYACHANDRAN</div>
+              <div class="emp-code">Emp #6741</div>
+              <div class="mt-2 mb-1">
+                <span class="badge badge-success px-2 py-1" style="font-size:0.78rem;">Active</span>
+                <span class="badge badge-primary px-2 py-1 ml-1" style="font-size:0.78rem;">Permanent</span>
+              </div>
+            </div>
+            <div class="profile-divider"></div>
+            <div class="block-content pb-3 px-3">
+              <div class="emp-meta-label">Department</div>
+              <div class="emp-meta-value">
+                <span class="badge badge-info px-2 py-1" style="font-size:0.8rem;">Business</span>
+              </div>
+
+              <div class="emp-meta-label">Designation</div>
+              <div class="emp-meta-value">JR Business Development Manager</div>
+
+              <div class="emp-meta-label">Branch</div>
+              <div class="emp-meta-value"><i class="fa fa-map-marker-alt text-muted mr-1" style="font-size:0.75rem;"></i>Tiruchengode</div>
+
+              <div class="emp-meta-label">Region</div>
+              <div class="emp-meta-value">Salem Region (SMC)</div>
+
+              <div class="profile-divider"></div>
+
+              <div class="emp-meta-label">Date of Joining</div>
+              <div class="emp-meta-value"><i class="fa fa-calendar text-muted mr-1" style="font-size:0.75rem;"></i>26 May 2026</div>
+
+              <div class="emp-meta-label">Reporting To</div>
+              <div class="emp-meta-value">
+                <a href="#" class="text-primary" style="font-size:0.88rem;">THANGADURAI APPRAMANI</a>
+              </div>
+
+              <div class="profile-divider"></div>
+
+              <div class="emp-meta-label">Mobile</div>
+              <div class="emp-meta-value"><i class="fa fa-phone text-muted mr-1" style="font-size:0.75rem;"></i>+91 90252 43896</div>
+
+              <div class="emp-meta-label">Email</div>
+              <div class="emp-meta-value" style="word-break:break-all;"><i class="fa fa-envelope text-muted mr-1" style="font-size:0.75rem;"></i>subashsubi21@gmail.com</div>
+            </div>
+          </div>
+        </div>
+        <!-- END LEFT -->
+
+        <!-- RIGHT: Tabs -->
+        <div class="col-lg-8 col-xl-9">
+          <div class="block mb-4" style="border-radius:12px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); border:0;">
+            <div class="block-content pt-3 pb-0 px-4">
+              <ul class="nav nav-tabs" id="empTabs" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="tab-basic" data-toggle="tab" href="#pane-basic" role="tab">
+                    <i class="fa fa-user mr-1"></i> Basic Info
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="tab-work" data-toggle="tab" href="#pane-work" role="tab">
+                    <i class="fa fa-briefcase mr-1"></i> Work Details
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="tab-personal" data-toggle="tab" href="#pane-personal" role="tab">
+                    <i class="fa fa-id-card mr-1"></i> Personal &amp; Bank
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="tab-att" data-toggle="tab" href="#pane-att" role="tab">
+                    <i class="fa fa-calendar-check mr-1"></i> Attendance
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="tab-leave" data-toggle="tab" href="#pane-leave" role="tab">
+                    <i class="fa fa-umbrella-beach mr-1"></i> Leave Balance
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="block-content px-4 pb-4">
+              <div class="tab-content" id="empTabContent">
+
+                <!-- ===== BASIC INFO ===== -->
+                <div class="tab-pane fade show active" id="pane-basic" role="tabpanel">
+                  <div class="section-heading">Personal Information</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Full Name</span>
+                        <span class="val">SUBHASH JAYACHANDRAN</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Father's Name</span>
+                        <span class="val">JAYACHANDRAN D</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Date of Birth</span>
+                        <span class="val">21 Aug 2004</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Age</span>
+                        <span class="val">21 years</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Gender</span>
+                        <span class="val">Male</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Mobile</span>
+                        <span class="val">+91 90252 43896</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Personal Email</span>
+                        <span class="val">subashsubi21@gmail.com</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Marital Status</span>
+                        <span class="val">Single</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Address</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Current Address</span>
+                        <span class="val">Tiruchengode, Namakkal District, Tamil Nadu — 637 211</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Permanent Address</span>
+                        <span class="val">Tiruchengode, Namakkal District, Tamil Nadu — 637 211</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Government IDs</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Aadhaar Number</span>
+                        <span class="val">
+                          6841-XXXX-XXXX
+                          <span class="badge badge-warning ml-1" style="font-size:0.65rem;">Masked</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">PAN</span>
+                        <span class="val">OKKPS9616C</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END BASIC INFO -->
+
+                <!-- ===== WORK DETAILS ===== -->
+                <div class="tab-pane fade" id="pane-work" role="tabpanel">
+                  <div class="section-heading">Employment Details</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Employee Code</span>
+                        <span class="val font-weight-bold">6741</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Department</span>
+                        <span class="val">Business</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Designation</span>
+                        <span class="val">JR Business Development Manager</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Employee Type</span>
+                        <span class="val">Permanent</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Date of Joining</span>
+                        <span class="val">26 May 2026</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Source of Hire</span>
+                        <span class="val">Referral</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Branch</span>
+                        <span class="val">Tiruchengode</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Region</span>
+                        <span class="val">Salem Region (SMC)</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Reporting To</span>
+                        <span class="val"><a href="#" class="text-primary">THANGADURAI APPRAMANI</a></span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Employment Status</span>
+                        <span class="val"><span class="badge badge-success">Active</span></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Shift Assignment</div>
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="info-row">
+                        <span class="lbl">Current Shift</span>
+                        <span class="val">Head Office 10:00 AM to 6:00 PM</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Shift Timings</span>
+                        <span class="val">10:00 AM – 6:00 PM</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Work Days</span>
+                        <span class="val">Monday – Saturday</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Statutory Details</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">EPF / UAN</span>
+                        <span class="val text-muted">— Not assigned —</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">ESI Number</span>
+                        <span class="val text-muted">— Not assigned —</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Pay Period</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Pay Cycle</span>
+                        <span class="val">26th (prev month) – 25th (current month)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WORK DETAILS -->
+
+                <!-- ===== PERSONAL & BANK ===== -->
+                <div class="tab-pane fade" id="pane-personal" role="tabpanel">
+                  <div class="section-heading">Personal Details</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Qualification</span>
+                        <span class="val">Diploma in Automobile Engineering</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Blood Group</span>
+                        <span class="val"><span class="badge badge-danger px-2">O +ve</span></span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Marital Status</span>
+                        <span class="val">Single</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Emergency Contact</span>
+                        <span class="val"><i class="fa fa-phone text-muted mr-1"></i>97870 50620</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Relationship</span>
+                        <span class="val">Father</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="section-heading">Bank Details</div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Bank Name</span>
+                        <span class="val">Indian Bank</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">IFSC Code</span>
+                        <span class="val">IDIB000T025</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Account Type</span>
+                        <span class="val">Savings Account</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Account Number</span>
+                        <span class="val">
+                          XXXX XXXX 4521
+                          <span class="badge badge-warning ml-1" style="font-size:0.65rem;">Masked</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="info-row">
+                        <span class="lbl">Payment Mode</span>
+                        <span class="val">Bank Transfer</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="lbl">Salary Day</span>
+                        <span class="val">26th of each month</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END PERSONAL & BANK -->
+
+                <!-- ===== ATTENDANCE ===== -->
+                <div class="tab-pane fade" id="pane-att" role="tabpanel">
+                  <!-- Stats row -->
+                  <div class="row mb-3">
+                    <div class="col-6 col-md-3 mb-2">
+                      <div class="att-stat-card" style="background:#f0fff4;">
+                        <div class="stat-num text-success">11</div>
+                        <div class="stat-lbl text-success">Present</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                      <div class="att-stat-card" style="background:#fff5f5;">
+                        <div class="stat-num text-danger">1</div>
+                        <div class="stat-lbl text-danger">Absent</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                      <div class="att-stat-card" style="background:#faf5ff;">
+                        <div class="stat-num" style="color:#553c9a;">4</div>
+                        <div class="stat-lbl" style="color:#553c9a;">Weekends</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                      <div class="att-stat-card" style="background:#fffaf0;">
+                        <div class="stat-num" style="color:#c05621;">3</div>
+                        <div class="stat-lbl" style="color:#c05621;">Remaining</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Calendar -->
+                  <div class="att-calendar">
+                    <div class="cal-header">
+                      <span><i class="fa fa-calendar-alt mr-2"></i>June 2026</span>
+                      <span style="font-size:0.78rem; font-weight:400; opacity:0.85;">Pay Period: 26 May – 25 Jun</span>
+                    </div>
+                    <div class="cal-grid">
+                      <!-- Day names -->
+                      <div class="day-name">Sun</div>
+                      <div class="day-name">Mon</div>
+                      <div class="day-name">Tue</div>
+                      <div class="day-name">Wed</div>
+                      <div class="day-name">Thu</div>
+                      <div class="day-name">Fri</div>
+                      <div class="day-name">Sat</div>
+
+                      <!-- Week 1 — Jun starts on Monday (day 2) -->
+                      <!-- Empty Sunday -->
+                      <div class="cal-cell" style="background:#fafafa;"></div>
+                      <!-- 1 Mon P -->
+                      <div class="cal-cell"><span class="day-num">1</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 2 Tue P -->
+                      <div class="cal-cell"><span class="day-num">2</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 3 Wed P -->
+                      <div class="cal-cell"><span class="day-num">3</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 4 Thu P -->
+                      <div class="cal-cell"><span class="day-num">4</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 5 Fri P -->
+                      <div class="cal-cell"><span class="day-num">5</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 6 Sat W -->
+                      <div class="cal-cell"><span class="day-num">6</span><br><span class="status-dot status-W">W</span></div>
+
+                      <!-- Week 2 -->
+                      <!-- 7 Sun W -->
+                      <div class="cal-cell"><span class="day-num">7</span><br><span class="status-dot status-W">W</span></div>
+                      <!-- 8 Mon P -->
+                      <div class="cal-cell"><span class="day-num">8</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 9 Tue P -->
+                      <div class="cal-cell"><span class="day-num">9</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 10 Wed P -->
+                      <div class="cal-cell"><span class="day-num">10</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 11 Thu P -->
+                      <div class="cal-cell"><span class="day-num">11</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 12 Fri A -->
+                      <div class="cal-cell"><span class="day-num">12</span><br><span class="status-dot status-A">A</span></div>
+                      <!-- 13 Sat W -->
+                      <div class="cal-cell"><span class="day-num">13</span><br><span class="status-dot status-W">W</span></div>
+
+                      <!-- Week 3 -->
+                      <!-- 14 Sun W -->
+                      <div class="cal-cell"><span class="day-num">14</span><br><span class="status-dot status-W">W</span></div>
+                      <!-- 15 Mon P -->
+                      <div class="cal-cell"><span class="day-num">15</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 16 Tue P -->
+                      <div class="cal-cell"><span class="day-num">16</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 17 Wed P -->
+                      <div class="cal-cell"><span class="day-num">17</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 18 Thu P -->
+                      <div class="cal-cell"><span class="day-num">18</span><br><span class="status-dot status-P">P</span></div>
+                      <!-- 19 Fri — today, future -->
+                      <div class="cal-cell today"><span class="day-num">19</span><br><span class="status-dot status-F">—</span></div>
+                      <!-- 20 Sat future -->
+                      <div class="cal-cell"><span class="day-num">20</span><br><span class="status-dot status-F">—</span></div>
+
+                      <!-- Week 4 -->
+                      <div class="cal-cell"><span class="day-num">21</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">22</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">23</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">24</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">25</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">26</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">27</span><br><span class="status-dot status-F">—</span></div>
+
+                      <!-- Week 5 -->
+                      <div class="cal-cell"><span class="day-num">28</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">29</span><br><span class="status-dot status-F">—</span></div>
+                      <div class="cal-cell"><span class="day-num">30</span><br><span class="status-dot status-F">—</span></div>
+                      <!-- Padding -->
+                      <div class="cal-cell" style="background:#fafafa;"></div>
+                      <div class="cal-cell" style="background:#fafafa;"></div>
+                      <div class="cal-cell" style="background:#fafafa;"></div>
+                      <div class="cal-cell" style="background:#fafafa;"></div>
+                    </div>
+                  </div>
+
+                  <!-- Legend -->
+                  <div class="mt-3 d-flex flex-wrap" style="gap:0.6rem;">
+                    <span class="status-dot status-P" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">P — Present</span>
+                    <span class="status-dot status-A" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">A — Absent</span>
+                    <span class="status-dot status-W" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">W — Weekend</span>
+                    <span class="status-dot status-H" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">H — Holiday</span>
+                    <span class="status-dot status-L" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">L — Leave</span>
+                    <span class="status-dot status-F" style="padding:3px 10px; border-radius:4px; font-size:0.75rem;">— Future</span>
+                  </div>
+                </div>
+                <!-- END ATTENDANCE -->
+
+                <!-- ===== LEAVE BALANCE ===== -->
+                <div class="tab-pane fade" id="pane-leave" role="tabpanel">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="section-heading mb-0">Leave Balance — FY 2026–27</div>
+                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#leaveModal">
+                      <i class="fa fa-plus mr-1"></i> Apply Leave
+                    </button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-hover table-vcenter" style="font-size:0.88rem;">
+                      <thead style="background:#f7fafc;">
+                        <tr>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem;">#</th>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem;">Leave Type</th>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem; text-align:center;">Entitled</th>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem; text-align:center;">Used</th>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem; text-align:center;">Balance</th>
+                          <th style="font-size:0.72rem; text-transform:uppercase; color:#a0aec0; font-weight:700; border-top:0; padding: 0.6rem 0.75rem;">Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="text-muted">1</td>
+                          <td><span class="font-weight-600">Casual Leave</span></td>
+                          <td class="text-center">12</td>
+                          <td class="text-center text-danger font-weight-600">0</td>
+                          <td class="text-center"><span class="badge badge-success leave-badge">12</span></td>
+                          <td><span class="badge badge-light border">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">2</td>
+                          <td><span class="font-weight-600">Sick Leave</span></td>
+                          <td class="text-center">6</td>
+                          <td class="text-center text-danger font-weight-600">0</td>
+                          <td class="text-center"><span class="badge badge-success leave-badge">6</span></td>
+                          <td><span class="badge badge-light border">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">3</td>
+                          <td><span class="font-weight-600">Earned Leave</span></td>
+                          <td class="text-center">15</td>
+                          <td class="text-center text-danger font-weight-600">0</td>
+                          <td class="text-center"><span class="badge badge-success leave-badge">15</span></td>
+                          <td><span class="badge badge-light border">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">4</td>
+                          <td><span class="font-weight-600">Compensatory Off</span></td>
+                          <td class="text-center">—</td>
+                          <td class="text-center text-danger font-weight-600">0</td>
+                          <td class="text-center"><span class="badge badge-secondary leave-badge">0</span></td>
+                          <td><span class="badge badge-light border">Comp Off</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">5</td>
+                          <td><span class="font-weight-600">On Duty</span></td>
+                          <td class="text-center">—</td>
+                          <td class="text-center text-danger font-weight-600">0</td>
+                          <td class="text-center"><span class="badge badge-secondary leave-badge">0</span></td>
+                          <td><span class="badge badge-light border">On Duty</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">6</td>
+                          <td><span class="font-weight-600">Maternity Leave</span></td>
+                          <td class="text-center">84</td>
+                          <td class="text-center text-danger font-weight-600">—</td>
+                          <td class="text-center"><span class="badge badge-info leave-badge">N/A</span></td>
+                          <td><span class="badge badge-light border">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">7</td>
+                          <td><span class="font-weight-600">Employee LOP</span></td>
+                          <td class="text-center">—</td>
+                          <td class="text-center text-danger font-weight-600">1</td>
+                          <td class="text-center"><span class="badge badge-danger leave-badge">−1</span></td>
+                          <td><span class="badge badge-warning border">Unpaid</span></td>
+                        </tr>
+                      </tbody>
+                      <tfoot style="background:#f7fafc;">
+                        <tr>
+                          <td colspan="2" class="font-weight-700 text-right" style="font-size:0.82rem;">Total Paid Balance</td>
+                          <td class="text-center font-weight-700">33</td>
+                          <td class="text-center font-weight-700 text-danger">0</td>
+                          <td class="text-center"><span class="badge badge-success leave-badge font-weight-700">33</span></td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+                <!-- END LEAVE BALANCE -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END RIGHT -->
+
+      </div>
+    </div>
+  </main>
+  <!-- END Main Content -->
+
+  <!-- ===== EDIT EMPLOYEE MODAL ===== -->
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" style="border-radius:12px; border:0; box-shadow:0 8px 32px rgba(0,0,0,0.12);">
+        <div class="modal-header" style="border-bottom:1px solid #e8ecf0;">
+          <h5 class="modal-title font-weight-700" id="editModalLabel">
+            <i class="fa fa-edit mr-2 text-primary"></i>Edit Employee — 6741 · SUBHASH JAYACHANDRAN
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-pills mb-3" id="editTabs" role="tablist" style="gap:0.35rem;">
+            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#edit-basic">Basic Info</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#edit-work">Work Details</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#edit-bank">Bank &amp; Personal</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="edit-basic">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Full Name</label>
+                  <input type="text" class="form-control" value="SUBHASH JAYACHANDRAN">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Father's Name</label>
+                  <input type="text" class="form-control" value="JAYACHANDRAN D">
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Date of Birth</label>
+                  <input type="date" class="form-control" value="2004-08-21">
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Mobile</label>
+                  <input type="text" class="form-control" value="9025243896">
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Gender</label>
+                  <select class="form-control">
+                    <option selected>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Email</label>
+                  <input type="email" class="form-control" value="subashsubi21@gmail.com">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Marital Status</label>
+                  <select class="form-control">
+                    <option selected>Single</option>
+                    <option>Married</option>
+                    <option>Divorced</option>
+                    <option>Widowed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="edit-work">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Department</label>
+                  <select class="form-control">
+                    <option>Accounts</option>
+                    <option>Administration</option>
+                    <option>Branch Operation</option>
+                    <option selected>Business</option>
+                    <option>Business Development</option>
+                    <option>Human Resources</option>
+                    <option>Legal</option>
+                    <option>Management</option>
+                    <option>Recovery</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Designation</label>
+                  <select class="form-control">
+                    <option>BCE</option>
+                    <option>BH/ABH/BI</option>
+                    <option>DH</option>
+                    <option>HO Accounts</option>
+                    <option>HO HR</option>
+                    <option>HO Operation</option>
+                    <option selected>Manager-BD</option>
+                    <option>Manager Operations</option>
+                    <option>Executive Operations</option>
+                    <option>Executive Collection</option>
+                    <option>Regional Team</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Branch</label>
+                  <select class="form-control">
+                    <option>Head Office (Krishnagiri)</option>
+                    <option>Chennai Regional</option>
+                    <option selected>Tiruchengode</option>
+                    <option>Salem</option>
+                    <option>Hosur</option>
+                    <option>Edappadi</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Shift</label>
+                  <select class="form-control">
+                    <option selected>Head Office 10:00 AM to 6:00 PM</option>
+                    <option>Chennai Regional &amp; Krishnagiri/Vellore</option>
+                    <option>Salem &amp; Krishnagiri Cluster</option>
+                    <option>Central Accounts Morning</option>
+                    <option>Central Accounts Evening</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Date of Joining</label>
+                  <input type="date" class="form-control" value="2026-05-26">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Employee Type</label>
+                  <select class="form-control">
+                    <option selected>Permanent</option>
+                    <option>Probation</option>
+                    <option>Contract</option>
+                    <option>Trainee</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="edit-bank">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Bank Name</label>
+                  <input type="text" class="form-control" value="Indian Bank">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">IFSC Code</label>
+                  <input type="text" class="form-control" value="IDIB000T025">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Account Number</label>
+                  <input type="text" class="form-control" placeholder="Enter account number">
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Account Type</label>
+                  <select class="form-control">
+                    <option selected>Savings</option>
+                    <option>Current</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Blood Group</label>
+                  <select class="form-control">
+                    <option>A+ve</option>
+                    <option>A-ve</option>
+                    <option>B+ve</option>
+                    <option>B-ve</option>
+                    <option selected>O+ve</option>
+                    <option>O-ve</option>
+                    <option>AB+ve</option>
+                    <option>AB-ve</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Qualification</label>
+                  <input type="text" class="form-control" value="Diploma Auto Mobile Engg">
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="font-weight-600" style="font-size:0.82rem;">Emergency Contact</label>
+                  <input type="text" class="form-control" value="9787050620">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #e8ecf0;">
+          <button type="button" class="btn btn-light border" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary"><i class="fa fa-save mr-1"></i> Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END EDIT MODAL -->
+
+  <!-- ===== APPLY LEAVE MODAL ===== -->
+  <div class="modal fade" id="leaveModal" tabindex="-1" role="dialog" aria-labelledby="leaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content" style="border-radius:12px; border:0; box-shadow:0 8px 32px rgba(0,0,0,0.12);">
+        <div class="modal-header" style="border-bottom:1px solid #e8ecf0;">
+          <h5 class="modal-title font-weight-700" id="leaveModalLabel">
+            <i class="fa fa-umbrella-beach mr-2 text-primary"></i>Apply Leave — SUBHASH JAYACHANDRAN
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="font-weight-600" style="font-size:0.82rem;">Leave Type</label>
+            <select class="form-control">
+              <option>Casual Leave (Balance: 12)</option>
+              <option>Sick Leave (Balance: 6)</option>
+              <option>Earned Leave (Balance: 15)</option>
+              <option>Compensatory Off</option>
+              <option>On Duty</option>
+              <option>Employee LOP (Unpaid)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="font-weight-600" style="font-size:0.82rem;">From Date</label>
+              <input type="date" class="form-control">
+            </div>
+            <div class="form-group col-md-6">
+              <label class="font-weight-600" style="font-size:0.82rem;">To Date</label>
+              <input type="date" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-600" style="font-size:0.82rem;">Reason</label>
+            <textarea class="form-control" rows="3" placeholder="Enter reason for leave..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-600" style="font-size:0.82rem;">Approved By</label>
+            <select class="form-control">
+              <option>THANGADURAI APPRAMANI (Reporting Manager)</option>
+              <option>ARUNKUMAR KATHIRESAN</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #e8ecf0;">
+          <button type="button" class="btn btn-light border" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary"><i class="fa fa-paper-plane mr-1"></i> Submit Application</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END LEAVE MODAL -->
+
+</div>
+<!-- END Page Container -->
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script src="../assets/jquery.dataTables.min.js"></script>
+<script src="../assets/dataTables.bootstrap4.min.js"></script>
+</body>
+</html>

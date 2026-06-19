@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNC Chits — HR Module</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+      padding: 72px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(56,189,248,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(56,189,248,.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56,189,248,.35);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 5px 18px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+    }
+    .hero h1 span { color: #38bdf8; }
+
+    .hero p {
+      margin-top: 16px;
+      font-size: clamp(15px, 2vw, 18px);
+      color: #94a3b8;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px 32px;
+      margin-top: 40px;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-item .num {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1;
+    }
+    .stat-item .lbl {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-top: 4px;
+    }
+    .stat-sep {
+      width: 1px;
+      background: rgba(255,255,255,.1);
+      align-self: stretch;
+      margin: 4px 0;
+    }
+
+    /* ── CTA Cards ── */
+    .section-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+    .section-sub {
+      font-size: 15px;
+      color: #64748b;
+      margin-bottom: 36px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .cta-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent, #38bdf8);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .cta-card:hover {
+      border-color: var(--accent, #38bdf8);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+      text-decoration: none;
+    }
+    .cta-card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--icon-bg, rgba(56,189,248,.12));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--accent, #38bdf8);
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .card-desc {
+      font-size: 13.5px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .card-arrow {
+      position: absolute;
+      top: 24px; right: 20px;
+      color: #334155;
+      font-size: 18px;
+      transition: color .2s, transform .2s;
+    }
+    .cta-card:hover .card-arrow {
+      color: var(--accent, #38bdf8);
+      transform: translateX(3px);
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 0;
+    }
+
+    /* ── Features table ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+    }
+    .feature-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: rgba(56,189,248,.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      color: #38bdf8;
+    }
+    .feature-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 3px;
+    }
+    .feature-text span {
+      font-size: 12.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .badge-status {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge-prototype { background: rgba(250,204,21,.15); color: #fbbf24; border: 1px solid rgba(250,204,21,.25); }
+    .badge-live      { background: rgba(34,197,94,.15);  color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    .badge-planned   { background: rgba(148,163,184,.1); color: #64748b; border: 1px solid rgba(148,163,184,.15); }
+
+    /* ── Entity Map ── */
+    .entity-map {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      overflow-x: auto;
+    }
+    .entity-flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .entity-node {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+    .entity-node.accent {
+      background: rgba(56,189,248,.1);
+      border-color: rgba(56,189,248,.3);
+      color: #38bdf8;
+    }
+    .entity-node.new-table {
+      background: rgba(251,146,60,.08);
+      border-color: rgba(251,146,60,.3);
+      color: #fb923c;
+    }
+    .entity-arrow {
+      color: #334155;
+      font-size: 18px;
+      font-weight: 300;
+    }
+
+    .tables-legend {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #334155;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .tables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .table-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .table-card-header {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-card-header.existing { background: rgba(56,189,248,.06); color: #38bdf8; border-bottom: 1px solid rgba(56,189,248,.15); }
+    .table-card-header.new      { background: rgba(251,146,60,.06); color: #fb923c; border-bottom: 1px solid rgba(251,146,60,.15); }
+    .table-card ul {
+      list-style: none;
+      padding: 10px 16px 14px;
+    }
+    .table-card ul li {
+      font-size: 12.5px;
+      color: #64748b;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,.03);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .table-card ul li:last-child { border-bottom: none; }
+    .table-card ul li::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #334155;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: #334155;
+      font-size: 13px;
+      border-top: 1px solid #1e293b;
+    }
+    .page-footer a { color: #38bdf8; text-decoration: none; }
+    .page-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-badge">HR Module Prototype</div>
+    <h1>DNC CHITS &mdash; <span>HR Module</span></h1>
+    <p>Employee management, attendance, leave and shift tracking across all branches and regions.</p>
+    <div class="stats-bar">
+      <div class="stat-item"><span class="num">965</span><span class="lbl">Active Employees</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="num">56</span><span class="lbl">Branches</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="num">4</span><span class="lbl">Regions</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="num">18</span><span class="lbl">Departments</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="num">22</span><span class="lbl">Designations</span></div>
+    </div>
+  </section>
+
+  <!-- ── CTA CARDS ── -->
+  <div class="section-wrap">
+    <div class="section-label">Navigation</div>
+    <div class="section-title">HR Module Pages</div>
+    <div class="section-sub">Select a module to open the prototype page.</div>
+    <div class="cards-grid">
+
+      <a href="employee-list.html" class="cta-card" style="--accent:#38bdf8;--icon-bg:rgba(56,189,248,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon">&#128100;</div>
+        <div>
+          <div class="card-title">Employees</div>
+          <div class="card-desc">Full employee directory with filters by branch, region, department and designation. Add, edit and view employee profiles.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">965 Employees</span>
+          <span class="tag">56 Branches</span>
+          <span class="tag">Search &amp; Filter</span>
+        </div>
+      </a>
+
+      <a href="attendance.html" class="cta-card" style="--accent:#a78bfa;--icon-bg:rgba(167,139,250,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon" style="color:#a78bfa;">&#128197;</div>
+        <div>
+          <div class="card-title">Attendance</div>
+          <div class="card-desc">Daily attendance dashboard. Mark present/absent/half-day, track late arrivals, and view branch-wise summaries for any date.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">Daily View</span>
+          <span class="tag">Branch Summary</span>
+          <span class="tag">Bulk Mark</span>
+        </div>
+      </a>
+
+      <a href="leave-tracker.html" class="cta-card" style="--accent:#34d399;--icon-bg:rgba(52,211,153,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon" style="color:#34d399;">&#127958;</div>
+        <div>
+          <div class="card-title">Leave Tracker</div>
+          <div class="card-desc">Apply, approve and track leave requests. Manage CL, SL, Earned Leave, LOP, Maternity, Compensatory Off and On Duty.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">7 Leave Types</span>
+          <span class="tag">Approval Flow</span>
+          <span class="tag">Balance View</span>
+        </div>
+      </a>
+
+      <a href="shifts.html" class="cta-card" style="--accent:#f472b6;--icon-bg:rgba(244,114,182,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon" style="color:#f472b6;">&#128336;</div>
+        <div>
+          <div class="card-title">Shifts</div>
+          <div class="card-desc">Define and manage work shift templates. Assign shifts to branches. Covers HO, Chennai Regional, Salem/Krishnagiri cluster timings.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">5 Shift Templates</span>
+          <span class="tag">Branch Assignment</span>
+          <span class="tag">Split Shifts</span>
+        </div>
+      </a>
+
+      <a href="holidays.html" class="cta-card" style="--accent:#fbbf24;--icon-bg:rgba(251,191,36,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon" style="color:#fbbf24;">&#127937;</div>
+        <div>
+          <div class="card-title">Holidays</div>
+          <div class="card-desc">Manage the 2026 holiday calendar. National, state and optional holidays. Location-specific overrides (e.g., election holidays).</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">11 Holidays 2026</span>
+          <span class="tag">Location Overrides</span>
+          <span class="tag">Calendar View</span>
+        </div>
+      </a>
+
+      <a href="attendance-report.html" class="cta-card" style="--accent:#fb923c;--icon-bg:rgba(251,146,60,.1);">
+        <span class="card-arrow">&#8594;</span>
+        <div class="card-icon" style="color:#fb923c;">&#128202;</div>
+        <div>
+          <div class="card-title">Reports</div>
+          <div class="card-desc">Attendance and leave reports. Monthly summaries, region/branch drill-down, LOP counts, late arrival trends and export to Excel.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag">Attendance</span>
+          <span class="tag">Leave Summary</span>
+          <span class="tag">Export Excel</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── WHAT'S COVERED ── -->
+  <div class="section-wrap">
+    <div class="section-label">Scope</div>
+    <div class="section-title">What&rsquo;s Covered</div>
+    <div class="section-sub">All features included in this prototype with current status.</div>
+    <div class="features-grid">
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128100;</div>
+        <div class="feature-text">
+          <strong>Employee Directory <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>Full list with EMP ID, name, branch, department, designation. Add / Edit / View profile. Filters by region, branch, department, designation, status.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#9989;</div>
+        <div class="feature-text">
+          <strong>Daily Attendance <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>Mark Present / Absent / Half-Day / On Duty per employee per day. Branch-wise view. Bulk mark. Auto-carry for holidays and leaves.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#127758;</div>
+        <div class="feature-text">
+          <strong>Leave Management <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>Apply and approve CL, SL, EL, LOP, Maternity, Comp Off, On Duty. Year-to-date balances. Leave calendar per employee.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128336;</div>
+        <div class="feature-text">
+          <strong>Shift Management <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>5 shift templates covering all branch clusters. In/Out times, break duration, working hours calculation. Branch-to-shift mapping.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128197;</div>
+        <div class="feature-text">
+          <strong>Holiday Calendar <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>2026 holidays with type (National / State / Optional) and location scope. Tamil Nadu state holidays included. Election-day overrides.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128202;</div>
+        <div class="feature-text">
+          <strong>Attendance Reports <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>Monthly attendance summary by employee or branch. Present / Absent / LOP / Leave day counts. Exportable to Excel.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128203;</div>
+        <div class="feature-text">
+          <strong>Leave Reports <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>Leave utilisation by type, department and branch. Remaining balance per employee for current financial year.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128198;</div>
+        <div class="feature-text">
+          <strong>Pay Period Config <span class="badge-status badge-prototype">Prototype</span></strong>
+          <span>26th&ndash;25th pay cycle definition. Period lock/unlock, cutoff date management, payroll-period list view.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128737;</div>
+        <div class="feature-text">
+          <strong>Role-based Access <span class="badge-status badge-planned">Planned</span></strong>
+          <span>HR Admin, Branch Manager, Employee self-service roles. Manager approval workflow for leaves and attendance corrections.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128241;</div>
+        <div class="feature-text">
+          <strong>Mobile / PWA <span class="badge-status badge-planned">Planned</span></strong>
+          <span>Employee self-service: apply leave, view payslip, check attendance from mobile browser or app shell.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128176;</div>
+        <div class="feature-text">
+          <strong>Payroll Integration <span class="badge-status badge-planned">Planned</span></strong>
+          <span>Export attendance + LOP data per pay period to payroll. Integration hooks with existing Rosca finance tables.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">&#128276;</div>
+        <div class="feature-text">
+          <strong>Notifications <span class="badge-status badge-planned">Planned</span></strong>
+          <span>Leave approval alerts via WhatsApp / email. Birthday and anniversary reminders for HR. Regularisation reminders.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── ENTITY MAP ── -->
+  <div class="section-wrap">
+    <div class="section-label">Data Architecture</div>
+    <div class="section-title">Entity Map</div>
+    <div class="section-sub">How HR builds on existing Rosca entities versus the new tables required.</div>
+
+    <div class="entity-map">
+
+      <!-- Org hierarchy flow -->
+      <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Organisation Hierarchy</div>
+      <div class="entity-flow">
+        <div class="entity-node accent">Region</div>
+        <div class="entity-arrow">&#8594;</div>
+        <div class="entity-node accent">Division</div>
+        <div class="entity-arrow">&#8594;</div>
+        <div class="entity-node accent">Branch</div>
+        <div class="entity-arrow">&#8594;</div>
+        <div class="entity-node new-table">Employee</div>
+        <div class="entity-arrow">&#8594;</div>
+        <div class="entity-node accent">Department</div>
+        <div class="entity-arrow">&amp;</div>
+        <div class="entity-node accent">Designation</div>
+      </div>
+
+      <!-- HR tables flow -->
+      <div style="margin-top:20px;margin-bottom:10px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">HR Tables</div>
+      <div class="entity-flow">
+        <div class="entity-node new-table">Employee</div>
+        <div class="entity-arrow">&#8594;</div>
+        <div class="entity-node new-table">Attendance</div>
+        <div class="entity-arrow">|</div>
+        <div class="entity-node new-table">Leave Request</div>
+        <div class="entity-arrow">|</div>
+        <div class="entity-node new-table">Leave Balance</div>
+        <div class="entity-arrow">|</div>
+        <div class="entity-node new-table">Shift Assignment</div>
+      </div>
+
+      <div class="tables-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#38bdf8;"></div>Existing Rosca table (reuse)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fb923c;"></div>New HR table (to build)</div>
+      </div>
+
+      <!-- Table detail cards -->
+      <div class="tables-grid">
+
+        <div class="table-card">
+          <div class="table-card-header existing">&#10003; rosca_regions</div>
+          <ul>
+            <li>Chennai Region (CHN)</li>
+            <li>Krishnagiri Region (KRC)</li>
+            <li>Salem Region (SMC)</li>
+            <li>Coimbatore Region (CBR)</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header existing">&#10003; rosca_branches</div>
+          <ul>
+            <li>Head Office (Krishnagiri)</li>
+            <li>Chennai Regional Office</li>
+            <li>Tiruchengode Branch</li>
+            <li>Salem Branch</li>
+            <li>Hosur Branch</li>
+            <li>Edappadi Branch</li>
+            <li>+ 50 more branches</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header existing">&#10003; rosca_departments</div>
+          <ul>
+            <li>Accounts</li>
+            <li>Administration</li>
+            <li>Branch Operation</li>
+            <li>Business / Business Development</li>
+            <li>Human Resources</li>
+            <li>Legal, Management, Recovery</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_employees</div>
+          <ul>
+            <li>emp_id, emp_code</li>
+            <li>name, gender, dob, doj</li>
+            <li>branch_id, department_id</li>
+            <li>designation_id, shift_id</li>
+            <li>status (active/inactive)</li>
+            <li>manager_id (FK self)</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_attendance</div>
+          <ul>
+            <li>employee_id, date</li>
+            <li>status (P/A/HD/OD/WO/H)</li>
+            <li>in_time, out_time</li>
+            <li>late_minutes, early_out_minutes</li>
+            <li>pay_period_id</li>
+            <li>marked_by, remarks</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_leave_requests</div>
+          <ul>
+            <li>employee_id, leave_type_id</li>
+            <li>from_date, to_date, days</li>
+            <li>status (pending/approved/rejected)</li>
+            <li>applied_on, approved_by</li>
+            <li>reason, remarks</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_leave_types</div>
+          <ul>
+            <li>Casual Leave (12 days, paid)</li>
+            <li>Sick Leave (paid)</li>
+            <li>Earned Leave (paid)</li>
+            <li>Employee LOP (unpaid)</li>
+            <li>Maternity Leave (paid)</li>
+            <li>Compensatory Off, On Duty</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_shifts</div>
+          <ul>
+            <li>HO 10:00 AM &ndash; 6:00 PM</li>
+            <li>Chennai Regional 10:00 &ndash; 18:30</li>
+            <li>Salem &amp; KRC 09:30 &ndash; 18:00</li>
+            <li>Central Accounts Morning</li>
+            <li>Central Accounts Evening</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_holidays</div>
+          <ul>
+            <li>date, name, type</li>
+            <li>National / State / Optional</li>
+            <li>location_scope (all / specific)</li>
+            <li>year (2026 &amp; future)</li>
+            <li>11 holidays configured for 2026</li>
+          </ul>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header new">+ hr_pay_periods</div>
+          <ul>
+            <li>period_name (e.g. May 2026)</li>
+            <li>from_date (26th prev month)</li>
+            <li>to_date (25th curr month)</li>
+            <li>status (open / locked)</li>
+            <li>locked_by, locked_at</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="page-footer">
+    DNC Chits Pvt Ltd &mdash; HR Module Prototype &mdash; 2026 &nbsp;|&nbsp;
+    Built on <a href="employee-list.html">OneUI / Bootstrap 4</a>
+  </footer>
+
+</body>
+</html>

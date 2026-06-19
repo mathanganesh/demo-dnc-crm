@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Tracker — DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .leave-type-header { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: #6c757d; }
+    .balance-cell { text-align: center; }
+    .balance-cell .entitled { font-size: 0.78rem; color: #6c757d; }
+    .balance-cell .used { font-size: 0.78rem; color: #e74c3c; font-weight: 600; }
+    .balance-cell .bal { font-size: 0.9rem; font-weight: 700; color: #2c3e50; }
+    .balance-bar { height: 4px; border-radius: 2px; background: #e9ecef; margin-top: 3px; }
+    .balance-bar-fill { height: 4px; border-radius: 2px; background: #4dabf7; }
+    .balance-bar-fill.low { background: #e74c3c; }
+    .balance-bar-fill.mid { background: #f59f00; }
+    .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .tab-pane { padding-top: 1.25rem; }
+    .nav-tabs .nav-link.active { font-weight: 600; color: #0665d0; border-bottom: 2px solid #0665d0; background: transparent; }
+    .nav-tabs .nav-link { color: #6c757d; border: none; padding: 0.6rem 1.2rem; }
+    .nav-tabs { border-bottom: 1px solid #dee2e6; }
+    .leave-badge { font-size: 0.72rem; padding: 0.25em 0.55em; border-radius: 4px; font-weight: 600; letter-spacing: 0.02em; }
+    .leave-badge-cl { background: #d3f9d8; color: #2b8a3e; }
+    .leave-badge-sl { background: #fff3bf; color: #856404; }
+    .leave-badge-el { background: #d0ebff; color: #1864ab; }
+    .leave-badge-lop { background: #ffe3e3; color: #c92a2a; }
+    .leave-badge-ml { background: #f3d9fa; color: #862e9c; }
+    .leave-badge-od { background: #e3fafc; color: #0c8599; }
+    .leave-badge-co { background: #fff4e6; color: #d9480f; }
+    .status-pending { background: #fff3bf; color: #856404; }
+    .status-approved { background: #d3f9d8; color: #2b8a3e; }
+    .status-rejected { background: #ffe3e3; color: #c92a2a; }
+    .employee-avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .customize-balance-row td { vertical-align: middle; }
+    .filter-bar { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+    .days-badge { display: inline-block; background: #e7f5ff; color: #1864ab; border-radius: 4px; padding: 0.15em 0.55em; font-size: 0.8rem; font-weight: 700; }
+    .table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #495057; background: #f8f9fa; }
+    .table td { vertical-align: middle; font-size: 0.875rem; }
+    .action-btn { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main Container -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+          <h2 class="h4 font-w700 mb-0">Leave Tracker</h2>
+          <p class="text-muted mb-0" style="font-size:0.85rem;">Pay period: 26 May 2026 – 25 Jun 2026 &nbsp;·&nbsp; 965 employees across 56 branches</p>
+        </div>
+        <div>
+          <button class="btn btn-sm btn-light border mr-1" id="btn-export-leave">
+            <i class="fa fa-download mr-1"></i> Export
+          </button>
+          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalAddLeave">
+            <i class="fa fa-plus mr-1"></i> Add Leave Request
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="row gutters-tiny mb-3">
+        <div class="col-6 col-md-4 col-xl-4">
+          <div class="block block-rounded block-bordered mb-0 h-100">
+            <div class="block-content d-flex align-items-center py-3">
+              <div class="stat-card-icon bg-warning-light text-warning mr-3">
+                <i class="fa fa-user-clock"></i>
+              </div>
+              <div>
+                <div class="font-size-h4 font-w700 mb-0">3</div>
+                <div class="text-muted" style="font-size:0.78rem;">On Leave Today</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-4">
+          <div class="block block-rounded block-bordered mb-0 h-100">
+            <div class="block-content d-flex align-items-center py-3">
+              <div class="stat-card-icon bg-danger-light text-danger mr-3">
+                <i class="fa fa-hourglass-half"></i>
+              </div>
+              <div>
+                <div class="font-size-h4 font-w700 mb-0">7</div>
+                <div class="text-muted" style="font-size:0.78rem;">Pending Requests</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-4">
+          <div class="block block-rounded block-bordered mb-0 h-100">
+            <div class="block-content d-flex align-items-center py-3">
+              <div class="stat-card-icon bg-success-light text-success mr-3">
+                <i class="fa fa-check-circle"></i>
+              </div>
+              <div>
+                <div class="font-size-h4 font-w700 mb-0">24</div>
+                <div class="text-muted" style="font-size:0.78rem;">Approved This Month</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-content block-content-full pt-3 pb-0">
+          <ul class="nav nav-tabs" id="leaveTabNav" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="tab-balance-link" data-toggle="tab" href="#tab-balance" role="tab">
+                <i class="fa fa-balance-scale mr-1"></i> Leave Balance
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-requests-link" data-toggle="tab" href="#tab-requests" role="tab">
+                <i class="fa fa-list-alt mr-1"></i> Leave Requests
+                <span class="badge badge-danger ml-1" style="font-size:0.7rem;">7</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="holidays.html">
+                <i class="fa fa-flag mr-1"></i> Holidays
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- TAB CONTENT -->
+        <div class="tab-content" id="leaveTabContent">
+
+          <!-- ===== TAB 1: LEAVE BALANCE ===== -->
+          <div class="tab-pane fade show active" id="tab-balance" role="tabpanel">
+            <div class="block-content">
+
+              <!-- Filter Bar -->
+              <div class="filter-bar">
+                <div class="row align-items-end gutters-tiny">
+                  <div class="col-12 col-md-4 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Employee</label>
+                    <input type="text" class="form-control form-control-sm" id="balanceEmpSearch" placeholder="Search by name or ID...">
+                  </div>
+                  <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Department</label>
+                    <select class="form-control form-control-sm" id="balanceDeptFilter">
+                      <option value="">All Departments</option>
+                      <option>Accounts</option>
+                      <option>Administration</option>
+                      <option>Branch Operation</option>
+                      <option>Business</option>
+                      <option>Business Development</option>
+                      <option>Human Resources</option>
+                      <option>Legal</option>
+                      <option>Management</option>
+                      <option>Recovery</option>
+                    </select>
+                  </div>
+                  <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Month / Year</label>
+                    <input type="month" class="form-control form-control-sm" id="balanceMonth" value="2026-06">
+                  </div>
+                  <div class="col-12 col-md-2 text-md-right">
+                    <button class="btn btn-sm btn-secondary mr-1"><i class="fa fa-filter mr-1"></i>Apply</button>
+                    <button class="btn btn-sm btn-light border" data-toggle="modal" data-target="#modalCustomizeBalance">
+                      <i class="fa fa-sliders-h mr-1"></i>Customize
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Balance Table -->
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0" id="leaveBalanceTable">
+                  <thead>
+                    <tr>
+                      <th rowspan="2" class="align-middle" style="min-width:200px;">Employee</th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-cl">Casual Leave</span></th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-sl">Sick Leave</span></th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-el">Earned Leave</span></th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-lop">LOP</span></th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-ml">Maternity</span></th>
+                      <th colspan="3" class="text-center leave-type-header border-left"><span class="leave-badge leave-badge-od">On Duty</span></th>
+                    </tr>
+                    <tr>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                      <th class="text-center border-left" style="font-size:0.7rem;min-width:42px;">Ent</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Used</th>
+                      <th class="text-center" style="font-size:0.7rem;min-width:42px;">Bal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Row template: ID, Name, Dept, Designation, CL(e/u/b), SL(e/u/b), EL(e/u/b), LOP(e/u/b), ML(e/u/b), OD(e/u/b) -->
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#4c6ef5;">SC</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">SUBHASH JAYACHANDRAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#6741 · Business · JR BDM · Tiruchengode</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">0</td><td class="text-center font-w700">12</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">0</td><td class="text-center font-w700">12</td>
+                      <td class="text-center border-left">0</td><td class="text-center text-danger">0</td><td class="text-center font-w700">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#2b8a3e;">AK</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">ARUNKUMAR KATHIRESAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#28 · Business · BDM · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">4</td><td class="text-center font-w700">8</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">1</td><td class="text-center font-w700">11</td>
+                      <td class="text-center border-left">3</td><td class="text-center text-danger">0</td><td class="text-center font-w700">3</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">2</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#862e9c;">MI</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">MURUGANANDHAM I</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#32 · Branch Operation · Manager Operations · Salem</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">4</td><td class="text-center font-w700">8</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">2</td><td class="text-center text-danger">0</td><td class="text-center font-w700">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">1</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#c92a2a;">VR</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">VIJAYALAKSHMI RAMANATHAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#83 · Accounts · HO Accounts · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">6</td><td class="text-center font-w700 text-warning">6</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">3</td><td class="text-center font-w700">9</td>
+                      <td class="text-center border-left">5</td><td class="text-center text-danger">2</td><td class="text-center font-w700">3</td>
+                      <td class="text-center border-left">—</td><td class="text-center text-danger">1</td><td class="text-center text-danger">1</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#0c8599;">TA</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">THANGADURAI APPRAMANI</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#6159 · Management · Manager-BD · Chennai Regional</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">1</td><td class="text-center font-w700">11</td>
+                      <td class="text-center border-left">4</td><td class="text-center text-danger">1</td><td class="text-center font-w700">3</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">3</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#1864ab;">RV</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">RAJESH VITTAL RAO</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#16 · Business Development · DH · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">3</td><td class="text-center font-w700">9</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">0</td><td class="text-center font-w700">12</td>
+                      <td class="text-center border-left">6</td><td class="text-center text-danger">3</td><td class="text-center font-w700">3</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">1</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#d9480f;">SK</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">SATHYAMOORTHY KANNAYIRAM</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#7 · Branch Operation · Executive Operations · Hosur</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">7</td><td class="text-center font-w700 text-danger">5</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">4</td><td class="text-center font-w700 text-warning">8</td>
+                      <td class="text-center border-left">1</td><td class="text-center text-danger">1</td><td class="text-center font-w700 text-danger">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center text-danger">2</td><td class="text-center text-danger">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#5c7cfa;">NK</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">NAVANEETHA KRISHNAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#8 · Branch Operation · BCE · Edappadi</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">1</td><td class="text-center font-w700">11</td>
+                      <td class="text-center border-left">2</td><td class="text-center text-danger">0</td><td class="text-center font-w700">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">2</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#f59f00;">VV</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">VALLI VIJAYAKUMAR</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#11 · Accounts · HO Accounts · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">5</td><td class="text-center font-w700 text-warning">7</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">4</td><td class="text-center text-danger">0</td><td class="text-center font-w700">4</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">84</td><td class="text-center text-danger">0</td><td class="text-center font-w700">84</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#099268;">RG</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">ROJA GOVINDASAMY</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#12 · Human Resources · HO HR · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">3</td><td class="text-center font-w700">9</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">3</td><td class="text-center text-danger">1</td><td class="text-center font-w700">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">1</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#495057;">PS</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">PRIYA SUBRAMANIAM</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#45 · Accounts · HO Accounts · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">8</td><td class="text-center font-w700 text-danger">4</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">5</td><td class="text-center font-w700 text-warning">7</td>
+                      <td class="text-center border-left">2</td><td class="text-center text-danger">2</td><td class="text-center font-w700 text-danger">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center text-danger">3</td><td class="text-center text-danger">3</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#7048e8;">KM</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">KARTHIKEYAN MUTHUSAMY</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#101 · Recovery · Executive Collection · Hosur</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">1</td><td class="text-center font-w700">11</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">0</td><td class="text-center font-w700">12</td>
+                      <td class="text-center border-left">1</td><td class="text-center text-danger">0</td><td class="text-center font-w700">1</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">4</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#e64980;">LS</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">LAKSHMI SELVAM</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#213 · Administration · BH/ABH/BI · Salem</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">6</td><td class="text-center font-w700 text-warning">6</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">3</td><td class="text-center font-w700">9</td>
+                      <td class="text-center border-left">3</td><td class="text-center text-danger">1</td><td class="text-center font-w700">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#0c8599;">SR</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">SUNDAR RAJAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#387 · Branch Operation · BCE · Edappadi</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">0</td><td class="text-center font-w700">12</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">1</td><td class="text-center font-w700">11</td>
+                      <td class="text-center border-left">0</td><td class="text-center text-danger">0</td><td class="text-center font-w700">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">—</td>
+                      <td class="text-center border-left">—</td><td class="text-center">1</td><td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#2f9e44;">MT</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">MEENAKSHI THILAK</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#512 · Legal · DH · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">12</td><td class="text-center text-danger">4</td><td class="text-center font-w700">8</td>
+                      <td class="text-center border-left">12</td><td class="text-center text-danger">2</td><td class="text-center font-w700">10</td>
+                      <td class="text-center border-left">2</td><td class="text-center text-danger">0</td><td class="text-center font-w700">2</td>
+                      <td class="text-center border-left">—</td><td class="text-center">0</td><td class="text-center">0</td>
+                      <td class="text-center border-left">84</td><td class="text-center text-danger">45</td><td class="text-center font-w700">39</td>
+                      <td class="text-center border-left">—</td><td class="text-center">2</td><td class="text-center">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- Pagination -->
+              <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+                <div class="text-muted" style="font-size:0.82rem;">Showing 15 of 965 employees</div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                    <li class="page-item"><a class="page-link" href="#">65</a></li>
+                    <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <!-- END TAB 1 -->
+
+          <!-- ===== TAB 2: LEAVE REQUESTS ===== -->
+          <div class="tab-pane fade" id="tab-requests" role="tabpanel">
+            <div class="block-content">
+
+              <!-- Filter Bar -->
+              <div class="filter-bar">
+                <div class="row align-items-end gutters-tiny">
+                  <div class="col-12 col-md-3 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Employee</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Search by name or ID...">
+                  </div>
+                  <div class="col-6 col-md-2 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Leave Type</label>
+                    <select class="form-control form-control-sm">
+                      <option value="">All Types</option>
+                      <option>Casual Leave</option>
+                      <option>Sick Leave</option>
+                      <option>Earned Leave</option>
+                      <option>Employee LOP</option>
+                      <option>Maternity Leave</option>
+                      <option>On Duty</option>
+                      <option>Compensatory Off</option>
+                    </select>
+                  </div>
+                  <div class="col-6 col-md-2 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">Status</label>
+                    <select class="form-control form-control-sm">
+                      <option value="">All Status</option>
+                      <option>Pending</option>
+                      <option>Approved</option>
+                      <option>Rejected</option>
+                    </select>
+                  </div>
+                  <div class="col-6 col-md-2 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">From</label>
+                    <input type="date" class="form-control form-control-sm" value="2026-06-01">
+                  </div>
+                  <div class="col-6 col-md-2 mb-2 mb-md-0">
+                    <label class="col-form-label col-form-label-sm font-w600 mb-1">To</label>
+                    <input type="date" class="form-control form-control-sm" value="2026-06-30">
+                  </div>
+                  <div class="col-12 col-md-1 text-md-right">
+                    <button class="btn btn-sm btn-secondary w-100"><i class="fa fa-filter mr-1"></i>Apply</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Leave Requests Table -->
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0" id="leaveRequestsTable">
+                  <thead>
+                    <tr>
+                      <th style="min-width:200px;">Employee</th>
+                      <th style="min-width:130px;">Leave Type</th>
+                      <th style="min-width:100px;">From</th>
+                      <th style="min-width:100px;">To</th>
+                      <th class="text-center" style="min-width:60px;">Days</th>
+                      <th style="min-width:200px;">Reason</th>
+                      <th class="text-center" style="min-width:90px;">Status</th>
+                      <th class="text-center" style="min-width:130px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#d9480f;">SK</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">SATHYAMOORTHY KANNAYIRAM</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#7 · Hosur</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-cl">Casual Leave</span></td>
+                      <td>19 Jun 2026</td>
+                      <td>20 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">2</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Personal work — family function</td>
+                      <td class="text-center"><span class="leave-badge status-pending">Pending</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-success mr-1" onclick="approveRequest(this)" title="Approve"><i class="fa fa-check mr-1"></i>Approve</button>
+                        <button class="btn action-btn btn-danger" onclick="rejectRequest(this)" title="Reject"><i class="fa fa-times mr-1"></i>Reject</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#495057;">PS</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">PRIYA SUBRAMANIAM</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#45 · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-sl">Sick Leave</span></td>
+                      <td>17 Jun 2026</td>
+                      <td>18 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">2</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Fever and cold — doctor's advice rest</td>
+                      <td class="text-center"><span class="leave-badge status-pending">Pending</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-success mr-1" onclick="approveRequest(this)" title="Approve"><i class="fa fa-check mr-1"></i>Approve</button>
+                        <button class="btn action-btn btn-danger" onclick="rejectRequest(this)" title="Reject"><i class="fa fa-times mr-1"></i>Reject</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#862e9c;">MI</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">MURUGANANDHAM I</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#32 · Salem</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-od">On Duty</span></td>
+                      <td>16 Jun 2026</td>
+                      <td>16 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">1</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Branch audit — Salem cluster visit</td>
+                      <td class="text-center"><span class="leave-badge status-pending">Pending</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-success mr-1" onclick="approveRequest(this)" title="Approve"><i class="fa fa-check mr-1"></i>Approve</button>
+                        <button class="btn action-btn btn-danger" onclick="rejectRequest(this)" title="Reject"><i class="fa fa-times mr-1"></i>Reject</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#0c8599;">TA</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">THANGADURAI APPRAMANI</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#6159 · Chennai Regional</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-el">Earned Leave</span></td>
+                      <td>14 Jun 2026</td>
+                      <td>15 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">2</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Vacation — pre-planned annual leave</td>
+                      <td class="text-center"><span class="leave-badge status-approved">Approved</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-outline-secondary" data-toggle="modal" data-target="#modalViewRequest"><i class="fa fa-eye mr-1"></i>View</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#2b8a3e;">AK</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">ARUNKUMAR KATHIRESAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#28 · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-cl">Casual Leave</span></td>
+                      <td>10 Jun 2026</td>
+                      <td>10 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">1</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Personal — bank and government office visit</td>
+                      <td class="text-center"><span class="leave-badge status-approved">Approved</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-outline-secondary" data-toggle="modal" data-target="#modalViewRequest"><i class="fa fa-eye mr-1"></i>View</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="employee-avatar mr-2" style="background:#c92a2a;">VR</div>
+                          <div>
+                            <div class="font-w600" style="font-size:0.85rem;">VIJAYALAKSHMI RAMANATHAN</div>
+                            <div class="text-muted" style="font-size:0.72rem;">#83 · Head Office</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="leave-badge leave-badge-lop">Employee LOP</span></td>
+                      <td>05 Jun 2026</td>
+                      <td>05 Jun 2026</td>
+                      <td class="text-center"><span class="days-badge">1</span></td>
+                      <td class="text-muted" style="font-size:0.82rem;">Absent without prior notice</td>
+                      <td class="text-center"><span class="leave-badge" style="background:#ffe3e3;color:#c92a2a;">Rejected</span></td>
+                      <td class="text-center">
+                        <button class="btn action-btn btn-outline-secondary" data-toggle="modal" data-target="#modalViewRequest"><i class="fa fa-eye mr-1"></i>View</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- Pagination -->
+              <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+                <div class="text-muted" style="font-size:0.82rem;">Showing 6 requests · 7 pending approvals</div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <!-- END TAB 2 -->
+
+        </div>
+        <!-- END TAB CONTENT -->
+      </div>
+      <!-- END Tabs Block -->
+
+    </div>
+  </main>
+  <!-- END Main Container -->
+
+
+  <!-- ===== MODAL: Add Leave Request ===== -->
+  <div class="modal fade" id="modalAddLeave" tabindex="-1" role="dialog" aria-labelledby="modalAddLeaveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w700" id="modalAddLeaveLabel"><i class="fa fa-plus-circle mr-2 text-primary"></i>Add Leave Request</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label class="font-w600 mb-1">Employee <span class="text-danger">*</span></label>
+              <select class="form-control" id="addLeaveEmp">
+                <option value="">— Select Employee —</option>
+                <option value="6741">6741 — SUBHASH JAYACHANDRAN</option>
+                <option value="28">28 — ARUNKUMAR KATHIRESAN</option>
+                <option value="32">32 — MURUGANANDHAM I</option>
+                <option value="83">83 — VIJAYALAKSHMI RAMANATHAN</option>
+                <option value="6159">6159 — THANGADURAI APPRAMANI</option>
+                <option value="16">16 — RAJESH VITTAL RAO</option>
+                <option value="7">7 — SATHYAMOORTHY KANNAYIRAM</option>
+                <option value="8">8 — NAVANEETHA KRISHNAN</option>
+                <option value="11">11 — VALLI VIJAYAKUMAR</option>
+                <option value="12">12 — ROJA GOVINDASAMY</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="font-w600 mb-1">Leave Type <span class="text-danger">*</span></label>
+              <select class="form-control" id="addLeaveType">
+                <option value="">— Select Leave Type —</option>
+                <option>Casual Leave</option>
+                <option>Sick Leave</option>
+                <option>Earned Leave</option>
+                <option>Employee LOP</option>
+                <option>Maternity Leave</option>
+                <option>On Duty</option>
+                <option>Compensatory Off</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-4 mb-3">
+              <label class="font-w600 mb-1">From Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="addLeaveFrom" value="2026-06-19">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-w600 mb-1">To Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="addLeaveTo" value="2026-06-19">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-w600 mb-1">Session</label>
+              <select class="form-control" id="addLeaveSession">
+                <option>Full Day</option>
+                <option>Morning Half</option>
+                <option>Afternoon Half</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-8 mb-3">
+              <label class="font-w600 mb-1">Reason</label>
+              <textarea class="form-control" rows="3" placeholder="Reason for leave..."></textarea>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-w600 mb-1">Days Calculated</label>
+              <div class="form-control bg-light text-center font-w700 text-primary" style="height:calc(3 * 1.5em + 0.75rem + 2px + 0.375rem + 2px);">
+                <div style="font-size:2rem; line-height:2.5rem;">1</div>
+                <small class="text-muted">Working Day(s)</small>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-2">
+              <label class="font-w600 mb-1">Handover To</label>
+              <select class="form-control">
+                <option value="">— Select Colleague —</option>
+                <option>ARUNKUMAR KATHIRESAN (#28)</option>
+                <option>MURUGANANDHAM I (#32)</option>
+                <option>ROJA GOVINDASAMY (#12)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="font-w600 mb-1">Notify Manager</label>
+              <input type="text" class="form-control" value="Mathan Raj (HR Admin)" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light border" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary font-w600"><i class="fa fa-paper-plane mr-1"></i>Submit Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MODAL: Add Leave Request -->
+
+
+  <!-- ===== MODAL: Customize Balance ===== -->
+  <div class="modal fade" id="modalCustomizeBalance" tabindex="-1" role="dialog" aria-labelledby="modalCustomizeBalanceLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w700" id="modalCustomizeBalanceLabel"><i class="fa fa-sliders-h mr-2 text-primary"></i>Customize Leave Balance</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info alert-sm mb-3 py-2" style="font-size:0.83rem;">
+            <i class="fa fa-info-circle mr-1"></i>
+            Override entitlement for individual employees. Leave changes apply from the current pay period (26 May – 25 Jun 2026).
+          </div>
+          <div class="form-row mb-3">
+            <div class="col-md-6">
+              <label class="font-w600 mb-1">Select Employee</label>
+              <select class="form-control" id="customizeEmpSelect" onchange="loadCustomizeData(this.value)">
+                <option value="">— Select Employee —</option>
+                <option value="28">28 — ARUNKUMAR KATHIRESAN</option>
+                <option value="32">32 — MURUGANANDHAM I</option>
+                <option value="83">83 — VIJAYALAKSHMI RAMANATHAN</option>
+                <option value="7">7 — SATHYAMOORTHY KANNAYIRAM</option>
+                <option value="11">11 — VALLI VIJAYAKUMAR</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="font-w600 mb-1">Year</label>
+              <select class="form-control">
+                <option>2026</option>
+                <option>2025</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="customizeBalanceTable">
+            <table class="table table-bordered table-sm mb-0">
+              <thead>
+                <tr>
+                  <th style="min-width:150px;">Leave Type</th>
+                  <th class="text-center">Policy Entitlement</th>
+                  <th class="text-center">Override Days</th>
+                  <th class="text-center">Used</th>
+                  <th class="text-center">Balance</th>
+                  <th>Remark</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-cl">Casual Leave</span></td>
+                  <td class="text-center">12</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="12" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">4</td>
+                  <td class="text-center font-w700">8</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-sl">Sick Leave</span></td>
+                  <td class="text-center">12</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="12" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">1</td>
+                  <td class="text-center font-w700">11</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-el">Earned Leave</span></td>
+                  <td class="text-center">3</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="3" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">0</td>
+                  <td class="text-center font-w700">3</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-lop">Employee LOP</span></td>
+                  <td class="text-center">—</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="0" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">0</td>
+                  <td class="text-center font-w700">—</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-ml">Maternity Leave</span></td>
+                  <td class="text-center">84</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="84" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">0</td>
+                  <td class="text-center font-w700">84</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+                <tr class="customize-balance-row">
+                  <td><span class="leave-badge leave-badge-od">On Duty</span></td>
+                  <td class="text-center">—</td>
+                  <td class="text-center"><input type="number" class="form-control form-control-sm text-center" value="0" min="0" style="width:65px;display:inline-block;"></td>
+                  <td class="text-center text-danger font-w600">2</td>
+                  <td class="text-center font-w700">—</td>
+                  <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light border" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary font-w600"><i class="fa fa-save mr-1"></i>Save Customization</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MODAL: Customize Balance -->
+
+
+  <!-- ===== MODAL: View Leave Request ===== -->
+  <div class="modal fade" id="modalViewRequest" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w700"><i class="fa fa-eye mr-2 text-primary"></i>Leave Request Details</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+            <div class="employee-avatar mr-3" style="background:#0c8599;width:48px;height:48px;font-size:1rem;">TA</div>
+            <div>
+              <div class="font-w700 font-size-sm">THANGADURAI APPRAMANI</div>
+              <div class="text-muted" style="font-size:0.78rem;">#6159 · Management · Manager-BD · Chennai Regional</div>
+            </div>
+            <div class="ml-auto"><span class="leave-badge status-approved">Approved</span></div>
+          </div>
+          <table class="table table-sm table-borderless mb-0">
+            <tr>
+              <td class="font-w600 text-muted" style="width:40%;font-size:0.82rem;">Leave Type</td>
+              <td><span class="leave-badge leave-badge-el">Earned Leave</span></td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Duration</td>
+              <td style="font-size:0.85rem;">14 Jun 2026 — 15 Jun 2026 <span class="days-badge ml-2">2 days</span></td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Session</td>
+              <td style="font-size:0.85rem;">Full Day</td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Reason</td>
+              <td style="font-size:0.85rem;">Vacation — pre-planned annual leave</td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Handover To</td>
+              <td style="font-size:0.85rem;">ROJA GOVINDASAMY (#12)</td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Applied On</td>
+              <td style="font-size:0.85rem;">10 Jun 2026, 11:42 AM</td>
+            </tr>
+            <tr>
+              <td class="font-w600 text-muted" style="font-size:0.82rem;">Approved By</td>
+              <td style="font-size:0.85rem;">Mathan Raj · 12 Jun 2026</td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light border" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MODAL: View Leave Request -->
+
+
+  <!-- Scripts -->
+  <script src="../assets/oneui.core.min.js"></script>
+  <script src="../assets/oneui.app.min.js"></script>
+  <script src="../assets/jquery.dataTables.min.js"></script>
+  <script src="../assets/dataTables.bootstrap4.min.js"></script>
+  <script src="../assets/select2.full.min.js"></script>
+  <script>
+    // Approve / Reject request inline
+    function approveRequest(btn) {
+      var row = btn.closest('tr');
+      var statusCell = row.querySelector('td:nth-child(7)');
+      var actionsCell = row.querySelector('td:nth-child(8)');
+      statusCell.innerHTML = '<span class="leave-badge status-approved">Approved</span>';
+      actionsCell.innerHTML = '<button class="btn action-btn btn-outline-secondary" data-toggle="modal" data-target="#modalViewRequest"><i class="fa fa-eye mr-1"></i>View</button>';
+    }
+    function rejectRequest(btn) {
+      var row = btn.closest('tr');
+      var statusCell = row.querySelector('td:nth-child(7)');
+      var actionsCell = row.querySelector('td:nth-child(8)');
+      statusCell.innerHTML = '<span class="leave-badge" style="background:#ffe3e3;color:#c92a2a;">Rejected</span>';
+      actionsCell.innerHTML = '<button class="btn action-btn btn-outline-secondary" data-toggle="modal" data-target="#modalViewRequest"><i class="fa fa-eye mr-1"></i>View</button>';
+    }
+
+    // Balance table search filter
+    document.getElementById('balanceEmpSearch').addEventListener('keyup', function() {
+      var q = this.value.toLowerCase();
+      document.querySelectorAll('#leaveBalanceTable tbody tr').forEach(function(row) {
+        var name = row.querySelector('td:first-child').textContent.toLowerCase();
+        row.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+
+    // Export stub
+    document.getElementById('btn-export-leave').addEventListener('click', function() {
+      alert('Export feature — will generate Excel/CSV report for current filter.');
+    });
+  </script>
+
+</div><!-- END #page-container -->
+</body>
+</html>

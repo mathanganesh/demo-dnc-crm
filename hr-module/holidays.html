@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Holidays 2026 — DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .badge-past { background-color: #6c757d; color: #fff; font-size: 0.72em; vertical-align: middle; }
+    .badge-all-loc { background-color: #e74c3c; color: #fff; font-size: 0.72em; vertical-align: middle; }
+    .badge-holiday { background-color: #1e88e5; color: #fff; font-size: 0.72em; }
+    .stat-card { border-left: 4px solid; }
+    .stat-card-total { border-left-color: #1e88e5; }
+    .stat-card-loc { border-left-color: #8e24aa; }
+    .stat-card-all { border-left-color: #e53935; }
+    .stat-card-rem { border-left-color: #43a047; }
+    .stat-icon { font-size: 2rem; opacity: 0.18; }
+    .holiday-past td { color: #aaa; }
+    .holiday-past td .badge { opacity: 0.8; }
+    table.dataTable thead th { white-space: nowrap; }
+    .criteria-row { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px 12px; margin-bottom: 8px; }
+    .criteria-row .form-group { margin-bottom: 0; }
+    #criteriaContainer .criteria-row + .criteria-row { margin-top: 8px; }
+    .year-selector .btn { min-width: 72px; }
+    .page-title-icon { background: #e3f0fb; border-radius: 10px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main Content -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page Title -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+          <div class="page-title-icon">
+            <i class="fa fa-flag text-primary fa-lg"></i>
+          </div>
+          <div>
+            <h1 class="h3 mb-0 font-w700">Holidays 2026</h1>
+            <p class="text-muted mb-0 font-size-sm">Public &amp; company holidays for the calendar year</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <!-- Year Selector -->
+          <div class="btn-group year-selector mr-3" role="group" aria-label="Year selector">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="yr2025">2025</button>
+            <button type="button" class="btn btn-sm btn-primary active" id="yr2026">2026</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="yr2027">2027</button>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addHolidayModal">
+            <i class="fa fa-plus mr-1"></i> Add Holiday
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="row mb-4">
+        <div class="col-6 col-xl-3 mb-3">
+          <div class="block block-rounded stat-card stat-card-total h-100 mb-0">
+            <div class="block-content d-flex align-items-center justify-content-between py-3">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase mb-1">Total Holidays</div>
+                <div class="font-size-h2 font-w700 text-primary mb-0">15</div>
+                <div class="font-size-sm text-muted">Year 2026</div>
+              </div>
+              <div class="stat-icon text-primary"><i class="fa fa-flag"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3 mb-3">
+          <div class="block block-rounded stat-card stat-card-loc h-100 mb-0">
+            <div class="block-content d-flex align-items-center justify-content-between py-3">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase mb-1">Location-Specific</div>
+                <div class="font-size-h2 font-w700 mb-0" style="color:#8e24aa;">14</div>
+                <div class="font-size-sm text-muted">Branch / Region</div>
+              </div>
+              <div class="stat-icon" style="color:#8e24aa;"><i class="fa fa-map-marker-alt"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3 mb-3">
+          <div class="block block-rounded stat-card stat-card-all h-100 mb-0">
+            <div class="block-content d-flex align-items-center justify-content-between py-3">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase mb-1">All-Location</div>
+                <div class="font-size-h2 font-w700 text-danger mb-0">1</div>
+                <div class="font-size-sm text-muted">Tamil Nadu Election</div>
+              </div>
+              <div class="stat-icon text-danger"><i class="fa fa-globe"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3 mb-3">
+          <div class="block block-rounded stat-card stat-card-rem h-100 mb-0">
+            <div class="block-content d-flex align-items-center justify-content-between py-3">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase mb-1">Remaining in 2026</div>
+                <div class="font-size-h2 font-w700 text-success mb-0">8</div>
+                <div class="font-size-sm text-muted">From today</div>
+              </div>
+              <div class="stat-icon text-success"><i class="fa fa-hourglass-half"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holiday List -->
+      <div class="block block-rounded">
+        <div class="block-header block-header-default">
+          <h3 class="block-title"><i class="fa fa-calendar-alt mr-2 text-primary"></i>Holiday List — 2026</h3>
+          <div class="block-options">
+            <button type="button" class="btn btn-sm btn-light" title="Export to Excel">
+              <i class="fa fa-file-excel mr-1 text-success"></i>Export
+            </button>
+          </div>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped table-vcenter" id="holidaysTable" style="width:100%">
+              <thead class="thead-light">
+                <tr>
+                  <th style="width:30px;">#</th>
+                  <th>Holiday Name</th>
+                  <th>Date</th>
+                  <th>Day</th>
+                  <th>Applicable To</th>
+                  <th>Shifts</th>
+                  <th>Classification</th>
+                  <th style="width:100px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- PAST: Jan -->
+                <tr class="holiday-past">
+                  <td>1</td>
+                  <td>
+                    <span class="font-w600">English New Year</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>01-Jan-2026</td>
+                  <td>Thu</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>2</td>
+                  <td>
+                    <span class="font-w600">Pongal</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>15-Jan-2026</td>
+                  <td>Thu</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>3</td>
+                  <td>
+                    <span class="font-w600">Thiruvalluvar Day</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>16-Jan-2026</td>
+                  <td>Fri</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>4</td>
+                  <td>
+                    <span class="font-w600">Uzhavar Thirunal</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>17-Jan-2026</td>
+                  <td>Sat</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>5</td>
+                  <td>
+                    <span class="font-w600">Republic Day</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>26-Jan-2026</td>
+                  <td>Mon</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>6</td>
+                  <td>
+                    <span class="font-w600">Tamil New Year</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>14-Apr-2026</td>
+                  <td>Tue</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>7</td>
+                  <td>
+                    <span class="font-w600">Tamil Nadu Election</span>
+                    <span class="badge badge-all-loc ml-1">All Locations</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>23-Apr-2026</td>
+                  <td>Thu</td>
+                  <td>
+                    <span class="badge badge-danger">All Locations</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr class="holiday-past">
+                  <td>8</td>
+                  <td>
+                    <span class="font-w600">May Day</span>
+                    <span class="badge badge-past ml-1">Past</span>
+                  </td>
+                  <td>01-May-2026</td>
+                  <td>Fri</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <!-- UPCOMING -->
+                <tr>
+                  <td>9</td>
+                  <td><span class="font-w600">Independence Day</span></td>
+                  <td>15-Aug-2026</td>
+                  <td>Sat</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>10</td>
+                  <td><span class="font-w600">Vinayagar Chathurthi</span></td>
+                  <td>14-Sep-2026</td>
+                  <td>Mon</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>11</td>
+                  <td><span class="font-w600">Gandhi Jayanthi</span></td>
+                  <td>02-Oct-2026</td>
+                  <td>Fri</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>12</td>
+                  <td><span class="font-w600">Ayutha Pooja</span></td>
+                  <td>19-Oct-2026</td>
+                  <td>Mon</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>13</td>
+                  <td><span class="font-w600">Deepavali</span></td>
+                  <td>08-Nov-2026</td>
+                  <td>Sun</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>14</td>
+                  <td><span class="font-w600">Gowri Viradham</span></td>
+                  <td>09-Nov-2026</td>
+                  <td>Mon</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>15</td>
+                  <td><span class="font-w600">Christmas</span></td>
+                  <td>25-Dec-2026</td>
+                  <td>Fri</td>
+                  <td>
+                    <span class="badge badge-secondary mr-1">Head Office</span>
+                    <span class="badge badge-secondary mr-1">Chennai Regional</span>
+                    <span class="badge badge-secondary">Krishnagiri/Vellore</span>
+                  </td>
+                  <td>All Shifts</td>
+                  <td><span class="badge badge-holiday">Holiday</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-light" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+                    <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="fa fa-trash"></i></button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  <!-- END Main Content -->
+
+  <!-- Add Holiday Modal -->
+  <div class="modal fade" id="addHolidayModal" tabindex="-1" role="dialog" aria-labelledby="addHolidayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary-light">
+          <h5 class="modal-title font-w700" id="addHolidayModalLabel">
+            <i class="fa fa-flag mr-2 text-primary"></i>Add New Holiday
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addHolidayForm">
+
+            <!-- Row 1: Name + Date -->
+            <div class="row">
+              <div class="col-md-7">
+                <div class="form-group">
+                  <label class="font-w600" for="holidayName">Holiday Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="holidayName" placeholder="e.g., Diwali, Republic Day">
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label class="font-w600" for="holidayDate">Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="holidayDate">
+                </div>
+              </div>
+            </div>
+
+            <!-- Applicability -->
+            <div class="form-group">
+              <label class="font-w600">Applicability (Location Criteria)</label>
+              <div id="criteriaContainer">
+                <div class="criteria-row d-flex align-items-center">
+                  <div class="row flex-grow-1 no-gutters">
+                    <div class="col-md-4 pr-2">
+                      <select class="form-control form-control-sm criteria-type">
+                        <option value="">-- Criteria Type --</option>
+                        <option value="all">All Locations</option>
+                        <option value="region">By Region</option>
+                        <option value="branch">By Branch</option>
+                        <option value="shift">By Shift</option>
+                      </select>
+                    </div>
+                    <div class="col-md-8 pl-2">
+                      <select class="form-control form-control-sm criteria-value">
+                        <option value="">-- Select Value --</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-light text-danger ml-2 remove-criteria" style="min-width:32px;" title="Remove"><i class="fa fa-times"></i></button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addCriteriaBtn">
+                <i class="fa fa-plus mr-1"></i>Add Criteria
+              </button>
+            </div>
+
+            <!-- Row: Shift-based + Classification -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-w600">Shift-Based Holiday</label>
+                  <div class="custom-control custom-checkbox mt-1">
+                    <input type="checkbox" class="custom-control-input" id="shiftBased">
+                    <label class="custom-control-label" for="shiftBased">Apply to specific shifts only</label>
+                  </div>
+                  <div id="shiftSelect" class="mt-2" style="display:none;">
+                    <select class="form-control form-control-sm" multiple id="shiftsMultiple">
+                      <option>Head Office 10:00 AM to 6:00 PM</option>
+                      <option>Chennai Regional &amp; Krishnagiri/Vellore</option>
+                      <option>Salem &amp; Krishnagiri Cluster</option>
+                      <option>Central Accounts Morning</option>
+                      <option>Central Accounts Evening</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-w600" for="holidayClassification">Classification <span class="text-danger">*</span></label>
+                  <select class="form-control" id="holidayClassification">
+                    <option value="">-- Select --</option>
+                    <option value="holiday" selected>Holiday</option>
+                    <option value="optional">Optional Holiday</option>
+                    <option value="restricted">Restricted Holiday</option>
+                    <option value="compoff">Compensatory Off</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="font-w600" for="holidayDescription">Description</label>
+              <textarea class="form-control" id="holidayDescription" rows="2" placeholder="Optional notes about this holiday..."></textarea>
+            </div>
+
+            <!-- Reminder Days -->
+            <div class="form-group">
+              <label class="font-w600" for="reminderDays">Reminder (Days Before)</label>
+              <div class="input-group" style="max-width:200px;">
+                <input type="number" class="form-control" id="reminderDays" value="3" min="0" max="30">
+                <div class="input-group-append"><span class="input-group-text">days before</span></div>
+              </div>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="notifyEmployees" checked>
+                  <label class="custom-control-label font-w600" for="notifyEmployees">Notify Employees</label>
+                  <small class="d-block text-muted">Send notification to all applicable employees</small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="reprocessLeave">
+                  <label class="custom-control-label font-w600" for="reprocessLeave">Reprocess Leave Applications</label>
+                  <small class="d-block text-muted">Recalculate leave deductions for this date</small>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-light" data-dismiss="modal">
+            <i class="fa fa-times mr-1"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="saveHolidayBtn">
+            <i class="fa fa-save mr-1"></i>Save Holiday
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END Add Holiday Modal -->
+
+  <!-- Scripts -->
+  <script src="../assets/oneui.core.min.js"></script>
+  <script src="../assets/oneui.app.min.js"></script>
+  <script src="../assets/jquery.dataTables.min.js"></script>
+  <script src="../assets/dataTables.bootstrap4.min.js"></script>
+  <script src="../assets/select2.full.min.js"></script>
+
+  <script>
+    $(function () {
+
+      // DataTable
+      $('#holidaysTable').DataTable({
+        paging: false,
+        info: false,
+        searching: true,
+        ordering: true,
+        order: [[2, 'asc']],
+        columnDefs: [
+          { orderable: false, targets: [7] }
+        ],
+        dom: '<"d-flex align-items-center justify-content-between mb-2"fl>t',
+        language: {
+          search: '',
+          searchPlaceholder: 'Search holidays...',
+          lengthMenu: 'Show _MENU_'
+        }
+      });
+
+      // Year selector buttons
+      $('#yr2025, #yr2027').on('click', function () {
+        $('.year-selector .btn').removeClass('btn-primary active').addClass('btn-outline-secondary');
+        $(this).removeClass('btn-outline-secondary').addClass('btn-primary active');
+      });
+      $('#yr2026').on('click', function () {
+        $('.year-selector .btn').removeClass('btn-primary active').addClass('btn-outline-secondary');
+        $(this).removeClass('btn-outline-secondary').addClass('btn-primary active');
+      });
+
+      // Shift-based checkbox toggle
+      $('#shiftBased').on('change', function () {
+        $('#shiftSelect').toggle(this.checked);
+      });
+
+      // Criteria type -> value dropdown
+      var regionOptions = ['Chennai Region (CHN)', 'Krishnagiri Region (KRC)', 'Salem Region (SMC)', 'Coimbatore Region (CBR)'];
+      var branchOptions = ['Head Office (Krishnagiri)', 'Chennai Regional', 'Tiruchengode', 'Salem', 'Hosur', 'Edappadi'];
+      var shiftOptions = [
+        'Head Office 10:00 AM to 6:00 PM',
+        'Chennai Regional & Krishnagiri/Vellore',
+        'Salem & Krishnagiri Cluster',
+        'Central Accounts Morning',
+        'Central Accounts Evening'
+      ];
+
+      function updateValueDropdown($row) {
+        var type = $row.find('.criteria-type').val();
+        var $val = $row.find('.criteria-value');
+        $val.empty().append('<option value="">-- Select Value --</option>');
+        var opts = [];
+        if (type === 'all') {
+          $val.append('<option value="all" selected>All Locations</option>');
+          $val.prop('disabled', true);
+          return;
+        } else if (type === 'region') {
+          opts = regionOptions;
+        } else if (type === 'branch') {
+          opts = branchOptions;
+        } else if (type === 'shift') {
+          opts = shiftOptions;
+        }
+        $val.prop('disabled', false);
+        $.each(opts, function (i, v) {
+          $val.append('<option value="' + v + '">' + v + '</option>');
+        });
+      }
+
+      $(document).on('change', '.criteria-type', function () {
+        updateValueDropdown($(this).closest('.criteria-row'));
+      });
+
+      // Add criteria row
+      $('#addCriteriaBtn').on('click', function () {
+        var $newRow = $('#criteriaContainer .criteria-row:first').clone();
+        $newRow.find('.criteria-type').val('');
+        $newRow.find('.criteria-value').empty().append('<option value="">-- Select Value --</option>');
+        $('#criteriaContainer').append($newRow);
+      });
+
+      // Remove criteria row
+      $(document).on('click', '.remove-criteria', function () {
+        if ($('#criteriaContainer .criteria-row').length > 1) {
+          $(this).closest('.criteria-row').remove();
+        }
+      });
+
+      // Save Holiday (demo)
+      $('#saveHolidayBtn').on('click', function () {
+        var name = $('#holidayName').val().trim();
+        var date = $('#holidayDate').val();
+        if (!name || !date) {
+          alert('Please fill in the Holiday Name and Date.');
+          return;
+        }
+        // Demo: just close modal
+        $('#addHolidayModal').modal('hide');
+        // Show success toast / alert
+        var $alert = $('<div class="alert alert-success alert-dismissible fade show m-3" role="alert">' +
+          '<i class="fa fa-check-circle mr-2"></i><strong>' + name + '</strong> has been added to the holiday list.' +
+          '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
+          '</div>');
+        $('.content').prepend($alert);
+        setTimeout(function () { $alert.alert('close'); }, 4000);
+        // Reset form
+        $('#addHolidayForm')[0].reset();
+        $('#shiftSelect').hide();
+      });
+
+    });
+  </script>
+</div>
+</body>
+</html>

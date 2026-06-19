@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance — ARUNKUMAR KATHIRESAN (EMP-28)</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    /* Timeline bar styles */
+    .attendance-timeline-row {
+      border-bottom: 1px solid #f0f2f5;
+      padding: 10px 0;
+    }
+    .attendance-timeline-row:last-child {
+      border-bottom: none;
+    }
+    .day-label {
+      width: 100px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .day-date {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+    .timeline-wrapper {
+      position: relative;
+      height: 38px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .timeline-bar {
+      position: absolute;
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .timeline-bar.present {
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+    }
+    .timeline-bar.overtime {
+      background: linear-gradient(90deg, #27ae60, #1e8449);
+    }
+    .timeline-absent {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 6px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px dashed #fca5a5;
+    }
+    .timeline-weekend {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: #9ca3af;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px dashed #d1d5db;
+    }
+    .time-markers {
+      position: relative;
+      height: 20px;
+      margin-bottom: 4px;
+    }
+    .time-marker {
+      position: absolute;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      transform: translateX(-50%);
+    }
+    .attendance-hours-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      min-width: 68px;
+      text-align: right;
+      color: #374151;
+    }
+    .attendance-hours-badge.overtime {
+      color: #d97706;
+    }
+    .punch-times {
+      font-size: 0.75rem;
+      color: #6b7280;
+      min-width: 180px;
+    }
+    /* Summary card */
+    .summary-stat {
+      text-align: center;
+      padding: 14px 8px;
+    }
+    .summary-stat .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .summary-stat .stat-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .stat-present { color: #059669; }
+    .stat-absent  { color: #dc2626; }
+    .stat-leave   { color: #7c3aed; }
+    .stat-holiday { color: #d97706; }
+    .stat-weekend { color: #6b7280; }
+    .stat-payable { color: #1d4ed8; }
+
+    /* Monthly calendar */
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-head {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #6b7280;
+      padding: 4px 0;
+      text-transform: uppercase;
+    }
+    .cal-cell {
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      min-height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 3px;
+    }
+    .cal-cell .cal-day-num {
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .cal-cell .cal-status {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .cal-cell.present    { background: #d1fae5; color: #065f46; }
+    .cal-cell.absent     { background: #fee2e2; color: #991b1b; }
+    .cal-cell.weekend    { background: #f3f4f6; color: #9ca3af; }
+    .cal-cell.holiday    { background: #fef3c7; color: #92400e; }
+    .cal-cell.empty      { background: transparent; }
+    .cal-cell.future     { background: #f9fafb; color: #d1d5db; }
+    .cal-cell.lop        { background: #ede9fe; color: #5b21b6; }
+
+    .shift-badge {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-section .nav-link {
+      font-weight: 600;
+      color: #6b7280;
+      border-radius: 8px 8px 0 0;
+    }
+    .tab-section .nav-link.active {
+      color: #1d4ed8;
+      background: #eff6ff;
+      border-color: #bfdbfe #bfdbfe #fff;
+    }
+
+    /* Employee selector */
+    .emp-selector-wrap .select2-container {
+      min-width: 320px;
+    }
+
+    /* Week nav */
+    .week-nav-btn {
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      color: #374151;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .week-nav-btn:hover {
+      background: #f3f4f6;
+    }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- ========== SIDEBAR ========== -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- ========== END SIDEBAR ========== -->
+
+  <!-- ========== HEADER ========== -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ========== END HEADER ========== -->
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page heading -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <div>
+          <h2 class="h4 font-w700 mb-0">Attendance</h2>
+          <p class="text-muted mb-0" style="font-size:0.85rem;">Track and manage daily attendance records</p>
+        </div>
+        <div class="d-flex align-items-center mt-2 mt-md-0" style="gap:10px;">
+          <button class="btn btn-sm btn-alt-secondary" data-toggle="modal" data-target="#modalMarkAttendance">
+            <i class="fa fa-plus mr-1"></i> Mark Attendance
+          </button>
+          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalRequest">
+            <i class="fa fa-paper-plane mr-1"></i> Request
+          </button>
+        </div>
+      </div>
+
+      <!-- Employee selector card -->
+      <div class="block block-rounded block-bordered mb-3">
+        <div class="block-content py-3">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-auto mb-2 mb-md-0">
+              <label class="mb-0 font-w600 text-muted" style="font-size:0.82rem;">EMPLOYEE</label>
+            </div>
+            <div class="col-12 col-md-4 emp-selector-wrap">
+              <select id="empSelect" class="form-control" style="width:100%;">
+                <option value="28" selected>ARUNKUMAR KATHIRESAN — EMP-28 (BDM, Business)</option>
+                <option value="6741">SUBHASH JAYACHANDRAN — EMP-6741 (JR BDM, Tiruchengode)</option>
+                <option value="32">MURUGANANDHAM I — EMP-32</option>
+                <option value="83">VIJAYALAKSHMI RAMANATHAN — EMP-83 (HO Accounts)</option>
+                <option value="6159">THANGADURAI APPRAMANI — EMP-6159 (Manager)</option>
+                <option value="16">RAJESH VITTAL RAO — EMP-16</option>
+                <option value="7">SATHYAMOORTHY KANNAYIRAM — EMP-7</option>
+                <option value="8">NAVANEETHA KRISHNAN — EMP-8</option>
+                <option value="11">VALLI VIJAYAKUMAR — EMP-11</option>
+                <option value="12">ROJA GOVINDASAMY — EMP-12</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-auto ml-md-auto mt-2 mt-md-0">
+              <div class="d-flex align-items-center" style="gap:8px;">
+                <span class="shift-badge">
+                  <i class="fa fa-clock"></i>
+                  Head Office 10:00 AM – 6:00 PM
+                </span>
+                <span class="badge badge-success px-3 py-2" style="font-size:0.78rem;">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee info strip -->
+      <div class="block block-rounded block-bordered mb-3" style="background:#f8faff;">
+        <div class="block-content py-2">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white font-w700"
+                   style="width:44px;height:44px;font-size:1rem;">AK</div>
+            </div>
+            <div class="col">
+              <div class="font-w700" style="font-size:0.95rem;">ARUNKUMAR KATHIRESAN</div>
+              <div class="text-muted" style="font-size:0.78rem;">EMP-28 &nbsp;·&nbsp; BDM &nbsp;·&nbsp; Business Dept &nbsp;·&nbsp; Head Office &nbsp;·&nbsp; Krishnagiri Region</div>
+            </div>
+            <div class="col-auto d-none d-md-flex" style="gap:24px;">
+              <div class="summary-stat">
+                <div class="stat-value stat-payable">24</div>
+                <div class="stat-label">Payable Days</div>
+              </div>
+              <div class="summary-stat">
+                <div class="stat-value stat-present">22</div>
+                <div class="stat-label">Present</div>
+              </div>
+              <div class="summary-stat">
+                <div class="stat-value stat-absent">1</div>
+                <div class="stat-label">Absent</div>
+              </div>
+              <div class="summary-stat">
+                <div class="stat-value stat-leave">0</div>
+                <div class="stat-label">Paid Leave</div>
+              </div>
+              <div class="summary-stat">
+                <div class="stat-value stat-holiday">2</div>
+                <div class="stat-label">Holidays</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View tabs -->
+      <ul class="nav nav-tabs tab-section mb-0" id="attTabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="weekly-tab" data-toggle="tab" href="#weekly" role="tab">
+            <i class="fa fa-list mr-1"></i> Weekly View
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="monthly-tab" data-toggle="tab" href="#monthly" role="tab">
+            <i class="fa fa-calendar mr-1"></i> Monthly View
+          </a>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="attTabContent">
+
+        <!-- ===== WEEKLY VIEW ===== -->
+        <div class="tab-pane fade show active" id="weekly" role="tabpanel">
+          <div class="block block-rounded block-bordered" style="border-top:none;border-radius:0 0 8px 8px;">
+            <div class="block-content">
+
+              <!-- Week navigation -->
+              <div class="d-flex align-items-center justify-content-between mb-3 pt-1">
+                <button class="week-nav-btn" id="prevWeek"><i class="fa fa-chevron-left mr-1"></i> Prev</button>
+                <div class="text-center">
+                  <div class="font-w700" style="font-size:0.95rem;" id="weekRangeLabel">Jun 01 – Jun 07, 2026</div>
+                  <div class="text-muted" style="font-size:0.75rem;">Pay Period: 26-May-2026 to 25-Jun-2026</div>
+                </div>
+                <button class="week-nav-btn" id="nextWeek">Next <i class="fa fa-chevron-right ml-1"></i></button>
+              </div>
+
+              <!-- Timeline scale -->
+              <div class="d-flex align-items-end mb-1" style="padding-left:228px;">
+                <div class="time-markers flex-grow-1" style="position:relative;">
+                  <span class="time-marker" style="left:0%;">9 AM</span>
+                  <span class="time-marker" style="left:16.67%;">10 AM</span>
+                  <span class="time-marker" style="left:33.33%;">11 AM</span>
+                  <span class="time-marker" style="left:50%;">12 PM</span>
+                  <span class="time-marker" style="left:66.67%;">2 PM</span>
+                  <span class="time-marker" style="left:83.33%;">4 PM</span>
+                  <span class="time-marker" style="left:100%;">7 PM</span>
+                </div>
+                <div style="width:78px;"></div>
+              </div>
+
+              <!-- Day rows -->
+              <!-- Helper: 9AM=0%, 7PM=100% (10 hrs span) -->
+              <!-- Mon Jun 01: 09:42–18:10 = start=(42/60)/10*100=7% end=(9*60+10)/600*100=153.33/600*100=91.67% -->
+
+              <!-- Monday Jun 01 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Mon</div>
+                  <div class="day-date">01 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-success font-w600"><i class="fa fa-sign-in-alt mr-1"></i>09:42 AM</span>
+                  <span class="mx-1 text-muted">→</span>
+                  <span class="text-danger font-w600"><i class="fa fa-sign-out-alt mr-1"></i>06:10 PM</span>
+                </div>
+                <div class="timeline-wrapper flex-grow-1">
+                  <!-- 9AM baseline, span 10hrs=600min. 09:42=42min, 18:10=549min -->
+                  <div class="timeline-bar present" style="left:7%;width:84.5%;">
+                    08:28 hrs
+                  </div>
+                </div>
+                <div class="attendance-hours-badge">08:28 hrs</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-success">Present</span>
+                </div>
+              </div>
+
+              <!-- Tuesday Jun 02 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Tue</div>
+                  <div class="day-date">02 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-success font-w600"><i class="fa fa-sign-in-alt mr-1"></i>09:49 AM</span>
+                  <span class="mx-1 text-muted">→</span>
+                  <span class="text-danger font-w600"><i class="fa fa-sign-out-alt mr-1"></i>06:31 PM</span>
+                </div>
+                <div class="timeline-wrapper flex-grow-1">
+                  <!-- 09:49=49min→8.17%, 18:31=571min→95.17% -->
+                  <div class="timeline-bar present" style="left:8.17%;width:87%;">
+                    08:42 hrs
+                  </div>
+                </div>
+                <div class="attendance-hours-badge">08:42 hrs</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-success">Present</span>
+                </div>
+              </div>
+
+              <!-- Wednesday Jun 03 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Wed</div>
+                  <div class="day-date">03 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-success font-w600"><i class="fa fa-sign-in-alt mr-1"></i>10:00 AM</span>
+                  <span class="mx-1 text-muted">→</span>
+                  <span class="text-danger font-w600"><i class="fa fa-sign-out-alt mr-1"></i>06:28 PM</span>
+                </div>
+                <div class="timeline-wrapper flex-grow-1">
+                  <!-- 10:00=60min→10%, 18:28=568min→94.67% -->
+                  <div class="timeline-bar present" style="left:10%;width:84.67%;">
+                    08:28 hrs
+                  </div>
+                </div>
+                <div class="attendance-hours-badge">08:28 hrs</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-success">Present</span>
+                </div>
+              </div>
+
+              <!-- Thursday Jun 04 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Thu</div>
+                  <div class="day-date">04 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-success font-w600"><i class="fa fa-sign-in-alt mr-1"></i>09:42 AM</span>
+                  <span class="mx-1 text-muted">→</span>
+                  <span class="text-danger font-w600"><i class="fa fa-sign-out-alt mr-1"></i>07:13 PM</span>
+                </div>
+                <div class="timeline-wrapper flex-grow-1">
+                  <!-- 09:42=42min→7%, 19:13=613min→capped at 100% visually but show extended -->
+                  <div class="timeline-bar overtime" style="left:7%;width:93%;">
+                    09:31 hrs
+                  </div>
+                </div>
+                <div class="attendance-hours-badge overtime">09:31 hrs</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-warning text-white">Overtime</span>
+                </div>
+              </div>
+
+              <!-- Friday Jun 05 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Fri</div>
+                  <div class="day-date">05 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-success font-w600"><i class="fa fa-sign-in-alt mr-1"></i>09:23 AM</span>
+                  <span class="mx-1 text-muted">→</span>
+                  <span class="text-danger font-w600"><i class="fa fa-sign-out-alt mr-1"></i>06:08 PM</span>
+                </div>
+                <div class="timeline-wrapper flex-grow-1">
+                  <!-- 09:23=23min→3.83%, 18:08=548min→91.33% -->
+                  <div class="timeline-bar present" style="left:3.83%;width:87.5%;">
+                    08:45 hrs
+                  </div>
+                </div>
+                <div class="attendance-hours-badge">08:45 hrs</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-success">Present</span>
+                </div>
+              </div>
+
+              <!-- Saturday Jun 06 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Sat</div>
+                  <div class="day-date">06 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-muted" style="font-size:0.78rem;"><i class="fa fa-minus-circle mr-1"></i>No punch</span>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="timeline-absent">
+                    <i class="fa fa-times-circle mr-2"></i> Absent
+                  </div>
+                </div>
+                <div class="attendance-hours-badge text-muted">—</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-danger">Absent</span>
+                </div>
+              </div>
+
+              <!-- Sunday Jun 07 -->
+              <div class="attendance-timeline-row d-flex align-items-center" style="gap:12px;">
+                <div class="day-label" style="min-width:100px;">
+                  <div>Sun</div>
+                  <div class="day-date">07 Jun</div>
+                </div>
+                <div class="punch-times" style="min-width:130px;">
+                  <span class="text-muted" style="font-size:0.78rem;"><i class="fa fa-moon mr-1"></i>Day off</span>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="timeline-weekend">
+                    <i class="fa fa-couch mr-2"></i> Weekend
+                  </div>
+                </div>
+                <div class="attendance-hours-badge text-muted">—</div>
+                <div style="min-width:80px;">
+                  <span class="badge badge-secondary">Weekend</span>
+                </div>
+              </div>
+
+              <!-- Weekly Summary -->
+              <div class="mt-4 p-3 rounded" style="background:#f8faff;border:1px solid #e0e7ff;">
+                <div class="row text-center">
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-payable">6</div>
+                    <div class="stat-label">Payable Days</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-present">5</div>
+                    <div class="stat-label">Present</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value" style="color:#d97706;">0</div>
+                    <div class="stat-label">On Duty</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-leave">0</div>
+                    <div class="stat-label">Paid Leave</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-absent">1</div>
+                    <div class="stat-label">Absent / LOP</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-holiday">0</div>
+                    <div class="stat-label">Holidays</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value stat-weekend">1</div>
+                    <div class="stat-label">Weekends</div>
+                  </div>
+                  <div class="col summary-stat">
+                    <div class="stat-value" style="color:#374151;">44:54</div>
+                    <div class="stat-label">Total Hours</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- ===== END WEEKLY VIEW ===== -->
+
+        <!-- ===== MONTHLY VIEW ===== -->
+        <div class="tab-pane fade" id="monthly" role="tabpanel">
+          <div class="block block-rounded block-bordered" style="border-top:none;border-radius:0 0 8px 8px;">
+            <div class="block-content">
+
+              <!-- Month navigation -->
+              <div class="d-flex align-items-center justify-content-between mb-4 pt-1">
+                <button class="week-nav-btn"><i class="fa fa-chevron-left mr-1"></i> May 2026</button>
+                <div class="text-center">
+                  <div class="font-w700" style="font-size:1rem;">June 2026</div>
+                  <div class="text-muted" style="font-size:0.75rem;">Pay Period: 26-May-2026 to 25-Jun-2026</div>
+                </div>
+                <button class="week-nav-btn">Jul 2026 <i class="fa fa-chevron-right ml-1"></i></button>
+              </div>
+
+              <!-- Legend -->
+              <div class="d-flex flex-wrap mb-3" style="gap:10px;">
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#d1fae5;border-radius:3px;display:inline-block;"></span> Present</span>
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#fee2e2;border-radius:3px;display:inline-block;"></span> Absent</span>
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#f3f4f6;border-radius:3px;display:inline-block;"></span> Weekend</span>
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#fef3c7;border-radius:3px;display:inline-block;"></span> Holiday</span>
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#ede9fe;border-radius:3px;display:inline-block;"></span> Leave / LOP</span>
+                <span class="d-flex align-items-center" style="gap:5px;font-size:0.78rem;"><span style="width:14px;height:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:3px;display:inline-block;"></span> Future</span>
+              </div>
+
+              <!-- Calendar grid -->
+              <!-- June 2026: starts Monday June 1 -->
+              <div class="cal-grid">
+                <!-- Header -->
+                <div class="cal-head">Sun</div>
+                <div class="cal-head">Mon</div>
+                <div class="cal-head">Tue</div>
+                <div class="cal-head">Wed</div>
+                <div class="cal-head">Thu</div>
+                <div class="cal-head">Fri</div>
+                <div class="cal-head">Sat</div>
+
+                <!-- Week 1: Jun 1 starts on Mon, so Sun is empty -->
+                <div class="cal-cell empty"></div>
+                <div class="cal-cell present" title="Present | 09:42–18:10 | 08:28 hrs">
+                  <span class="cal-day-num">1</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:28</span>
+                </div>
+                <div class="cal-cell present" title="Present | 09:49–18:31 | 08:42 hrs">
+                  <span class="cal-day-num">2</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:42</span>
+                </div>
+                <div class="cal-cell present" title="Present | 10:00–18:28 | 08:28 hrs">
+                  <span class="cal-day-num">3</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:28</span>
+                </div>
+                <div class="cal-cell present" title="Present | 09:42–19:13 | 09:31 hrs">
+                  <span class="cal-day-num">4</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#d97706;">09:31 OT</span>
+                </div>
+                <div class="cal-cell present" title="Present | 09:23–18:08 | 08:45 hrs">
+                  <span class="cal-day-num">5</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:45</span>
+                </div>
+                <div class="cal-cell absent" title="Absent">
+                  <span class="cal-day-num">6</span>
+                  <span class="cal-status">Absent</span>
+                </div>
+
+                <!-- Week 2 -->
+                <div class="cal-cell weekend">
+                  <span class="cal-day-num">7</span>
+                  <span class="cal-status">Weekend</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">8</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:35</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">9</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:20</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">10</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:30</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">11</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:15</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">12</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:40</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">13</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:22</span>
+                </div>
+
+                <!-- Week 3 -->
+                <div class="cal-cell weekend">
+                  <span class="cal-day-num">14</span>
+                  <span class="cal-status">Weekend</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">15</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:10</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">16</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:45</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">17</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:30</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">18</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:28</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">19</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:42</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">20</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:18</span>
+                </div>
+
+                <!-- Week 4 -->
+                <div class="cal-cell weekend">
+                  <span class="cal-day-num">21</span>
+                  <span class="cal-status">Weekend</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">22</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:35</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">23</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:25</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">24</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:30</span>
+                </div>
+                <div class="cal-cell present">
+                  <span class="cal-day-num">25</span>
+                  <span class="cal-status">Present</span>
+                  <span style="font-size:0.62rem;color:#059669;">08:48</span>
+                </div>
+                <div class="cal-cell future">
+                  <span class="cal-day-num">26</span>
+                  <span class="cal-status">—</span>
+                </div>
+                <div class="cal-cell future">
+                  <span class="cal-day-num">27</span>
+                  <span class="cal-status">—</span>
+                </div>
+
+                <!-- Week 5 -->
+                <div class="cal-cell weekend">
+                  <span class="cal-day-num">28</span>
+                  <span class="cal-status">Weekend</span>
+                </div>
+                <div class="cal-cell future">
+                  <span class="cal-day-num">29</span>
+                  <span class="cal-status">—</span>
+                </div>
+                <div class="cal-cell future">
+                  <span class="cal-day-num">30</span>
+                  <span class="cal-status">—</span>
+                </div>
+                <div class="cal-cell empty"></div>
+                <div class="cal-cell empty"></div>
+                <div class="cal-cell empty"></div>
+                <div class="cal-cell empty"></div>
+              </div>
+
+              <!-- Monthly Summary -->
+              <div class="mt-4 p-3 rounded" style="background:#f8faff;border:1px solid #e0e7ff;">
+                <div class="row text-center">
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-payable">20</div>
+                    <div class="stat-label">Working Days (till today)</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-present">19</div>
+                    <div class="stat-label">Present</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-absent">1</div>
+                    <div class="stat-label">Absent / LOP</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-leave">0</div>
+                    <div class="stat-label">Paid Leave</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-holiday">0</div>
+                    <div class="stat-label">Holidays</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value stat-weekend">4</div>
+                    <div class="stat-label">Weekends</div>
+                  </div>
+                  <div class="col-6 col-md summary-stat">
+                    <div class="stat-value" style="color:#374151;">159:02</div>
+                    <div class="stat-label">Total Hours</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- ===== END MONTHLY VIEW ===== -->
+
+      </div>
+      <!-- end tab-content -->
+
+    </div>
+  </main>
+  <!-- ========== END MAIN CONTENT ========== -->
+
+  <!-- ===== MODAL: Request Leave / On Duty ===== -->
+  <div class="modal fade" id="modalRequest" tabindex="-1" role="dialog" aria-labelledby="modalRequestLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="block block-themed block-transparent mb-0">
+          <div class="block-header bg-primary">
+            <h3 class="block-title" id="modalRequestLabel">Submit Request</h3>
+            <div class="block-options">
+              <button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close"><i class="fa fa-fw fa-times"></i></button>
+            </div>
+          </div>
+          <div class="block-content">
+            <form id="requestForm">
+              <div class="form-group">
+                <label class="font-w600" for="reqType">Request Type</label>
+                <select class="form-control" id="reqType">
+                  <option value="">— Select type —</option>
+                  <option value="casual">Casual Leave</option>
+                  <option value="sick">Sick Leave</option>
+                  <option value="earned">Earned Leave</option>
+                  <option value="comp">Compensatory Off</option>
+                  <option value="on_duty">On Duty</option>
+                  <option value="lop">Employee LOP</option>
+                  <option value="maternity">Maternity Leave</option>
+                </select>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="font-w600" for="reqFrom">From Date</label>
+                    <input type="date" class="form-control" id="reqFrom">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="font-w600" for="reqTo">To Date</label>
+                    <input type="date" class="form-control" id="reqTo">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="dutyFieldGroup" style="display:none;">
+                <label class="font-w600" for="dutyLocation">On Duty Location / Purpose</label>
+                <input type="text" class="form-control" id="dutyLocation" placeholder="e.g., Hosur branch visit">
+              </div>
+              <div class="form-group">
+                <label class="font-w600" for="reqReason">Reason / Remarks</label>
+                <textarea class="form-control" id="reqReason" rows="3" placeholder="Provide a brief reason..."></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="block-content block-content-full text-right border-top">
+            <button type="button" class="btn btn-alt-secondary mr-1" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="submitRequest()">
+              <i class="fa fa-paper-plane mr-1"></i> Submit Request
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Mark Attendance ===== -->
+  <div class="modal fade" id="modalMarkAttendance" tabindex="-1" role="dialog" aria-labelledby="modalMarkAttLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="block block-themed block-transparent mb-0">
+          <div class="block-header bg-primary">
+            <h3 class="block-title" id="modalMarkAttLabel">Mark Attendance</h3>
+            <div class="block-options">
+              <button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close"><i class="fa fa-fw fa-times"></i></button>
+            </div>
+          </div>
+          <div class="block-content">
+            <form id="markAttForm">
+              <div class="form-group">
+                <label class="font-w600">Employee</label>
+                <select class="form-control">
+                  <option selected>ARUNKUMAR KATHIRESAN — EMP-28</option>
+                  <option>SUBHASH JAYACHANDRAN — EMP-6741</option>
+                  <option>MURUGANANDHAM I — EMP-32</option>
+                  <option>VIJAYALAKSHMI RAMANATHAN — EMP-83</option>
+                  <option>THANGADURAI APPRAMANI — EMP-6159</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="font-w600" for="attDate">Date</label>
+                <input type="date" class="form-control" id="attDate" value="2026-06-19">
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="font-w600" for="punchIn">Punch In</label>
+                    <input type="time" class="form-control" id="punchIn" value="10:00">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="font-w600" for="punchOut">Punch Out</label>
+                    <input type="time" class="form-control" id="punchOut" value="18:00">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="font-w600">Status</label>
+                <select class="form-control">
+                  <option>Present</option>
+                  <option>Absent</option>
+                  <option>Half Day</option>
+                  <option>On Duty</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="font-w600" for="attRemarks">Remarks</label>
+                <input type="text" class="form-control" id="attRemarks" placeholder="Optional remarks...">
+              </div>
+            </form>
+          </div>
+          <div class="block-content block-content-full text-right border-top">
+            <button type="button" class="btn btn-alt-secondary mr-1" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveAttendance()">
+              <i class="fa fa-save mr-1"></i> Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- End page-container -->
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script src="../assets/jquery.dataTables.min.js"></script>
+<script src="../assets/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/select2.full.min.js"></script>
+<script>
+  // Initialize Select2 for employee dropdown
+  $(document).ready(function () {
+    if (typeof $.fn.select2 !== 'undefined') {
+      $('#empSelect').select2({
+        theme: 'bootstrap4',
+        placeholder: 'Select employee...',
+        allowClear: false
+      });
+    }
+
+    // Show/hide On Duty field
+    $('#reqType').on('change', function () {
+      if ($(this).val() === 'on_duty') {
+        $('#dutyFieldGroup').show();
+      } else {
+        $('#dutyFieldGroup').hide();
+      }
+    });
+  });
+
+  // Stub: Submit request
+  function submitRequest() {
+    var type = document.getElementById('reqType').value;
+    var from = document.getElementById('reqFrom').value;
+    var to   = document.getElementById('reqTo').value;
+    if (!type || !from || !to) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+    $('#modalRequest').modal('hide');
+    // TODO: POST to /api/hr/attendance/requests/
+    setTimeout(function () {
+      alert('Request submitted successfully. Pending approval.');
+    }, 300);
+  }
+
+  // Stub: Save attendance
+  function saveAttendance() {
+    $('#modalMarkAttendance').modal('hide');
+    // TODO: POST to /api/hr/attendance/
+    setTimeout(function () {
+      alert('Attendance record saved.');
+    }, 300);
+  }
+
+  // Week navigation (stub — updates label only)
+  var weeks = [
+    { label: 'May 25 – May 31, 2026', prev: 'May 18–24', next: 'Jun 01–07' },
+    { label: 'Jun 01 – Jun 07, 2026', prev: 'May 25–31', next: 'Jun 08–14' },
+    { label: 'Jun 08 – Jun 14, 2026', prev: 'Jun 01–07', next: 'Jun 15–21' },
+  ];
+  var currentWeek = 1;
+
+  document.getElementById('prevWeek').addEventListener('click', function () {
+    if (currentWeek > 0) {
+      currentWeek--;
+      document.getElementById('weekRangeLabel').textContent = weeks[currentWeek].label;
+    }
+  });
+  document.getElementById('nextWeek').addEventListener('click', function () {
+    if (currentWeek < weeks.length - 1) {
+      currentWeek++;
+      document.getElementById('weekRangeLabel').textContent = weeks[currentWeek].label;
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shift Management — DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .shift-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .shift-badge.active {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .shift-badge.inactive {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .time-pill {
+      background: #eef2ff;
+      color: #3730a3;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+    .table-shifts thead th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6c757d;
+      border-top: none;
+      background: #f8f9fa;
+    }
+    .table-shifts td {
+      vertical-align: middle;
+      font-size: 0.88rem;
+    }
+    .shift-name-cell {
+      font-weight: 600;
+      color: #212529;
+    }
+    .location-tag {
+      display: inline-block;
+      background: #f0f4ff;
+      color: #3730a3;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      padding: 1px 7px;
+      margin: 1px 2px;
+    }
+    .emp-count-badge {
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .section-header-bar {
+      background: linear-gradient(90deg, #1a3c6b 0%, #1e4d8c 100%);
+      border-radius: 8px 8px 0 0;
+      padding: 14px 20px;
+    }
+    .modal-header-primary {
+      background: linear-gradient(90deg, #1a3c6b, #1e4d8c);
+      color: #fff;
+    }
+    .modal-header-primary .close {
+      color: #fff;
+      opacity: 0.8;
+    }
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.83rem;
+      color: #495057;
+    }
+    .custom-control-label {
+      font-weight: 500;
+    }
+    .shift-details-row {
+      border-left: 3px solid #1e4d8c;
+      background: #f8f9ff;
+    }
+    .page-header-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a3c6b;
+    }
+    .breadcrumb {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 0;
+      font-size: 0.82rem;
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+      content: "›";
+      font-weight: 700;
+      color: #adb5bd;
+    }
+    .btn-assign {
+      background: #e8f4fd;
+      color: #0c63a4;
+      border: 1px solid #bee3f8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 5px;
+    }
+    .btn-assign:hover {
+      background: #cfe9fb;
+      color: #0c63a4;
+    }
+    .btn-edit-shift {
+      background: #fff;
+      color: #495057;
+      border: 1px solid #ced4da;
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 5px;
+    }
+    .btn-edit-shift:hover {
+      background: #f8f9fa;
+      color: #212529;
+    }
+    .table-shifts tbody tr:hover {
+      background-color: #f0f4ff;
+    }
+    .nav-main-link.active {
+      background-color: rgba(255,255,255,0.1);
+      color: #fff !important;
+    }
+    .nav-main-link.active .nav-main-link-icon {
+      color: #fff !important;
+    }
+    @media (max-width: 768px) {
+      .stat-row .col-md-4 { margin-bottom: 12px; }
+    }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main Content -->
+  <div id="main-container">
+    <div class="content">
+
+      <!-- Page Heading -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="page-header-title mb-1"><i class="fa fa-clock mr-2 text-primary"></i>Shift Management</h1>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+              <li class="breadcrumb-item">HR Module</li>
+              <li class="breadcrumb-item active" aria-current="page">Shifts</li>
+            </ol>
+          </nav>
+        </div>
+        <div>
+          <button class="btn btn-primary" data-toggle="modal" data-target="#addShiftModal">
+            <i class="fa fa-plus mr-1"></i> Add Shift
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="row stat-row mb-4">
+        <div class="col-md-4 col-sm-12">
+          <div class="block block-rounded shadow-sm">
+            <div class="block-content py-3">
+              <div class="d-flex align-items-center">
+                <div class="stat-card-icon mr-3" style="background:#e8f0fe;">
+                  <i class="fa fa-clock" style="color:#1a3c6b;"></i>
+                </div>
+                <div>
+                  <div class="font-size-h3 font-w700 text-dark mb-0">13</div>
+                  <div class="text-muted font-size-sm">Total Shifts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="block block-rounded shadow-sm">
+            <div class="block-content py-3">
+              <div class="d-flex align-items-center">
+                <div class="stat-card-icon mr-3" style="background:#d4edda;">
+                  <i class="fa fa-user-check" style="color:#155724;"></i>
+                </div>
+                <div>
+                  <div class="font-size-h3 font-w700 text-dark mb-0">965</div>
+                  <div class="text-muted font-size-sm">Active Employees on Shifts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="block block-rounded shadow-sm">
+            <div class="block-content py-3">
+              <div class="d-flex align-items-center">
+                <div class="stat-card-icon mr-3" style="background:#fff3cd;">
+                  <i class="fa fa-exchange-alt" style="color:#856404;"></i>
+                </div>
+                <div>
+                  <div class="font-size-h3 font-w700 text-dark mb-0">2</div>
+                  <div class="text-muted font-size-sm">Shifts Changed This Month</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shifts Table Block -->
+      <div class="block block-rounded shadow-sm">
+        <div class="section-header-bar d-flex align-items-center justify-content-between">
+          <span class="text-white font-w600"><i class="fa fa-list mr-2"></i>All Shifts</span>
+          <span class="badge badge-light text-primary font-w700">13 Shifts</span>
+        </div>
+        <div class="block-content block-content-full p-0">
+          <div class="table-responsive">
+            <table class="table table-shifts table-hover mb-0" id="shiftsTable">
+              <thead>
+                <tr>
+                  <th style="width:30px;">#</th>
+                  <th>Shift Name</th>
+                  <th>Timing</th>
+                  <th>Duration</th>
+                  <th>Applicable To</th>
+                  <th class="text-center">Employees</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <tr>
+                  <td class="text-muted">1</td>
+                  <td class="shift-name-cell">Head Office 10:00 AM to 6:00 PM</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:00 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8 hrs</small></td>
+                  <td>
+                    <span class="location-tag">KRG - HO</span>
+                    <span class="location-tag">Head Office</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">234</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Head Office 10:00 AM to 6:00 PM"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Head Office 10:00 AM to 6:00 PM" data-from="10:00" data-to="18:00" data-location="Head Office"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">2</td>
+                  <td class="shift-name-cell">Chennai Regional &amp; Krishnagiri/Vellore</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:00 AM &ndash; 06:30 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Chennai Regional</span>
+                    <span class="location-tag">Krishnagiri/Vellore</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">312</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Chennai Regional &amp; Krishnagiri/Vellore"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Chennai Regional &amp; Krishnagiri/Vellore" data-from="10:00" data-to="18:30" data-location="Chennai Regional"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">3</td>
+                  <td class="shift-name-cell">Salem &amp; Krishnagiri Cluster</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>09:30 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Salem</span>
+                    <span class="location-tag">Krishnagiri Cluster</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">145</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Salem &amp; Krishnagiri Cluster"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Salem &amp; Krishnagiri Cluster" data-from="09:30" data-to="18:00" data-location="Salem"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">4</td>
+                  <td class="shift-name-cell">Central Accounts Morning</td>
+                  <td><span class="time-pill" style="background:#fef3c7;color:#92400e;"><i class="fa fa-coffee fa-sm mr-1"></i>09:00 AM &ndash; 01:30 PM</span></td>
+                  <td><small class="text-muted">4.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Head Office (Accounts)</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">28</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Central Accounts Morning"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Central Accounts Morning" data-from="09:00" data-to="13:30" data-location="Head Office"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">5</td>
+                  <td class="shift-name-cell">Central Accounts Evening</td>
+                  <td><span class="time-pill" style="background:#ede9fe;color:#5b21b6;"><i class="fa fa-moon fa-sm mr-1"></i>01:30 PM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">4.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Head Office (Accounts)</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">28</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Central Accounts Evening"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Central Accounts Evening" data-from="13:30" data-to="18:00" data-location="Head Office"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">6</td>
+                  <td class="shift-name-cell">KRG (Bhuvaneswari)</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:30 AM &ndash; 06:30 PM</span></td>
+                  <td><small class="text-muted">8 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Krishnagiri (Bhuvaneswari)</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">12</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="KRG (Bhuvaneswari)"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="KRG (Bhuvaneswari)" data-from="10:30" data-to="18:30" data-location="Krishnagiri"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">7</td>
+                  <td class="shift-name-cell">SALEM ELAMPILLAI</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:00 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Salem Elampillai</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">18</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="SALEM ELAMPILLAI"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="SALEM ELAMPILLAI" data-from="10:00" data-to="18:00" data-location="Salem"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">8</td>
+                  <td class="shift-name-cell">MIS DEPT</td>
+                  <td><span class="time-pill" style="background:#fee2e2;color:#991b1b;"><i class="fa fa-star fa-sm mr-1"></i>04:00 AM &ndash; 05:30 PM</span></td>
+                  <td><small class="text-muted">13.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Head Office (MIS)</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">8</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="MIS DEPT"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="MIS DEPT" data-from="04:00" data-to="17:30" data-location="Head Office"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">9</td>
+                  <td class="shift-name-cell">Krishnagiri Region Shift 9.30 to 6</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>09:30 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Krishnagiri Region</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">67</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Krishnagiri Region Shift 9.30 to 6"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Krishnagiri Region Shift 9.30 to 6" data-from="09:30" data-to="18:00" data-location="Krishnagiri"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">10</td>
+                  <td class="shift-name-cell">Krishnagiri Region Shift 10 to 6.30</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:00 AM &ndash; 06:30 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Krishnagiri Region</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">54</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Krishnagiri Region Shift 10 to 6.30"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Krishnagiri Region Shift 10 to 6.30" data-from="10:00" data-to="18:30" data-location="Krishnagiri"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">11</td>
+                  <td class="shift-name-cell">Coimbatore Region Standard</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>09:30 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Coimbatore Region</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">43</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Coimbatore Region Standard"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Coimbatore Region Standard" data-from="09:30" data-to="18:00" data-location="Coimbatore"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">12</td>
+                  <td class="shift-name-cell">Salem Region Extended</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>10:00 AM &ndash; 06:30 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Salem Region</span>
+                    <span class="location-tag">Edappadi</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">31</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Salem Region Extended"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Salem Region Extended" data-from="10:00" data-to="18:30" data-location="Salem"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="text-muted">13</td>
+                  <td class="shift-name-cell">Hosur Branch Shift</td>
+                  <td><span class="time-pill"><i class="fa fa-sun fa-sm mr-1" style="color:#f59e0b;"></i>09:30 AM &ndash; 06:00 PM</span></td>
+                  <td><small class="text-muted">8.5 hrs</small></td>
+                  <td>
+                    <span class="location-tag">Hosur</span>
+                  </td>
+                  <td class="text-center"><span class="emp-count-badge">25</span></td>
+                  <td class="text-center"><span class="shift-badge active">Active</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-assign mr-1" data-toggle="modal" data-target="#assignEmpModal" data-shift="Hosur Branch Shift"><i class="fa fa-user-plus fa-sm mr-1"></i>Assign</button>
+                    <button class="btn btn-edit-shift" data-toggle="modal" data-target="#editShiftModal" data-shift-name="Hosur Branch Shift" data-from="09:30" data-to="18:00" data-location="Hosur"><i class="fa fa-pen fa-sm mr-1"></i>Edit</button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- END Shifts Table -->
+
+    </div>
+  </div>
+  <!-- END Main Content -->
+
+
+  <!-- ============================================================ -->
+  <!-- ADD SHIFT MODAL -->
+  <!-- ============================================================ -->
+  <div class="modal fade" id="addShiftModal" tabindex="-1" role="dialog" aria-labelledby="addShiftModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header modal-header-primary">
+          <h5 class="modal-title" id="addShiftModalLabel"><i class="fa fa-plus-circle mr-2"></i>Add New Shift</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="addShiftForm">
+            <!-- Shift Name -->
+            <div class="form-group">
+              <label for="addShiftName">Shift Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="addShiftName" placeholder="e.g. Head Office Morning Shift">
+            </div>
+
+            <!-- Time Row -->
+            <div class="row">
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label for="addFromTime">From Time <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" id="addFromTime" value="10:00">
+                </div>
+              </div>
+              <div class="col-md-2 d-flex align-items-center justify-content-center pt-2">
+                <span class="text-muted font-w600" style="margin-top:10px;">to</span>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label for="addToTime">To Time <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" id="addToTime" value="18:00">
+                </div>
+              </div>
+            </div>
+
+            <!-- Shift Margin -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="addShiftMargin">
+                <label class="custom-control-label" for="addShiftMargin">
+                  Enable Shift Margin
+                  <small class="text-muted d-block">Allow grace period before marking late (e.g. 15 minutes).</small>
+                </label>
+              </div>
+              <div class="mt-2 ml-4 d-none" id="addShiftMarginFields">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="small font-w600">Check-in Grace (mins)</label>
+                    <input type="number" class="form-control form-control-sm" value="15" min="0" max="60">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="small font-w600">Check-out Grace (mins)</label>
+                    <input type="number" class="form-control form-control-sm" value="15" min="0" max="60">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Core Working Hours -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="addCoreHours" checked>
+                <label class="custom-control-label" for="addCoreHours">
+                  Set Core Working Hours
+                  <small class="text-muted d-block">Mandatory hours employees must be present.</small>
+                </label>
+              </div>
+              <div class="mt-2 ml-4" id="addCoreHoursFields">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="small font-w600">Core From</label>
+                    <input type="time" class="form-control form-control-sm" value="10:00">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="small font-w600">Core To</label>
+                    <input type="time" class="form-control form-control-sm" value="16:00">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Weekends Based On -->
+            <div class="form-group">
+              <label class="d-block">Weekends Based On</label>
+              <div class="d-flex">
+                <div class="custom-control custom-radio mr-4">
+                  <input type="radio" class="custom-control-input" id="addWeekendLocation" name="addWeekend" value="location" checked>
+                  <label class="custom-control-label" for="addWeekendLocation">Location</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input type="radio" class="custom-control-input" id="addWeekendShift" name="addWeekend" value="shift">
+                  <label class="custom-control-label" for="addWeekendShift">Shift</label>
+                </div>
+              </div>
+              <small class="text-muted">Use "Location" to inherit weekend rules from the branch; "Shift" to define independently.</small>
+            </div>
+
+            <!-- Shift Allowance -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="addShiftAllowance">
+                <label class="custom-control-label" for="addShiftAllowance">
+                  Shift Allowance
+                  <small class="text-muted d-block">Enable additional pay allowance for this shift.</small>
+                </label>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Eligibility Criteria -->
+            <div class="form-group">
+              <label for="addEligibilityLocation">Eligibility Criteria — Location <span class="text-danger">*</span></label>
+              <select class="form-control" id="addEligibilityLocation" multiple>
+                <optgroup label="Head Office">
+                  <option value="HO">Head Office (Krishnagiri)</option>
+                  <option value="HO-ACC">Head Office (Accounts)</option>
+                  <option value="HO-MIS">Head Office (MIS)</option>
+                </optgroup>
+                <optgroup label="Chennai Region">
+                  <option value="CHN">Chennai Regional</option>
+                </optgroup>
+                <optgroup label="Krishnagiri Region">
+                  <option value="KRG">Krishnagiri Region</option>
+                  <option value="KRG-BHU">Krishnagiri (Bhuvaneswari)</option>
+                  <option value="KRG-VEL">Krishnagiri/Vellore</option>
+                  <option value="HSR">Hosur</option>
+                </optgroup>
+                <optgroup label="Salem Region">
+                  <option value="SLM">Salem</option>
+                  <option value="SLM-ELP">Salem Elampillai</option>
+                  <option value="EDP">Edappadi</option>
+                </optgroup>
+                <optgroup label="Coimbatore Region">
+                  <option value="CBE">Coimbatore Region</option>
+                </optgroup>
+              </select>
+              <small class="text-muted">Hold Ctrl/Cmd to select multiple locations.</small>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fa fa-times mr-1"></i>Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveAddShift"><i class="fa fa-save mr-1"></i>Save Shift</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- EDIT SHIFT MODAL -->
+  <!-- ============================================================ -->
+  <div class="modal fade" id="editShiftModal" tabindex="-1" role="dialog" aria-labelledby="editShiftModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header modal-header-primary">
+          <h5 class="modal-title" id="editShiftModalLabel"><i class="fa fa-pen mr-2"></i>Edit Shift</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="editShiftForm">
+            <!-- Shift Name -->
+            <div class="form-group">
+              <label for="editShiftName">Shift Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="editShiftName" value="">
+            </div>
+
+            <!-- Time Row -->
+            <div class="row">
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label for="editFromTime">From Time <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" id="editFromTime">
+                </div>
+              </div>
+              <div class="col-md-2 d-flex align-items-center justify-content-center pt-2">
+                <span class="text-muted font-w600" style="margin-top:10px;">to</span>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label for="editToTime">To Time <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" id="editToTime">
+                </div>
+              </div>
+            </div>
+
+            <!-- Shift Margin -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="editShiftMargin">
+                <label class="custom-control-label" for="editShiftMargin">
+                  Enable Shift Margin
+                  <small class="text-muted d-block">Allow grace period before marking late (e.g. 15 minutes).</small>
+                </label>
+              </div>
+              <div class="mt-2 ml-4 d-none" id="editShiftMarginFields">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="small font-w600">Check-in Grace (mins)</label>
+                    <input type="number" class="form-control form-control-sm" value="15" min="0" max="60">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="small font-w600">Check-out Grace (mins)</label>
+                    <input type="number" class="form-control form-control-sm" value="15" min="0" max="60">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Core Working Hours -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="editCoreHours" checked>
+                <label class="custom-control-label" for="editCoreHours">
+                  Set Core Working Hours
+                  <small class="text-muted d-block">Mandatory hours employees must be present.</small>
+                </label>
+              </div>
+              <div class="mt-2 ml-4" id="editCoreHoursFields">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="small font-w600">Core From</label>
+                    <input type="time" class="form-control form-control-sm" value="10:00">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="small font-w600">Core To</label>
+                    <input type="time" class="form-control form-control-sm" value="16:00">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Weekends Based On -->
+            <div class="form-group">
+              <label class="d-block">Weekends Based On</label>
+              <div class="d-flex">
+                <div class="custom-control custom-radio mr-4">
+                  <input type="radio" class="custom-control-input" id="editWeekendLocation" name="editWeekend" value="location" checked>
+                  <label class="custom-control-label" for="editWeekendLocation">Location</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input type="radio" class="custom-control-input" id="editWeekendShift" name="editWeekend" value="shift">
+                  <label class="custom-control-label" for="editWeekendShift">Shift</label>
+                </div>
+              </div>
+              <small class="text-muted">Use "Location" to inherit weekend rules from the branch; "Shift" to define independently.</small>
+            </div>
+
+            <!-- Shift Allowance -->
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="editShiftAllowance">
+                <label class="custom-control-label" for="editShiftAllowance">
+                  Shift Allowance
+                  <small class="text-muted d-block">Enable additional pay allowance for this shift.</small>
+                </label>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- Eligibility Criteria -->
+            <div class="form-group">
+              <label for="editEligibilityLocation">Eligibility Criteria — Location <span class="text-danger">*</span></label>
+              <select class="form-control" id="editEligibilityLocation" multiple>
+                <optgroup label="Head Office">
+                  <option value="HO">Head Office (Krishnagiri)</option>
+                  <option value="HO-ACC">Head Office (Accounts)</option>
+                  <option value="HO-MIS">Head Office (MIS)</option>
+                </optgroup>
+                <optgroup label="Chennai Region">
+                  <option value="CHN">Chennai Regional</option>
+                </optgroup>
+                <optgroup label="Krishnagiri Region">
+                  <option value="KRG">Krishnagiri Region</option>
+                  <option value="KRG-BHU">Krishnagiri (Bhuvaneswari)</option>
+                  <option value="KRG-VEL">Krishnagiri/Vellore</option>
+                  <option value="HSR">Hosur</option>
+                </optgroup>
+                <optgroup label="Salem Region">
+                  <option value="SLM">Salem</option>
+                  <option value="SLM-ELP">Salem Elampillai</option>
+                  <option value="EDP">Edappadi</option>
+                </optgroup>
+                <optgroup label="Coimbatore Region">
+                  <option value="CBE">Coimbatore Region</option>
+                </optgroup>
+              </select>
+              <small class="text-muted">Hold Ctrl/Cmd to select multiple locations.</small>
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+              <label for="editShiftStatus">Status</label>
+              <select class="form-control" id="editShiftStatus">
+                <option value="active" selected>Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fa fa-times mr-1"></i>Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveEditShift"><i class="fa fa-save mr-1"></i>Update Shift</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- ASSIGN EMPLOYEES MODAL -->
+  <!-- ============================================================ -->
+  <div class="modal fade" id="assignEmpModal" tabindex="-1" role="dialog" aria-labelledby="assignEmpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header modal-header-primary">
+          <h5 class="modal-title" id="assignEmpModalLabel"><i class="fa fa-user-plus mr-2"></i>Assign Employees to Shift</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info py-2 px-3 d-flex align-items-center" style="border-radius:6px;">
+            <i class="fa fa-info-circle mr-2"></i>
+            <span>Assigning employees to: <strong id="assignShiftName">—</strong></span>
+          </div>
+
+          <!-- Filter Row -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="small font-w600">Filter by Region</label>
+              <select class="form-control form-control-sm" id="assignRegionFilter">
+                <option value="">All Regions</option>
+                <option value="CHN">Chennai Region (CHN)</option>
+                <option value="KRC">Krishnagiri Region (KRC)</option>
+                <option value="SMC">Salem Region (SMC)</option>
+                <option value="CBR">Coimbatore Region (CBR)</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="small font-w600">Filter by Department</label>
+              <select class="form-control form-control-sm" id="assignDeptFilter">
+                <option value="">All Departments</option>
+                <option>Accounts</option>
+                <option>Administration</option>
+                <option>Branch Operation</option>
+                <option>Business</option>
+                <option>Business Development</option>
+                <option>Human Resources</option>
+                <option>Legal</option>
+                <option>Management</option>
+                <option>Recovery</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="small font-w600">Search Employee</label>
+              <input type="text" class="form-control form-control-sm" id="assignEmpSearch" placeholder="Name or ID...">
+            </div>
+          </div>
+
+          <!-- Employee Table -->
+          <div class="table-responsive" style="max-height:320px;overflow-y:auto;">
+            <table class="table table-sm table-hover mb-0" id="assignEmpTable">
+              <thead class="thead-light" style="position:sticky;top:0;">
+                <tr>
+                  <th style="width:36px;"><input type="checkbox" id="selectAllEmp" title="Select all"></th>
+                  <th>EMP ID</th>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Branch</th>
+                  <th>Current Shift</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">6741</span></td>
+                  <td class="font-w600">Subhash Jayachandran</td>
+                  <td>Business</td>
+                  <td>JR BDM</td>
+                  <td>Tiruchengode</td>
+                  <td><span class="location-tag">Salem &amp; KRG Cluster</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">28</span></td>
+                  <td class="font-w600">Arunkumar Kathiresan</td>
+                  <td>Business</td>
+                  <td>BDM</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">HO 10AM-6PM</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">32</span></td>
+                  <td class="font-w600">Muruganandham I</td>
+                  <td>Business Development</td>
+                  <td>BDM</td>
+                  <td>Krishnagiri</td>
+                  <td><span class="location-tag">KRG 9.30-6</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">83</span></td>
+                  <td class="font-w600">Vijayalakshmi Ramanathan</td>
+                  <td>Accounts</td>
+                  <td>HO Accounts</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">Central Acc Morning</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">6159</span></td>
+                  <td class="font-w600">Thangadurai Appramani</td>
+                  <td>Management</td>
+                  <td>Manager Operations</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">HO 10AM-6PM</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">16</span></td>
+                  <td class="font-w600">Rajesh Vittal Rao</td>
+                  <td>Administration</td>
+                  <td>Executive Operations</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">HO 10AM-6PM</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">7</span></td>
+                  <td class="font-w600">Sathyamoorthy Kannayiram</td>
+                  <td>Branch Operation</td>
+                  <td>BCE</td>
+                  <td>Chennai Regional</td>
+                  <td><span class="location-tag">Chennai Regional</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">8</span></td>
+                  <td class="font-w600">Navaneetha Krishnan</td>
+                  <td>Branch Operation</td>
+                  <td>BCE</td>
+                  <td>Salem</td>
+                  <td><span class="location-tag">Salem &amp; KRG Cluster</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">11</span></td>
+                  <td class="font-w600">Valli Vijayakumar</td>
+                  <td>Accounts</td>
+                  <td>HO Accounts</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">Central Acc Evening</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="emp-chk"></td>
+                  <td><span class="text-muted font-size-sm">12</span></td>
+                  <td class="font-w600">Roja Govindasamy</td>
+                  <td>Human Resources</td>
+                  <td>HO HR</td>
+                  <td>Head Office</td>
+                  <td><span class="location-tag">HO 10AM-6PM</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Effective Date -->
+          <div class="row mt-3">
+            <div class="col-md-5">
+              <div class="form-group mb-0">
+                <label class="font-w600" style="font-size:0.83rem;">Effective From Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control form-control-sm" id="assignEffectiveDate" value="2026-06-19">
+              </div>
+            </div>
+            <div class="col-md-7 d-flex align-items-end">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="assignNotifyEmp">
+                <label class="custom-control-label" for="assignNotifyEmp" style="font-size:0.83rem;">Notify employees of shift change</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <span class="text-muted font-size-sm mr-auto" id="assignSelCount">0 employees selected</span>
+          <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fa fa-times mr-1"></i>Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveAssignEmp"><i class="fa fa-user-plus mr-1"></i>Assign to Shift</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Scripts -->
+  <script src="../assets/oneui.core.min.js"></script>
+  <script src="../assets/oneui.app.min.js"></script>
+  <script src="../assets/jquery.dataTables.min.js"></script>
+  <script src="../assets/dataTables.bootstrap4.min.js"></script>
+  <script src="../assets/select2.full.min.js"></script>
+  <script>
+    (function() {
+
+      // Toggle shift margin fields
+      document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'addShiftMargin') {
+          document.getElementById('addShiftMarginFields').classList.toggle('d-none', !e.target.checked);
+        }
+        if (e.target && e.target.id === 'editShiftMargin') {
+          document.getElementById('editShiftMarginFields').classList.toggle('d-none', !e.target.checked);
+        }
+        if (e.target && e.target.id === 'addCoreHours') {
+          document.getElementById('addCoreHoursFields').classList.toggle('d-none', !e.target.checked);
+        }
+        if (e.target && e.target.id === 'editCoreHours') {
+          document.getElementById('editCoreHoursFields').classList.toggle('d-none', !e.target.checked);
+        }
+      });
+
+      // Populate Edit Shift Modal
+      var editShiftModal = document.getElementById('editShiftModal');
+      if (editShiftModal) {
+        editShiftModal.addEventListener('show.bs.modal', function(event) {
+          var button = event.relatedTarget;
+          if (!button) return;
+          document.getElementById('editShiftName').value = button.getAttribute('data-shift-name') || '';
+          document.getElementById('editFromTime').value = button.getAttribute('data-from') || '';
+          document.getElementById('editToTime').value = button.getAttribute('data-to') || '';
+        });
+      }
+
+      // Populate Assign Employees Modal
+      var assignEmpModal = document.getElementById('assignEmpModal');
+      if (assignEmpModal) {
+        assignEmpModal.addEventListener('show.bs.modal', function(event) {
+          var button = event.relatedTarget;
+          if (!button) return;
+          var shiftName = button.getAttribute('data-shift') || '—';
+          document.getElementById('assignShiftName').textContent = shiftName;
+          document.getElementById('assignSelCount').textContent = '0 employees selected';
+          // Uncheck all
+          document.querySelectorAll('.emp-chk').forEach(function(c) { c.checked = false; });
+          document.getElementById('selectAllEmp').checked = false;
+        });
+      }
+
+      // Select all checkbox
+      var selectAll = document.getElementById('selectAllEmp');
+      if (selectAll) {
+        selectAll.addEventListener('change', function() {
+          var chks = document.querySelectorAll('.emp-chk');
+          chks.forEach(function(c) { c.checked = selectAll.checked; });
+          updateSelCount();
+        });
+      }
+
+      document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('emp-chk')) {
+          updateSelCount();
+        }
+      });
+
+      function updateSelCount() {
+        var count = document.querySelectorAll('.emp-chk:checked').length;
+        var el = document.getElementById('assignSelCount');
+        if (el) el.textContent = count + ' employee' + (count !== 1 ? 's' : '') + ' selected';
+      }
+
+      // Save Add Shift (demo)
+      var saveAddBtn = document.getElementById('saveAddShift');
+      if (saveAddBtn) {
+        saveAddBtn.addEventListener('click', function() {
+          var name = document.getElementById('addShiftName').value.trim();
+          if (!name) {
+            alert('Please enter a shift name.');
+            return;
+          }
+          // Close modal
+          var $ = window.jQuery;
+          if ($) $('#addShiftModal').modal('hide');
+        });
+      }
+
+      // Save Edit Shift (demo)
+      var saveEditBtn = document.getElementById('saveEditShift');
+      if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', function() {
+          var $ = window.jQuery;
+          if ($) $('#editShiftModal').modal('hide');
+        });
+      }
+
+      // Save Assign Emp (demo)
+      var saveAssignBtn = document.getElementById('saveAssignEmp');
+      if (saveAssignBtn) {
+        saveAssignBtn.addEventListener('click', function() {
+          var count = document.querySelectorAll('.emp-chk:checked').length;
+          if (count === 0) {
+            alert('Please select at least one employee.');
+            return;
+          }
+          var $ = window.jQuery;
+          if ($) $('#assignEmpModal').modal('hide');
+        });
+      }
+
+    })();
+  </script>
+
+</div>
+<!-- END Page Container -->
+</body>
+</html>

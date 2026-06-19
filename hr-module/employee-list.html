@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Employees — Directory | DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .badge-active   { background-color: #28a745; color: #fff; }
+    .badge-inactive { background-color: #6c757d; color: #fff; }
+    .stat-card .stat-icon { font-size: 2rem; opacity: .15; }
+    .filter-block { background: #fff; border: 1px solid #e4e7ed; border-radius: 4px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+    .table thead th { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: #6c757d; border-top: 0; }
+    .table tbody tr:hover { background-color: #f8f9fa; }
+    .employee-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e4eaf6; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .75rem; color: #3f5faf; margin-right: 8px; flex-shrink: 0; }
+    .name-cell { display: flex; align-items: center; }
+    .emp-code-badge { font-family: monospace; background: #f0f4ff; color: #3f5faf; padding: 2px 6px; border-radius: 3px; font-size: .8rem; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- Left Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- END Sidebar -->
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END Header -->
+
+  <!-- Main Content -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page Title -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+          <h2 class="h4 font-w700 mb-0">Employee Directory</h2>
+          <p class="text-muted mb-0" style="font-size:.85rem;">
+            <i class="fa fa-map-marker-alt mr-1"></i>All Regions &nbsp;&bull;&nbsp;
+            <i class="fa fa-sync-alt mr-1"></i>Last synced: 19 Jun 2026, 09:14 AM
+          </p>
+        </div>
+        <div>
+          <button class="btn btn-sm btn-outline-secondary mr-1" title="Export to Excel">
+            <i class="fa fa-file-excel mr-1"></i>Export
+          </button>
+          <a href="employee-detail.html" class="btn btn-sm btn-primary">
+            <i class="fa fa-plus mr-1"></i>New Employee
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="row gutters-tiny mb-3">
+        <div class="col-6 col-sm-3">
+          <div class="block block-rounded block-bordered mb-0">
+            <div class="block-content py-3 d-flex align-items-center justify-content-between">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase">Total Active</div>
+                <div class="font-size-h3 font-w700 text-primary">965</div>
+              </div>
+              <i class="fa fa-users fa-2x text-primary-light stat-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-3">
+          <div class="block block-rounded block-bordered mb-0">
+            <div class="block-content py-3 d-flex align-items-center justify-content-between">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase">Permanent</div>
+                <div class="font-size-h3 font-w700 text-success">820</div>
+              </div>
+              <i class="fa fa-id-card fa-2x text-success stat-icon" style="opacity:.15;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-3">
+          <div class="block block-rounded block-bordered mb-0">
+            <div class="block-content py-3 d-flex align-items-center justify-content-between">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase">Contract</div>
+                <div class="font-size-h3 font-w700 text-warning">145</div>
+              </div>
+              <i class="fa fa-file-contract fa-2x text-warning stat-icon" style="opacity:.15;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-3">
+          <div class="block block-rounded block-bordered mb-0">
+            <div class="block-content py-3 d-flex align-items-center justify-content-between">
+              <div>
+                <div class="font-size-sm text-muted font-w600 text-uppercase">New This Month</div>
+                <div class="font-size-h3 font-w700 text-info">23</div>
+              </div>
+              <i class="fa fa-user-plus fa-2x text-info stat-icon" style="opacity:.15;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Block -->
+      <div class="filter-block">
+        <div class="row gutters-tiny align-items-end">
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">Region</label>
+            <select class="form-control form-control-sm select2" id="filter-region">
+              <option value="">All Regions</option>
+              <option>Chennai Region (CHN)</option>
+              <option>Krishnagiri Region (KRC)</option>
+              <option>Salem Region (SMC)</option>
+              <option>Coimbatore Region (CBR)</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">Branch</label>
+            <select class="form-control form-control-sm select2" id="filter-branch">
+              <option value="">All Branches</option>
+              <option>Head Office (Krishnagiri)</option>
+              <option>Chennai Regional</option>
+              <option>Tiruchengode</option>
+              <option>Salem</option>
+              <option>Hosur</option>
+              <option>Edappadi</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">Department</label>
+            <select class="form-control form-control-sm select2" id="filter-dept">
+              <option value="">All Departments</option>
+              <option>Accounts</option>
+              <option>Administration</option>
+              <option>Branch Operation</option>
+              <option>Business</option>
+              <option>Business Development</option>
+              <option>Human Resources</option>
+              <option>Legal</option>
+              <option>Management</option>
+              <option>Recovery</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">Designation</label>
+            <select class="form-control form-control-sm select2" id="filter-desig">
+              <option value="">All Designations</option>
+              <option>BCE</option>
+              <option>BH/ABH/BI</option>
+              <option>DH</option>
+              <option>HO Accounts</option>
+              <option>HO HR</option>
+              <option>HO Operation</option>
+              <option>Manager-BD</option>
+              <option>Manager Operations</option>
+              <option>Executive Operations</option>
+              <option>Executive Collection</option>
+              <option>Regional Team</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">Status</label>
+            <select class="form-control form-control-sm" id="filter-status">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2 mb-2 mb-md-0">
+            <label class="font-size-sm font-w600 text-muted mb-1">&nbsp;</label>
+            <div class="d-flex">
+              <button class="btn btn-sm btn-primary flex-fill mr-1" id="btn-apply-filter">
+                <i class="fa fa-filter mr-1"></i>Apply
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" id="btn-clear-filter" title="Clear Filters">
+                <i class="fa fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Table -->
+      <div class="block block-rounded block-bordered">
+        <div class="block-header block-header-default">
+          <h3 class="block-title">All Employees <span class="badge badge-primary ml-1">965</span></h3>
+          <div class="block-options">
+            <button type="button" class="btn-block-option" data-toggle="block-option" data-action="fullscreen_toggle"><i class="si si-size-fullscreen"></i></button>
+          </div>
+        </div>
+        <div class="block-content block-content-full">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover table-vcenter font-size-sm" id="employees-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="width:40px;">#</th>
+                  <th style="width:100px;">Emp Code</th>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Branch / Location</th>
+                  <th style="width:120px;">Date of Joining</th>
+                  <th style="width:80px;">Status</th>
+                  <th style="width:70px;" class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-muted">1</td>
+                  <td><span class="emp-code-badge">DNC-0007</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">SK</span>
+                      <div>
+                        <div class="font-w600">Sathyamoorthy Kannayiram</div>
+                        <small class="text-muted">sathya.k@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Management</td>
+                  <td>Manager Operations</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
+                  <td>12 Mar 2014</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">2</td>
+                  <td><span class="emp-code-badge">DNC-0008</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">NK</span>
+                      <div>
+                        <div class="font-w600">Navaneetha Krishnan</div>
+                        <small class="text-muted">navaneethak@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>BH/ABH/BI</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
+                  <td>05 Jun 2014</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">3</td>
+                  <td><span class="emp-code-badge">DNC-0011</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">VV</span>
+                      <div>
+                        <div class="font-w600">Valli Vijayakumar</div>
+                        <small class="text-muted">valli.v@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Accounts</td>
+                  <td>HO Accounts</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
+                  <td>18 Sep 2014</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">4</td>
+                  <td><span class="emp-code-badge">DNC-0012</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">RG</span>
+                      <div>
+                        <div class="font-w600">Roja Govindasamy</div>
+                        <small class="text-muted">roja.g@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Human Resources</td>
+                  <td>HO HR</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
+                  <td>22 Sep 2014</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">5</td>
+                  <td><span class="emp-code-badge">DNC-0016</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">RV</span>
+                      <div>
+                        <div class="font-w600">Rajesh Vittal Rao</div>
+                        <small class="text-muted">rajesh.vr@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business Development</td>
+                  <td>Manager-BD</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
+                  <td>10 Jan 2015</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">6</td>
+                  <td><span class="emp-code-badge">DNC-0028</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">AK</span>
+                      <div>
+                        <div class="font-w600">Arunkumar Kathiresan</div>
+                        <small class="text-muted">arun.k@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>Manager-BD</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Hosur</td>
+                  <td>03 Apr 2015</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">7</td>
+                  <td><span class="emp-code-badge">DNC-0032</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">MI</span>
+                      <div>
+                        <div class="font-w600">Muruganandham I</div>
+                        <small class="text-muted">muruganandham@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>Executive Operations</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Edappadi</td>
+                  <td>29 May 2015</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">8</td>
+                  <td><span class="emp-code-badge">DNC-0083</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">VR</span>
+                      <div>
+                        <div class="font-w600">Vijayalakshmi Ramanathan</div>
+                        <small class="text-muted">vijaya.r@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Accounts</td>
+                  <td>HO Accounts</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
+                  <td>14 Aug 2016</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">9</td>
+                  <td><span class="emp-code-badge">DNC-0142</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">PS</span>
+                      <div>
+                        <div class="font-w600">Priya Sundaram</div>
+                        <small class="text-muted">priya.s@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Administration</td>
+                  <td>HO Operation</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
+                  <td>07 Feb 2017</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">10</td>
+                  <td><span class="emp-code-badge">DNC-0289</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">KR</span>
+                      <div>
+                        <div class="font-w600">Karthikeyan Rajan</div>
+                        <small class="text-muted">karthik.r@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Recovery</td>
+                  <td>Executive Collection</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
+                  <td>19 Jun 2018</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">11</td>
+                  <td><span class="emp-code-badge">DNC-0451</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">LN</span>
+                      <div>
+                        <div class="font-w600">Lakshmi Narayanan</div>
+                        <small class="text-muted">lakshmi.n@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Legal</td>
+                  <td>DH</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
+                  <td>11 Nov 2019</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">12</td>
+                  <td><span class="emp-code-badge">DNC-0612</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">SM</span>
+                      <div>
+                        <div class="font-w600">Selvaraj Murugan</div>
+                        <small class="text-muted">selva.m@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>BCE</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Tiruchengode</td>
+                  <td>08 Mar 2021</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">13</td>
+                  <td><span class="emp-code-badge">DNC-6159</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar">TA</span>
+                      <div>
+                        <div class="font-w600">Thangadurai Appramani</div>
+                        <small class="text-muted">thangadurai.a@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Management</td>
+                  <td>Manager Operations</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
+                  <td>02 Jan 2023</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">14</td>
+                  <td><span class="emp-code-badge">DNC-6741</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">SJ</span>
+                      <div>
+                        <div class="font-w600">Subhash Jayachandran <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">subhash.j@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>JR BDM</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Tiruchengode</td>
+                  <td>26 May 2026</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">15</td>
+                  <td><span class="emp-code-badge">DNC-6758</span></td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">AM</span>
+                      <div>
+                        <div class="font-w600">Anitha Muthukrishnan <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">anitha.m@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>Regional Team</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Coimbatore</td>
+                  <td>01 Jun 2026</td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- END Employee Table -->
+
+    </div>
+  </main>
+  <!-- END Main Content -->
+
+</div>
+<!-- END Page Container -->
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script src="../assets/jquery.dataTables.min.js"></script>
+<script src="../assets/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/select2.full.min.js"></script>
+<script>
+  $(function () {
+    // Init Select2
+    $('.select2').select2({ width: '100%' });
+
+    // Init DataTable
+    var table = $('#employees-table').DataTable({
+      pageLength: 15,
+      lengthMenu: [10, 15, 25, 50, 100],
+      order: [[0, 'asc']],
+      columnDefs: [
+        { orderable: false, targets: [8] }
+      ],
+      language: {
+        search: '',
+        searchPlaceholder: 'Search name, code...',
+        lengthMenu: 'Show _MENU_ employees',
+        info: 'Showing _START_ to _END_ of _TOTAL_ employees',
+        infoEmpty: 'No employees found',
+        infoFiltered: '(filtered from _MAX_ total)'
+      },
+      dom: '<"row align-items-center mb-2"<"col-sm-6"l><"col-sm-6 text-right"f>>rt<"row align-items-center mt-2"<"col-sm-6"i><"col-sm-6"p>>'
+    });
+
+    // Apply filter button
+    $('#btn-apply-filter').on('click', function () {
+      var region  = $('#filter-region').val();
+      var branch  = $('#filter-branch').val();
+      var dept    = $('#filter-dept').val();
+      var desig   = $('#filter-desig').val();
+      var status  = $('#filter-status').val();
+
+      // Simple search — production would hit server; here we cascade DataTable search
+      var searchVal = [region, branch, dept, desig, status].filter(Boolean).join(' ');
+      table.search(searchVal).draw();
+    });
+
+    // Clear filter button
+    $('#btn-clear-filter').on('click', function () {
+      $('#filter-region, #filter-branch, #filter-dept, #filter-desig').val(null).trigger('change');
+      $('#filter-status').val('');
+      table.search('').draw();
+    });
+  });
+</script>
+</body>
+</html>

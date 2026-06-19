@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Reports — DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <link rel="stylesheet" href="../assets/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="../assets/select2.min.css">
+  <style>
+    /* Page-level tweaks */
+    .block-title { font-size: 1rem; font-weight: 700; }
+    .nav-tabs .nav-link { font-weight: 600; color: #495057; }
+    .nav-tabs .nav-link.active { color: #0665d0; border-bottom: 3px solid #0665d0; }
+    .badge-present  { background-color: #28a745; color: #fff; }
+    .badge-absent   { background-color: #dc3545; color: #fff; }
+    .badge-weekend  { background-color: #adb5bd; color: #fff; }
+    .badge-holiday  { background-color: #17a2b8; color: #fff; }
+
+    /* Attendance matrix */
+    .att-matrix th, .att-matrix td { font-size: 0.73rem; padding: 4px 5px; white-space: nowrap; text-align: center; vertical-align: middle; }
+    .att-matrix td.emp-name { text-align: left; min-width: 160px; font-weight: 600; }
+    .att-matrix .day-cell { width: 26px; min-width: 26px; border-radius: 3px; font-size: 0.65rem; font-weight: 700; }
+    .day-P { background: #d4edda; color: #155724; }
+    .day-A { background: #f8d7da; color: #721c24; }
+    .day-W { background: #e9ecef; color: #6c757d; }
+    .day-H { background: #d1ecf1; color: #0c5460; }
+    .day-L { background: #fff3cd; color: #856404; }
+    .day-OD{ background: #e2d9f3; color: #3d1a78; }
+
+    /* Early/Late table */
+    .early-late-tbl th { font-size: 0.8rem; white-space: nowrap; }
+    .early-late-tbl td { font-size: 0.8rem; white-space: nowrap; vertical-align: middle; }
+    .text-early { color: #28a745; font-weight: 600; }
+    .text-late  { color: #dc3545; font-weight: 600; }
+    .text-neutral { color: #6c757d; }
+
+    /* Filter block */
+    .filter-row .form-group { margin-bottom: 0; }
+    .filter-row label { font-size: 0.78rem; font-weight: 600; color: #6c757d; margin-bottom: 2px; }
+
+    /* Summary row */
+    .summary-row td { font-weight: 700; background: #f8f9fa; }
+
+    /* Stat cards */
+    .stat-card { border-radius: 8px; padding: 16px 20px; }
+    .stat-card .stat-val { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+    .stat-card .stat-lbl { font-size: 0.75rem; color: #6c757d; margin-top: 4px; }
+
+    .table-responsive { overflow-x: auto; }
+    .nav-tabs { border-bottom: 2px solid #dee2e6; margin-bottom: 0; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+      Continue →
+    </button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok', DAYS=7;
+  try {
+    var ts=localStorage.getItem(KEY);
+    if(ts && Date.now()-parseInt(ts)<DAYS*86400000){
+      document.getElementById('auth-wall').style.display='none';
+      return;
+    }
+  } catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  var PASS='dnc@2026';
+  var val=document.getElementById('auth-input').value;
+  if(val===PASS){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-layer-group"></i><span class="nav-main-link-name">Groups</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- ===================== END SIDEBAR ===================== -->
+
+  <!-- ===================== HEADER ===================== -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===================== END HEADER ===================== -->
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page Title -->
+      <div class="d-flex align-items-center mb-3">
+        <div class="flex-grow-1">
+          <h2 class="h4 font-w700 mb-0"><i class="fa fa-chart-bar text-primary mr-2"></i>Attendance Reports</h2>
+          <p class="text-muted mb-0" style="font-size:0.82rem;">Organization-wide attendance analytics — 965 active employees across 56 branches</p>
+        </div>
+        <div>
+          <span class="badge badge-info px-3 py-2" style="font-size:0.8rem;"><i class="fa fa-calendar mr-1"></i>Pay Period: 26-May-2026 to 25-Jun-2026</span>
+        </div>
+      </div>
+
+      <!-- ========== STAT CARDS ========== -->
+      <div class="row mb-4">
+        <div class="col-6 col-md-3 mb-3">
+          <div class="block block-rounded mb-0 stat-card border-left border-success" style="border-left-width:4px!important;">
+            <div class="stat-val text-success">87.4%</div>
+            <div class="stat-lbl">Avg Attendance Rate</div>
+            <div class="text-muted" style="font-size:0.7rem;">Jun 2026 · All Branches</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="block block-rounded mb-0 stat-card border-left border-primary" style="border-left-width:4px!important;">
+            <div class="stat-val text-primary">843</div>
+            <div class="stat-lbl">Present Today</div>
+            <div class="text-muted" style="font-size:0.7rem;">19-Jun-2026 · All Branches</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="block block-rounded mb-0 stat-card border-left border-danger" style="border-left-width:4px!important;">
+            <div class="stat-val text-danger">122</div>
+            <div class="stat-lbl">Absent Today</div>
+            <div class="text-muted" style="font-size:0.7rem;">19-Jun-2026 · All Branches</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="block block-rounded mb-0 stat-card border-left border-warning" style="border-left-width:4px!important;">
+            <div class="stat-val text-warning">38</div>
+            <div class="stat-lbl">Late Check-ins Today</div>
+            <div class="text-muted" style="font-size:0.7rem;">19-Jun-2026 · All Branches</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== FILTER BLOCK ========== -->
+      <div class="block block-rounded mb-3">
+        <div class="block-header block-header-default py-2 px-3">
+          <span class="block-title"><i class="fa fa-filter text-primary mr-2"></i>Filters</span>
+          <div class="block-options">
+            <button type="button" class="btn btn-sm btn-light" id="btnClearFilters"><i class="fa fa-times mr-1"></i>Clear</button>
+          </div>
+        </div>
+        <div class="block-content py-3">
+          <div class="row filter-row align-items-end">
+            <!-- Period -->
+            <div class="col-12 col-sm-6 col-md-3 mb-2">
+              <div class="form-group">
+                <label>Period</label>
+                <select class="form-control form-control-sm" id="filterPeriod">
+                  <option value="today">Today</option>
+                  <option value="last_week">Last Week</option>
+                  <option value="last_month">Last Month</option>
+                  <option value="jun2026" selected>June 2026</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+            </div>
+            <!-- Custom dates (hidden by default) -->
+            <div class="col-12 col-sm-6 col-md-2 mb-2 d-none" id="customDateFrom">
+              <div class="form-group">
+                <label>From</label>
+                <input type="date" class="form-control form-control-sm" value="2026-06-01">
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2 mb-2 d-none" id="customDateTo">
+              <div class="form-group">
+                <label>To</label>
+                <input type="date" class="form-control form-control-sm" value="2026-06-19">
+              </div>
+            </div>
+            <!-- Department -->
+            <div class="col-12 col-sm-6 col-md-3 mb-2">
+              <div class="form-group">
+                <label>Department</label>
+                <select class="form-control form-control-sm" id="filterDept">
+                  <option value="">All Departments</option>
+                  <option>Accounts</option>
+                  <option>Administration</option>
+                  <option>Branch Operation</option>
+                  <option>Business</option>
+                  <option>Business Development</option>
+                  <option>Human Resources</option>
+                  <option>Legal</option>
+                  <option>Management</option>
+                  <option>Recovery</option>
+                </select>
+              </div>
+            </div>
+            <!-- Region -->
+            <div class="col-12 col-sm-6 col-md-2 mb-2">
+              <div class="form-group">
+                <label>Region</label>
+                <select class="form-control form-control-sm" id="filterRegion">
+                  <option value="">All Regions</option>
+                  <option value="CHN">Chennai (CHN)</option>
+                  <option value="KRC">Krishnagiri (KRC)</option>
+                  <option value="SMC">Salem (SMC)</option>
+                  <option value="CBR">Coimbatore (CBR)</option>
+                </select>
+              </div>
+            </div>
+            <!-- Branch -->
+            <div class="col-12 col-sm-6 col-md-3 mb-2">
+              <div class="form-group">
+                <label>Branch / Location</label>
+                <select class="form-control form-control-sm" id="filterBranch">
+                  <option value="">All Branches</option>
+                  <option>Head Office (Krishnagiri)</option>
+                  <option>Chennai Regional</option>
+                  <option>Tiruchengode</option>
+                  <option>Salem</option>
+                  <option>Hosur</option>
+                  <option>Edappadi</option>
+                </select>
+              </div>
+            </div>
+            <!-- Employee Status -->
+            <div class="col-12 col-sm-6 col-md-2 mb-2">
+              <div class="form-group">
+                <label>Employee Status</label>
+                <select class="form-control form-control-sm" id="filterStatus">
+                  <option value="active" selected>Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+            <!-- Apply button -->
+            <div class="col-12 col-sm-6 col-md-2 mb-2">
+              <button class="btn btn-primary btn-sm btn-block" id="btnApplyFilters"><i class="fa fa-search mr-1"></i>Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== TABS ========== -->
+      <div class="block block-rounded">
+        <div class="block-header block-header-default">
+          <ul class="nav nav-tabs card-header-tabs" id="reportTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="tab-earlylate-link" data-toggle="tab" href="#tab-earlylate" role="tab" aria-controls="tab-earlylate" aria-selected="true">
+                <i class="fa fa-clock mr-1"></i>Early / Late Check-in
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-summary-link" data-toggle="tab" href="#tab-summary" role="tab" aria-controls="tab-summary" aria-selected="false">
+                <i class="fa fa-calendar-alt mr-1"></i>Present / Absent Summary
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="block-content tab-content pt-0">
+
+          <!-- ==================== TAB 1: EARLY / LATE CHECK-IN ==================== -->
+          <div class="tab-pane fade show active" id="tab-earlylate" role="tabpanel" aria-labelledby="tab-earlylate-link">
+            <div class="pt-3 pb-2 px-0">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <span class="font-w700 text-dark">Day View — </span>
+                  <span class="text-muted">Wednesday, 03-Jun-2026</span>
+                  <span class="badge badge-light ml-2">Shift: Chennai Regional &amp; Krishnagiri/Vellore &nbsp;|&nbsp; 10:00 AM – 6:30 PM</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <button class="btn btn-sm btn-light mr-2" id="btnPrevDay"><i class="fa fa-chevron-left"></i></button>
+                  <span class="text-muted small" id="dayNavLabel">03 Jun 2026</span>
+                  <button class="btn btn-sm btn-light ml-2" id="btnNextDay"><i class="fa fa-chevron-right"></i></button>
+                  <button class="btn btn-sm btn-outline-success ml-3" id="btnExportCSV"><i class="fa fa-file-csv mr-1"></i>Export CSV</button>
+                </div>
+              </div>
+
+              <!-- Legend -->
+              <div class="mb-3 d-flex flex-wrap" style="gap:12px;">
+                <span class="text-early"><i class="fa fa-circle mr-1" style="font-size:0.65rem;"></i>Early / Overtime (+)</span>
+                <span class="text-late"><i class="fa fa-circle mr-1" style="font-size:0.65rem;"></i>Late / Early Exit (−)</span>
+                <span class="text-neutral"><i class="fa fa-minus mr-1" style="font-size:0.65rem;"></i>On Time / Not Applicable</span>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered early-late-tbl mb-0" id="tblEarlyLate">
+                  <thead class="thead-light">
+                    <tr>
+                      <th style="min-width:220px;">Employee</th>
+                      <th>First In</th>
+                      <th>Last Out</th>
+                      <th>Total Hours</th>
+                      <th title="Entry Early (positive)">Entry Early (+)</th>
+                      <th title="Entry Late (negative)">Entry Late (−)</th>
+                      <th title="Exit Early (negative)">Exit Early (−)</th>
+                      <th title="Exit Late (positive)">Exit Late (+)</th>
+                      <th title="Net Hours Variance">Net Hours</th>
+                      <th>Branch</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="font-w600">ANIS FATHIMA KASALI S</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #5237 &middot; Branch Operation</div>
+                      </td>
+                      <td>10:00 AM</td>
+                      <td>06:57 PM</td>
+                      <td><span class="badge badge-light">08h 27m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:27</td>
+                      <td class="text-early font-w600">+00:27</td>
+                      <td><span class="badge badge-info">Chennai Regional</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">GIRIJA MURUGESAN</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #6109 &middot; Branch Operation</div>
+                      </td>
+                      <td>10:00 AM</td>
+                      <td>06:52 PM</td>
+                      <td><span class="badge badge-light">08h 22m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:22</td>
+                      <td class="text-early font-w600">+00:22</td>
+                      <td><span class="badge badge-info">Chennai Regional</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">MAHALINGAM NAMACHIVAYAM</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #174 &middot; Accounts</div>
+                      </td>
+                      <td>10:00 AM</td>
+                      <td>06:50 PM</td>
+                      <td><span class="badge badge-light">08h 50m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:50</td>
+                      <td class="text-early font-w600">+00:50</td>
+                      <td><span class="badge badge-secondary">Head Office</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">GOWTHAM KUMAR</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #6399 &middot; Business Development</div>
+                      </td>
+                      <td>10:00 AM</td>
+                      <td>06:48 PM</td>
+                      <td><span class="badge badge-light">08h 18m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:18</td>
+                      <td class="text-early font-w600">+00:18</td>
+                      <td><span class="badge badge-info">Chennai Regional</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">RAJESH VITTAL RAO</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #16 &middot; Management</div>
+                      </td>
+                      <td>09:52 AM</td>
+                      <td>07:05 PM</td>
+                      <td><span class="badge badge-light">09h 13m</span></td>
+                      <td class="text-early">+00:08</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:35</td>
+                      <td class="text-early font-w600">+00:43</td>
+                      <td><span class="badge badge-secondary">Head Office</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">SATHYAMOORTHY KANNAYIRAM</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #7 &middot; Business</div>
+                      </td>
+                      <td>10:14 AM</td>
+                      <td>06:30 PM</td>
+                      <td><span class="badge badge-light">08h 16m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late">−00:14</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late font-w600">−00:14</td>
+                      <td><span class="badge badge-secondary">Head Office</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">NAVANEETHA KRISHNAN</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #8 &middot; Recovery</div>
+                      </td>
+                      <td>10:22 AM</td>
+                      <td>06:18 PM</td>
+                      <td><span class="badge badge-light">07h 56m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late">−00:22</td>
+                      <td class="text-late">−00:12</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late font-w600">−00:34</td>
+                      <td><span class="badge badge-warning text-dark">Salem</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">VALLI VIJAYAKUMAR</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #11 &middot; Administration</div>
+                      </td>
+                      <td>09:58 AM</td>
+                      <td>06:32 PM</td>
+                      <td><span class="badge badge-light">08h 34m</span></td>
+                      <td class="text-early">+00:02</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:02</td>
+                      <td class="text-early font-w600">+00:04</td>
+                      <td><span class="badge badge-secondary">Head Office</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">ROJA GOVINDASAMY</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #12 &middot; Branch Operation</div>
+                      </td>
+                      <td>10:05 AM</td>
+                      <td>05:55 PM</td>
+                      <td><span class="badge badge-light">07h 50m</span></td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late">−00:05</td>
+                      <td class="text-late">−00:35</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-late font-w600">−00:40</td>
+                      <td><span class="badge badge-success">Hosur</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="font-w600">THANGADURAI APPRAMANI</div>
+                        <div class="text-muted" style="font-size:0.72rem;">EMP #6159 &middot; Management</div>
+                      </td>
+                      <td>09:45 AM</td>
+                      <td>07:20 PM</td>
+                      <td><span class="badge badge-light">09h 35m</span></td>
+                      <td class="text-early">+00:15</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-neutral">—</td>
+                      <td class="text-early">+00:50</td>
+                      <td class="text-early font-w600">+01:05</td>
+                      <td><span class="badge badge-secondary">Head Office</span></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="summary-row">
+                      <td colspan="3" class="text-right text-muted">10 employees shown &nbsp;|&nbsp; Page average:</td>
+                      <td><span class="badge badge-secondary">08h 31m</span></td>
+                      <td class="text-early">+00:05 avg</td>
+                      <td class="text-late">−00:08 avg</td>
+                      <td class="text-late">−00:05 avg</td>
+                      <td class="text-early">+00:19 avg</td>
+                      <td class="text-early">+00:11 avg</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="d-flex justify-content-between align-items-center mt-3 px-1">
+                <div class="text-muted small">Showing 1–10 of 843 present employees on 03-Jun-2026</div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                    <li class="page-item"><a class="page-link" href="#">85</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <!-- ==================== END TAB 1 ==================== -->
+
+          <!-- ==================== TAB 2: PRESENT/ABSENT SUMMARY ==================== -->
+          <div class="tab-pane fade" id="tab-summary" role="tabpanel" aria-labelledby="tab-summary-link">
+            <div class="pt-3 pb-2 px-0">
+              <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap" style="gap:8px;">
+                <div>
+                  <span class="font-w700 text-dark">Monthly View — </span>
+                  <span class="text-muted">June 2026 &nbsp;|&nbsp; Working days: 21</span>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+                  <!-- Legend -->
+                  <span class="badge day-P px-2 py-1">P&nbsp;Present</span>
+                  <span class="badge day-A px-2 py-1">A&nbsp;Absent</span>
+                  <span class="badge day-W px-2 py-1">W&nbsp;Weekend</span>
+                  <span class="badge day-H px-2 py-1">H&nbsp;Holiday</span>
+                  <span class="badge day-L px-2 py-1">L&nbsp;Leave</span>
+                  <span class="badge day-OD px-2 py-1">OD&nbsp;On Duty</span>
+                  <button class="btn btn-sm btn-outline-success ml-2" id="btnExportSummaryCSV"><i class="fa fa-file-csv mr-1"></i>Export CSV</button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-bordered att-matrix mb-0" id="tblSummary">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="emp-name" rowspan="2" style="vertical-align:middle;">Employee</th>
+                      <th colspan="30" class="text-center">June 2026</th>
+                      <th rowspan="2" style="vertical-align:middle;">P</th>
+                      <th rowspan="2" style="vertical-align:middle;">A</th>
+                      <th rowspan="2" style="vertical-align:middle;">L</th>
+                      <th rowspan="2" style="vertical-align:middle; min-width:50px;">%</th>
+                    </tr>
+                    <tr>
+                      <!-- Day headers 1–30 -->
+                      <th class="day-cell day-W">1<br><span style="font-size:0.55rem;">M</span></th>
+                      <th class="day-cell day-W">2<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">3<br><span style="font-size:0.55rem;">W</span></th>
+                      <th class="day-cell">4<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">5<br><span style="font-size:0.55rem;">F</span></th>
+                      <th class="day-cell">6<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">7<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">8<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell">9<br><span style="font-size:0.55rem;">M</span></th>
+                      <th class="day-cell">10<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">11<br><span style="font-size:0.55rem;">W</span></th>
+                      <th class="day-cell">12<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">13<br><span style="font-size:0.55rem;">F</span></th>
+                      <th class="day-cell">14<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">15<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">16<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell">17<br><span style="font-size:0.55rem;">M</span></th>
+                      <th class="day-cell">18<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">19<br><span style="font-size:0.55rem;">W</span></th>
+                      <th class="day-cell">20<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">21<br><span style="font-size:0.55rem;">F</span></th>
+                      <th class="day-cell">22<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">23<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell day-W">24<br><span style="font-size:0.55rem;">S</span></th>
+                      <th class="day-cell">25<br><span style="font-size:0.55rem;">M</span></th>
+                      <th class="day-cell">26<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">27<br><span style="font-size:0.55rem;">W</span></th>
+                      <th class="day-cell">28<br><span style="font-size:0.55rem;">T</span></th>
+                      <th class="day-cell">29<br><span style="font-size:0.55rem;">F</span></th>
+                      <th class="day-cell">30<br><span style="font-size:0.55rem;">S</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Helper: W=weekend, H=holiday, P=present, A=absent, L=leave, OD=on duty -->
+                    <!-- June 2026: Sun=7,8,14,15,21,22 (but Jun 1=Mon... let me recalculate: Jun 1 2026 = Mon) -->
+                    <!-- Mon=1,8,15,22,29; Tue=2,9,16,23,30; Wed=3,10,17,24; Thu=4,11,18,25; Fri=5,12,19,26; Sat=6,13,20,27; Sun=7,14,21,28 -->
+                    <!-- Weekends (Sat+Sun): 6,7,13,14,20,21,27,28 -->
+
+                    <!-- Employee 1: SUBHASH JAYACHANDRAN #6741 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>SUBHASH JAYACHANDRAN</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#6741 · Business · Tiruchengode</div>
+                      </td>
+                      <!-- 1 Mon -->  <td class="day-cell day-P">P</td>
+                      <!-- 2 Tue -->  <td class="day-cell day-P">P</td>
+                      <!-- 3 Wed -->  <td class="day-cell day-P">P</td>
+                      <!-- 4 Thu -->  <td class="day-cell day-P">P</td>
+                      <!-- 5 Fri -->  <td class="day-cell day-P">P</td>
+                      <!-- 6 Sat -->  <td class="day-cell day-W">W</td>
+                      <!-- 7 Sun -->  <td class="day-cell day-W">W</td>
+                      <!-- 8 Mon -->  <td class="day-cell day-P">P</td>
+                      <!-- 9 Tue -->  <td class="day-cell day-A">A</td>
+                      <!-- 10 Wed --> <td class="day-cell day-P">P</td>
+                      <!-- 11 Thu --> <td class="day-cell day-P">P</td>
+                      <!-- 12 Fri --> <td class="day-cell day-P">P</td>
+                      <!-- 13 Sat --> <td class="day-cell day-W">W</td>
+                      <!-- 14 Sun --> <td class="day-cell day-W">W</td>
+                      <!-- 15 Mon --> <td class="day-cell day-P">P</td>
+                      <!-- 16 Tue --> <td class="day-cell day-P">P</td>
+                      <!-- 17 Wed --> <td class="day-cell day-P">P</td>
+                      <!-- 18 Thu --> <td class="day-cell day-P">P</td>
+                      <!-- 19 Fri --> <td class="day-cell day-P">P</td>
+                      <!-- 20 Sat --> <td class="day-cell day-W">W</td>
+                      <!-- 21 Sun --> <td class="day-cell day-W">W</td>
+                      <!-- 22 Mon --> <td class="day-cell day-P">P</td>
+                      <!-- 23 Tue --> <td class="day-cell day-P">P</td>
+                      <!-- 24 Wed --> <td class="day-cell day-L">L</td>
+                      <!-- 25 Thu --> <td class="day-cell day-L">L</td>
+                      <!-- 26 Fri --> <td class="day-cell day-P">P</td>
+                      <!-- 27 Sat --> <td class="day-cell day-W">W</td>
+                      <!-- 28 Sun --> <td class="day-cell day-W">W</td>
+                      <!-- 29 Mon --> <td class="day-cell day-P">P</td>
+                      <!-- 30 Tue --> <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">17</td>
+                      <td class="font-w700 text-danger">1</td>
+                      <td class="font-w700 text-warning">2</td>
+                      <td><span class="badge badge-success">85%</span></td>
+                    </tr>
+
+                    <!-- Employee 2: ARUNKUMAR KATHIRESAN #28 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>ARUNKUMAR KATHIRESAN</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#28 · Business · Head Office</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">19</td>
+                      <td class="font-w700 text-danger">1</td>
+                      <td class="font-w700 text-warning">0</td>
+                      <td><span class="badge badge-success">95%</span></td>
+                    </tr>
+
+                    <!-- Employee 3: VIJAYALAKSHMI RAMANATHAN #83 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>VIJAYALAKSHMI RAMANATHAN</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#83 · HO Accounts · Head Office</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-L">L</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">18</td>
+                      <td class="font-w700 text-danger">0</td>
+                      <td class="font-w700 text-warning">1</td>
+                      <td><span class="badge badge-success">95%</span></td>
+                    </tr>
+
+                    <!-- Employee 4: THANGADURAI APPRAMANI #6159 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>THANGADURAI APPRAMANI</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#6159 · Management · Head Office</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-OD">OD</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">17</td>
+                      <td class="font-w700 text-danger">1</td>
+                      <td class="font-w700 text-warning">0</td>
+                      <td><span class="badge badge-success">90%</span></td>
+                    </tr>
+
+                    <!-- Employee 5: RAJESH VITTAL RAO #16 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>RAJESH VITTAL RAO</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#16 · Management · Head Office</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-L">L</td>
+                      <td class="day-cell day-L">L</td>
+                      <td class="day-cell day-L">L</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">14</td>
+                      <td class="font-w700 text-danger">2</td>
+                      <td class="font-w700 text-warning">3</td>
+                      <td><span class="badge badge-warning text-dark">75%</span></td>
+                    </tr>
+
+                    <!-- Employee 6: SATHYAMOORTHY KANNAYIRAM #7 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>SATHYAMOORTHY KANNAYIRAM</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#7 · Business · Head Office</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">18</td>
+                      <td class="font-w700 text-danger">1</td>
+                      <td class="font-w700 text-warning">0</td>
+                      <td><span class="badge badge-success">95%</span></td>
+                    </tr>
+
+                    <!-- Employee 7: NAVANEETHA KRISHNAN #8 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>NAVANEETHA KRISHNAN</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#8 · Recovery · Salem</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-L">L</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">16</td>
+                      <td class="font-w700 text-danger">2</td>
+                      <td class="font-w700 text-warning">1</td>
+                      <td><span class="badge badge-warning text-dark">80%</span></td>
+                    </tr>
+
+                    <!-- Employee 8: ROJA GOVINDASAMY #12 -->
+                    <tr>
+                      <td class="emp-name">
+                        <div>ROJA GOVINDASAMY</div>
+                        <div class="text-muted" style="font-size:0.68rem;">#12 · Branch Operation · Hosur</div>
+                      </td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-A">A</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-OD">OD</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-W">W</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="day-cell day-P">P</td>
+                      <td class="font-w700 text-success">17</td>
+                      <td class="font-w700 text-danger">1</td>
+                      <td class="font-w700 text-warning">0</td>
+                      <td><span class="badge badge-success">90%</span></td>
+                    </tr>
+
+                  </tbody>
+                  <tfoot>
+                    <tr class="summary-row">
+                      <td class="emp-name text-right text-muted" style="font-size:0.75rem;">Total / Average (8 shown)</td>
+                      <!-- Day totals abbreviated -->
+                      <td class="day-cell">8</td><td class="day-cell">7</td><td class="day-cell">8</td><td class="day-cell">7</td>
+                      <td class="day-cell">7</td><td class="day-cell day-W"></td><td class="day-cell day-W"></td>
+                      <td class="day-cell">8</td><td class="day-cell">7</td><td class="day-cell">8</td>
+                      <td class="day-cell">7</td><td class="day-cell">7</td><td class="day-cell day-W"></td><td class="day-cell day-W"></td>
+                      <td class="day-cell">7</td><td class="day-cell">7</td><td class="day-cell">8</td>
+                      <td class="day-cell">8</td><td class="day-cell">8</td><td class="day-cell day-W"></td><td class="day-cell day-W"></td>
+                      <td class="day-cell">8</td><td class="day-cell">8</td><td class="day-cell">7</td>
+                      <td class="day-cell">8</td><td class="day-cell">8</td><td class="day-cell day-W"></td><td class="day-cell day-W"></td>
+                      <td class="day-cell">8</td><td class="day-cell">8</td>
+                      <td class="font-w700 text-success">136</td>
+                      <td class="font-w700 text-danger">9</td>
+                      <td class="font-w700 text-warning">7</td>
+                      <td><span class="badge badge-primary">88%</span></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="d-flex justify-content-between align-items-center mt-3 px-1">
+                <div class="text-muted small">Showing 1–8 of 965 active employees</div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                    <li class="page-item"><a class="page-link" href="#">121</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <!-- ==================== END TAB 2 ==================== -->
+
+        </div><!-- /tab-content -->
+      </div><!-- /block -->
+
+    </div><!-- /content -->
+  </main>
+  <!-- ===================== END MAIN CONTENT ===================== -->
+
+</div><!-- /page-container -->
+
+<!-- ===================== SCRIPTS ===================== -->
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script src="../assets/jquery.dataTables.min.js"></script>
+<script src="../assets/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/select2.full.min.js"></script>
+<script>
+  (function () {
+    'use strict';
+
+    // Show/hide custom date range inputs
+    var filterPeriod = document.getElementById('filterPeriod');
+    if (filterPeriod) {
+      filterPeriod.addEventListener('change', function () {
+        var isCustom = this.value === 'custom';
+        document.getElementById('customDateFrom').classList.toggle('d-none', !isCustom);
+        document.getElementById('customDateTo').classList.toggle('d-none', !isCustom);
+      });
+    }
+
+    // Clear filters button
+    var btnClear = document.getElementById('btnClearFilters');
+    if (btnClear) {
+      btnClear.addEventListener('click', function () {
+        document.getElementById('filterPeriod').value = 'jun2026';
+        document.getElementById('filterDept').value = '';
+        document.getElementById('filterRegion').value = '';
+        document.getElementById('filterBranch').value = '';
+        document.getElementById('filterStatus').value = 'active';
+        document.getElementById('customDateFrom').classList.add('d-none');
+        document.getElementById('customDateTo').classList.add('d-none');
+      });
+    }
+
+    // CSV export — Tab 1 Early/Late
+    var btnCSV = document.getElementById('btnExportCSV');
+    if (btnCSV) {
+      btnCSV.addEventListener('click', function () {
+        var rows = [
+          ['Employee', 'Emp No', 'First In', 'Last Out', 'Total Hours', 'Entry Early', 'Entry Late', 'Exit Early', 'Exit Late', 'Net Hours', 'Branch'],
+          ['ANIS FATHIMA KASALI S', '5237', '10:00 AM', '06:57 PM', '08:27', '+00:00', '-', '-', '+00:27', '+00:27', 'Chennai Regional'],
+          ['GIRIJA MURUGESAN', '6109', '10:00 AM', '06:52 PM', '08:22', '+00:00', '-', '-', '+00:22', '+00:22', 'Chennai Regional'],
+          ['MAHALINGAM NAMACHIVAYAM', '174', '10:00 AM', '06:50 PM', '08:50', '+00:00', '-', '-', '+00:50', '+00:50', 'Head Office'],
+          ['GOWTHAM KUMAR', '6399', '10:00 AM', '06:48 PM', '08:18', '+00:00', '-', '-', '+00:18', '+00:18', 'Chennai Regional'],
+          ['RAJESH VITTAL RAO', '16', '09:52 AM', '07:05 PM', '09:13', '+00:08', '-', '-', '+00:35', '+00:43', 'Head Office'],
+          ['SATHYAMOORTHY KANNAYIRAM', '7', '10:14 AM', '06:30 PM', '08:16', '-', '-00:14', '-', '-', '-00:14', 'Head Office'],
+          ['NAVANEETHA KRISHNAN', '8', '10:22 AM', '06:18 PM', '07:56', '-', '-00:22', '-00:12', '-', '-00:34', 'Salem'],
+          ['VALLI VIJAYAKUMAR', '11', '09:58 AM', '06:32 PM', '08:34', '+00:02', '-', '-', '+00:02', '+00:04', 'Head Office'],
+          ['ROJA GOVINDASAMY', '12', '10:05 AM', '05:55 PM', '07:50', '-', '-00:05', '-00:35', '-', '-00:40', 'Hosur'],
+          ['THANGADURAI APPRAMANI', '6159', '09:45 AM', '07:20 PM', '09:35', '+00:15', '-', '-', '+00:50', '+01:05', 'Head Office']
+        ];
+        var csv = rows.map(function (r) { return r.join(','); }).join('\n');
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'early-late-checkin-03Jun2026.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // CSV export — Tab 2 Summary
+    var btnSummaryCSV = document.getElementById('btnExportSummaryCSV');
+    if (btnSummaryCSV) {
+      btnSummaryCSV.addEventListener('click', function () {
+        alert('Exporting Present/Absent Summary for June 2026...\n(Full export would include all 965 employees)');
+      });
+    }
+
+    // Apply filters button visual feedback
+    var btnApply = document.getElementById('btnApplyFilters');
+    if (btnApply) {
+      btnApply.addEventListener('click', function () {
+        var orig = this.innerHTML;
+        this.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i>Loading...';
+        this.disabled = true;
+        var self = this;
+        setTimeout(function () {
+          self.innerHTML = orig;
+          self.disabled = false;
+        }, 800);
+      });
+    }
+
+    // Day navigation buttons
+    var days = [
+      '03 Jun 2026', '04 Jun 2026', '05 Jun 2026',
+      '09 Jun 2026', '10 Jun 2026', '11 Jun 2026'
+    ];
+    var dayIdx = 0;
+    var label = document.getElementById('dayNavLabel');
+    var btnPrev = document.getElementById('btnPrevDay');
+    var btnNext = document.getElementById('btnNextDay');
+
+    if (btnPrev && btnNext && label) {
+      btnPrev.addEventListener('click', function () {
+        if (dayIdx > 0) { dayIdx--; label.textContent = days[dayIdx]; }
+        btnPrev.disabled = (dayIdx === 0);
+        btnNext.disabled = false;
+      });
+      btnNext.addEventListener('click', function () {
+        if (dayIdx < days.length - 1) { dayIdx++; label.textContent = days[dayIdx]; }
+        btnNext.disabled = (dayIdx === days.length - 1);
+        btnPrev.disabled = false;
+      });
+      btnPrev.disabled = true; // start at first day
+    }
+
+  }());
+</script>
+</body>
+</html>
