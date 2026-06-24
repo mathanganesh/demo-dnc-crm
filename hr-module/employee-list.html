@@ -17,7 +17,7 @@
     .table tbody tr:hover { background-color: #f8f9fa; }
     .employee-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e4eaf6; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .75rem; color: #3f5faf; margin-right: 8px; flex-shrink: 0; }
     .name-cell { display: flex; align-items: center; }
-    .emp-code-badge { font-family: monospace; background: #f0f4ff; color: #3f5faf; padding: 2px 6px; border-radius: 3px; font-size: .8rem; }
+    .emp-code-badge { font-family: monospace; background: #dce6ff; color: #1e3a8a; padding: 2px 7px; border-radius: 4px; font-size: .78rem; font-weight: 700; letter-spacing: .03em; }
   </style>
 </head>
 <body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
@@ -93,6 +93,8 @@ function authCheck(){
         <li class="nav-main-heading">Reports</li>
         <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
         <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Integrations</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
         <li class="nav-main-heading">Configuration</li>
         <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
       </ul>
@@ -286,12 +288,12 @@ function authCheck(){
               <thead>
                 <tr>
                   <th style="width:40px;">#</th>
-                  <th style="width:100px;">Emp Code</th>
                   <th>Name</th>
                   <th>Department</th>
                   <th>Designation</th>
                   <th>Branch / Location</th>
                   <th style="width:120px;">Date of Joining</th>
+                  <th>Reporting To</th>
                   <th style="width:80px;">Status</th>
                   <th style="width:70px;" class="text-center">Action</th>
                 </tr>
@@ -299,12 +301,11 @@ function authCheck(){
               <tbody>
                 <tr>
                   <td class="text-muted">1</td>
-                  <td><span class="emp-code-badge">DNC-0007</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">SK</span>
                       <div>
-                        <div class="font-w600">Sathyamoorthy Kannayiram</div>
+                        <div class="font-w600"><span class="emp-code-badge">0007</span> Sathyamoorthy Kannayiram</div>
                         <small class="text-muted">sathya.k@dncchits.in</small>
                       </div>
                     </div>
@@ -313,17 +314,17 @@ function authCheck(){
                   <td>Manager Operations</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
                   <td>12 Mar 2014</td>
+                  <td><small class="text-muted">Management</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">2</td>
-                  <td><span class="emp-code-badge">DNC-0008</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">NK</span>
                       <div>
-                        <div class="font-w600">Navaneetha Krishnan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0008</span> Navaneetha Krishnan</div>
                         <small class="text-muted">navaneethak@dncchits.in</small>
                       </div>
                     </div>
@@ -332,17 +333,17 @@ function authCheck(){
                   <td>BH/ABH/BI</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
                   <td>05 Jun 2014</td>
+                  <td><small class="text-muted">Sathyamoorthy K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">3</td>
-                  <td><span class="emp-code-badge">DNC-0011</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">VV</span>
                       <div>
-                        <div class="font-w600">Valli Vijayakumar</div>
+                        <div class="font-w600"><span class="emp-code-badge">0011</span> Valli Vijayakumar</div>
                         <small class="text-muted">valli.v@dncchits.in</small>
                       </div>
                     </div>
@@ -351,17 +352,17 @@ function authCheck(){
                   <td>HO Accounts</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
                   <td>18 Sep 2014</td>
+                  <td><small class="text-muted">Sathyamoorthy K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">4</td>
-                  <td><span class="emp-code-badge">DNC-0012</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">RG</span>
                       <div>
-                        <div class="font-w600">Roja Govindasamy</div>
+                        <div class="font-w600"><span class="emp-code-badge">0012</span> Roja Govindasamy</div>
                         <small class="text-muted">roja.g@dncchits.in</small>
                       </div>
                     </div>
@@ -370,17 +371,17 @@ function authCheck(){
                   <td>HO HR</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
                   <td>22 Sep 2014</td>
+                  <td><small class="text-muted">Sathyamoorthy K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">5</td>
-                  <td><span class="emp-code-badge">DNC-0016</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">RV</span>
                       <div>
-                        <div class="font-w600">Rajesh Vittal Rao</div>
+                        <div class="font-w600"><span class="emp-code-badge">0016</span> Rajesh Vittal Rao</div>
                         <small class="text-muted">rajesh.vr@dncchits.in</small>
                       </div>
                     </div>
@@ -389,17 +390,17 @@ function authCheck(){
                   <td>Manager-BD</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
                   <td>10 Jan 2015</td>
+                  <td><small class="text-muted">Sathyamoorthy K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">6</td>
-                  <td><span class="emp-code-badge">DNC-0028</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">AK</span>
                       <div>
-                        <div class="font-w600">Arunkumar Kathiresan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0028</span> Arunkumar Kathiresan</div>
                         <small class="text-muted">arun.k@dncchits.in</small>
                       </div>
                     </div>
@@ -408,17 +409,17 @@ function authCheck(){
                   <td>Manager-BD</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Hosur</td>
                   <td>03 Apr 2015</td>
+                  <td><small class="text-muted">Rajesh Vittal Rao</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">7</td>
-                  <td><span class="emp-code-badge">DNC-0032</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">MI</span>
                       <div>
-                        <div class="font-w600">Muruganandham I</div>
+                        <div class="font-w600"><span class="emp-code-badge">0032</span> Muruganandham I</div>
                         <small class="text-muted">muruganandham@dncchits.in</small>
                       </div>
                     </div>
@@ -427,17 +428,17 @@ function authCheck(){
                   <td>Executive Operations</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Edappadi</td>
                   <td>29 May 2015</td>
+                  <td><small class="text-muted">Rajesh Vittal Rao</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">8</td>
-                  <td><span class="emp-code-badge">DNC-0083</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">VR</span>
                       <div>
-                        <div class="font-w600">Vijayalakshmi Ramanathan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0083</span> Vijayalakshmi Ramanathan</div>
                         <small class="text-muted">vijaya.r@dncchits.in</small>
                       </div>
                     </div>
@@ -446,17 +447,17 @@ function authCheck(){
                   <td>HO Accounts</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
                   <td>14 Aug 2016</td>
+                  <td><small class="text-muted">Sathyamoorthy K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">9</td>
-                  <td><span class="emp-code-badge">DNC-0142</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">PS</span>
                       <div>
-                        <div class="font-w600">Priya Sundaram</div>
+                        <div class="font-w600"><span class="emp-code-badge">0142</span> Priya Sundaram</div>
                         <small class="text-muted">priya.s@dncchits.in</small>
                       </div>
                     </div>
@@ -465,17 +466,17 @@ function authCheck(){
                   <td>HO Operation</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Head Office, Krishnagiri</td>
                   <td>07 Feb 2017</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">10</td>
-                  <td><span class="emp-code-badge">DNC-0289</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">KR</span>
                       <div>
-                        <div class="font-w600">Karthikeyan Rajan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0289</span> Karthikeyan Rajan</div>
                         <small class="text-muted">karthik.r@dncchits.in</small>
                       </div>
                     </div>
@@ -484,17 +485,17 @@ function authCheck(){
                   <td>Executive Collection</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
                   <td>19 Jun 2018</td>
+                  <td><small class="text-muted">Arunkumar K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">11</td>
-                  <td><span class="emp-code-badge">DNC-0451</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">LN</span>
                       <div>
-                        <div class="font-w600">Lakshmi Narayanan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0451</span> Lakshmi Narayanan</div>
                         <small class="text-muted">lakshmi.n@dncchits.in</small>
                       </div>
                     </div>
@@ -503,17 +504,17 @@ function authCheck(){
                   <td>DH</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
                   <td>11 Nov 2019</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">12</td>
-                  <td><span class="emp-code-badge">DNC-0612</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">SM</span>
                       <div>
-                        <div class="font-w600">Selvaraj Murugan</div>
+                        <div class="font-w600"><span class="emp-code-badge">0612</span> Selvaraj Murugan</div>
                         <small class="text-muted">selva.m@dncchits.in</small>
                       </div>
                     </div>
@@ -522,17 +523,17 @@ function authCheck(){
                   <td>BCE</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Tiruchengode</td>
                   <td>08 Mar 2021</td>
+                  <td><small class="text-muted">Arunkumar K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">13</td>
-                  <td><span class="emp-code-badge">DNC-6159</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar">TA</span>
                       <div>
-                        <div class="font-w600">Thangadurai Appramani</div>
+                        <div class="font-w600"><span class="emp-code-badge">6159</span> Thangadurai Appramani</div>
                         <small class="text-muted">thangadurai.a@dncchits.in</small>
                       </div>
                     </div>
@@ -541,17 +542,17 @@ function authCheck(){
                   <td>Manager Operations</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
                   <td>02 Jan 2023</td>
+                  <td><small class="text-muted">Thangadurai A</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">14</td>
-                  <td><span class="emp-code-badge">DNC-6741</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">SJ</span>
                       <div>
-                        <div class="font-w600">Subhash Jayachandran <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <div class="font-w600"><span class="emp-code-badge">6741</span> Subhash Jayachandran <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
                         <small class="text-muted">subhash.j@dncchits.in</small>
                       </div>
                     </div>
@@ -560,17 +561,17 @@ function authCheck(){
                   <td>JR BDM</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Tiruchengode</td>
                   <td>26 May 2026</td>
+                  <td><small class="text-muted">Thangadurai A</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
-                </tr>
+                
                 <tr>
                   <td class="text-muted">15</td>
-                  <td><span class="emp-code-badge">DNC-6758</span></td>
                   <td>
                     <div class="name-cell">
                       <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">AM</span>
                       <div>
-                        <div class="font-w600">Anitha Muthukrishnan <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <div class="font-w600"><span class="emp-code-badge">6758</span> Anitha Muthukrishnan <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
                         <small class="text-muted">anitha.m@dncchits.in</small>
                       </div>
                     </div>
@@ -579,6 +580,141 @@ function authCheck(){
                   <td>Regional Team</td>
                   <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Coimbatore</td>
                   <td>01 Jun 2026</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                
+
+                <tr>
+                  <td class="text-muted">16</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">NR</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6738</span> Nivetha R <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">nivetha.r@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>BH/ABH/BI</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
+                  <td>01 Jun 2026</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">17</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">MK</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6739</span> Meena K <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">meena.k@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>BH/ABH/BI</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Chennai Regional</td>
+                  <td>05 Jun 2026</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">18</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">DS</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6740</span> Deepika Sankar <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">deepika.s@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>JR BDM</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Vellore</td>
+                  <td>10 Jun 2026</td>
+                  <td><small class="text-muted">Thangadurai A</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">19</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">SD</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6742</span> Sivakumar D <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">sivakumar.d@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>BDM</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Salem</td>
+                  <td>02 Jun 2026</td>
+                  <td><small class="text-muted">Thangadurai A</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">20</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">SG</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6743</span> Saravanan G <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">saravanan.g@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>JR BDM</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Krishnagiri</td>
+                  <td>01 Jun 2026</td>
+                  <td><small class="text-muted">Arunkumar K</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">21</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">NL</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6744</span> Nagaraj Logan <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">nagaraj.l@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Business</td>
+                  <td>BDM</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Dharmapuri</td>
+                  <td>10 Jun 2026</td>
+                  <td><small class="text-muted">Arunkumar K</small></td>
+                  <td><span class="badge badge-active">Active</span></td>
+                  <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                <tr>
+                  <td class="text-muted">22</td>
+                  <td>
+                    <div class="name-cell">
+                      <span class="employee-avatar" style="background:#e6f4ea;color:#2d6a4f;">LR</span>
+                      <div>
+                        <div class="font-w600"><span class="emp-code-badge">6745</span> Lalethaa R P <span class="badge badge-info ml-1" style="font-size:.65rem;">New</span></div>
+                        <small class="text-muted">lalethaa.rp@dncchits.in</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Branch Operation</td>
+                  <td>BH/ABH/BI</td>
+                  <td><i class="fa fa-map-marker-alt text-muted mr-1"></i>Vellore</td>
+                  <td>01 Jun 2026</td>
+                  <td><small class="text-muted">Navaneetha K</small></td>
                   <td><span class="badge badge-active">Active</span></td>
                   <td class="text-center"><a href="employee-detail.html" class="btn btn-sm btn-outline-primary py-1 px-2"><i class="fa fa-eye"></i></a></td>
                 </tr>

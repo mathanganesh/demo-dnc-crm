@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll Sync — Zoho Payroll | DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    /* ── Stat cards ───────────────────────────────────────────── */
+    .stat-card { background:#fff; border:1px solid #e9ecef; border-radius:10px; padding:18px 20px; display:flex; align-items:center; gap:14px; }
+    .stat-icon { width:46px; height:46px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .stat-val  { font-size:1.5rem; font-weight:800; line-height:1.1; }
+    .stat-lbl  { font-size:.75rem; color:#6c757d; margin-top:2px; }
+
+    /* ── Status badges ────────────────────────────────────────── */
+    .badge-synced  { background:#d3f9d8; color:#2b8a3e; }
+    .badge-pending { background:#fff3bf; color:#856404; }
+    .badge-failed  { background:#ffe3e3; color:#c92a2a; }
+    .badge-skipped { background:#f1f3f5; color:#868e96; }
+    .badge-nolop   { background:#f1f3f5; color:#868e96; }
+    .sync-badge { font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:4px; }
+
+    /* ── Period selector tabs ─────────────────────────────────── */
+    .period-tabs { display:flex; gap:0; border:1px solid #dee2e6; border-radius:8px; overflow:hidden; margin-bottom:20px; }
+    .period-tab  { padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; border:none; background:#fff; color:#6c757d; transition:background .12s; flex:1; text-align:center; border-right:1px solid #dee2e6; }
+    .period-tab:last-child { border-right:none; }
+    .period-tab.active { background:#0665d0; color:#fff; }
+    .period-tab:hover:not(.active) { background:#f8f9fa; }
+
+    /* ── Timeline / progress steps ────────────────────────────── */
+    .sync-steps { display:flex; flex-direction:column; gap:0; }
+    .sync-step  { display:flex; align-items:flex-start; gap:14px; padding:10px 0; border-left:2px solid #e9ecef; margin-left:11px; padding-left:18px; position:relative; }
+    .sync-step:last-child { border-left-color:transparent; }
+    .step-dot { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex-shrink:0; position:absolute; left:-12px; }
+    .step-dot.done    { background:#2b8a3e; color:#fff; }
+    .step-dot.running { background:#0665d0; color:#fff; animation:pulse .8s infinite; }
+    .step-dot.waiting { background:#e9ecef; color:#adb5bd; }
+    .step-dot.error   { background:#c92a2a; color:#fff; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .step-title { font-size:.85rem; font-weight:600; }
+    .step-meta  { font-size:.75rem; color:#6c757d; margin-top:2px; }
+
+    /* ── Table ────────────────────────────────────────────────── */
+    .table th { font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#6c757d; background:#f8f9fa; border-top:0; }
+    .table td { vertical-align:middle; font-size:.855rem; }
+    .emp-mini { display:flex; align-items:center; gap:8px; }
+    .emp-av-xs { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .emp-code-sm { font-family:monospace; background:#dce6ff; color:#1e3a8a; padding:1px 5px; border-radius:3px; font-size:.72rem; font-weight:700; }
+    .lop-days { font-weight:700; font-size:.9rem; }
+    .lop-days.zero { color:#adb5bd; font-weight:400; }
+    .lop-days.high { color:#c92a2a; }
+    .deduction-amt { font-weight:700; color:#212529; font-size:.9rem; }
+    .deduction-amt.zero { color:#adb5bd; font-weight:400; }
+
+    /* ── Info banner ──────────────────────────────────────────── */
+    .info-banner { background:#e7f5ff; border:1px solid #a5d8ff; border-radius:8px; padding:12px 16px; display:flex; align-items:flex-start; gap:10px; }
+    .warn-banner { background:#fff9db; border:1px solid #ffe066; border-radius:8px; padding:12px 16px; display:flex; align-items:flex-start; gap:10px; }
+    .err-banner  { background:#fff5f5; border:1px solid #ffa8a8; border-radius:8px; padding:12px 16px; display:flex; align-items:flex-start; gap:10px; }
+
+    /* ── History table ────────────────────────────────────────── */
+    .history-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f1f3f5; }
+    .history-row:last-child { border-bottom:none; }
+    .history-period { font-weight:600; font-size:.85rem; min-width:200px; }
+    .history-meta   { font-size:.78rem; color:#6c757d; }
+
+    /* ── Zoho brand strip ─────────────────────────────────────── */
+    .zoho-strip { background:#fff; border:1px solid #e9ecef; border-radius:8px; padding:10px 16px; display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+    .zoho-logo  { font-size:.85rem; font-weight:800; color:#e4000f; letter-spacing:-.01em; }
+    .zoho-status-dot { width:8px; height:8px; border-radius:50%; background:#2b8a3e; display:inline-block; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+<!-- Auth Wall -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Continue →</button>
+  </div>
+  <div style="margin-top:20px;font-size:11px;color:#475569;">DNC CHITS · HR Module · 2026</div>
+</div>
+<script>
+(function(){
+  var KEY='crm_auth_ok',DAYS=7;
+  try{ var ts=localStorage.getItem(KEY); if(ts&&Date.now()-parseInt(ts)<DAYS*86400000){ document.getElementById('auth-wall').style.display='none'; return; } }catch(e){}
+  setTimeout(function(){ var el=document.getElementById('auth-input'); if(el) el.focus(); },100);
+})();
+function authCheck(){
+  if(document.getElementById('auth-input').value==='dnc@2026'){
+    try{ localStorage.setItem('crm_auth_ok',Date.now()); }catch(e){}
+    document.getElementById('auth-wall').style.display='none';
+  } else {
+    document.getElementById('auth-err').textContent='Incorrect password. Try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+  <div id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-heading">Integrations</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control form-control-alt" placeholder="Search employees...">
+          <div class="input-group-append"><span class="input-group-text bg-body border-0"><i class="si si-magnifier"></i></span></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-2">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span><i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Page header -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h2 class="h4 font-w700 mb-0">Payroll Sync</h2>
+          <p class="text-muted mb-0" style="font-size:.85rem;">Push LOP deductions to Zoho Payroll at end of each pay period &nbsp;·&nbsp; Period: 26th prev month – 25th current month</p>
+        </div>
+        <div class="d-flex gap-2" style="gap:8px;">
+          <button class="btn btn-sm btn-light border" onclick="$('#modalSyncLog').modal('show')">
+            <i class="fa fa-history mr-1"></i> Sync History
+          </button>
+          <button class="btn btn-sm btn-primary" onclick="$('#modalRunSync').modal('show')">
+            <i class="fa fa-sync-alt mr-1"></i> Run Sync Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Zoho connection status -->
+      <div class="zoho-strip mb-3">
+        <span class="zoho-logo">zoho</span>
+        <span style="font-size:.75rem;color:#6c757d;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Payroll</span>
+        <span style="width:1px;height:16px;background:#dee2e6;display:inline-block;margin:0 4px;"></span>
+        <span class="zoho-status-dot"></span>
+        <span style="font-size:.82rem;color:#2b8a3e;font-weight:600;">Connected</span>
+        <span class="text-muted ml-2" style="font-size:.78rem;">Organization: DNC Chits Pvt Ltd &nbsp;·&nbsp; Last verified: 22 Jun 2026 09:12</span>
+        <span class="ml-auto">
+          <a href="#" style="font-size:.78rem;color:#0665d0;">Re-authenticate</a>
+          <span class="text-muted mx-1">·</span>
+          <a href="#" style="font-size:.78rem;color:#0665d0;">API Settings</a>
+        </span>
+      </div>
+
+      <!-- Period tabs -->
+      <div class="period-tabs">
+        <div class="period-tab active" onclick="switchPeriod(0,this)">
+          <div style="font-size:.78rem;font-weight:700;">Current</div>
+          <div style="font-size:.72rem;opacity:.8;">26 May – 25 Jun 2026</div>
+        </div>
+        <div class="period-tab" onclick="switchPeriod(1,this)">
+          <div style="font-size:.78rem;font-weight:700;">Last Period</div>
+          <div style="font-size:.72rem;opacity:.8;">26 Apr – 25 May 2026</div>
+        </div>
+        <div class="period-tab" onclick="switchPeriod(2,this)">
+          <div style="font-size:.78rem;font-weight:700;">Mar – Apr 2026</div>
+          <div style="font-size:.72rem;opacity:.8;">26 Mar – 25 Apr 2026</div>
+        </div>
+        <div class="period-tab" onclick="switchPeriod(3,this)">
+          <div style="font-size:.78rem;font-weight:700;">Feb – Mar 2026</div>
+          <div style="font-size:.72rem;opacity:.8;">26 Feb – 25 Mar 2026</div>
+        </div>
+      </div>
+
+      <!-- ── Period 0: Current (not yet synced) ─────────────────── -->
+      <div id="period-0">
+
+        <!-- Warning: period not closed -->
+        <div class="warn-banner mb-3">
+          <i class="fa fa-exclamation-triangle mt-1" style="color:#f59f00;flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;color:#856404;">Period not closed — sync not recommended yet</div>
+            <div style="font-size:.78rem;color:#856404;margin-top:2px;">The current pay period ends on <strong>25 Jun 2026</strong>. Employees may still have unresolved absent days. The scheduler will auto-run at <strong>00:05 on 26 Jun 2026</strong>. You can run manually if needed.</div>
+          </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="row gutters-sm mb-3">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e7f5ff;"><span style="font-size:1.2rem;">👥</span></div>
+              <div>
+                <div class="stat-val" style="color:#1864ab;">12</div>
+                <div class="stat-lbl">Employees with LOP</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fff5f5;"><span style="font-size:1.2rem;">📅</span></div>
+              <div>
+                <div class="stat-val" style="color:#c92a2a;">18.5</div>
+                <div class="stat-lbl">Total LOP Days</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fff9db;"><span style="font-size:1.2rem;">💰</span></div>
+              <div>
+                <div class="stat-val" style="color:#856404;">₹34,218</div>
+                <div class="stat-lbl">Estimated Deductions</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#f8f9fa;"><span style="font-size:1.2rem;">🔄</span></div>
+              <div>
+                <div class="stat-val" style="color:#868e96;">—</div>
+                <div class="stat-lbl">Not synced yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employee LOP table -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header block-header-default">
+            <h3 class="block-title">Employee LOP Summary &nbsp;<span class="badge badge-warning" style="font-size:.72rem;">Pending Sync</span></h3>
+            <div class="block-options">
+              <span class="text-muted" style="font-size:.78rem;">Working days in period: <strong>27</strong> &nbsp;·&nbsp; All Saturdays included, Sundays excluded</span>
+            </div>
+          </div>
+          <div class="block-content p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th class="text-center">Absent Days</th>
+                    <th class="text-center">CL Taken</th>
+                    <th class="text-center">OD Days</th>
+                    <th class="text-center">LOP Days</th>
+                    <th class="text-right">Monthly CTC</th>
+                    <th class="text-right">LOP Deduction</th>
+                    <th class="text-center">Zoho Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#4dabf7;">AK</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">0028</span> Arunkumar K</div><div style="font-size:.72rem;color:#868e96;">BDM · Head Office</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days high">2</span></td>
+                    <td class="text-center text-muted">3.5</td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center"><span class="lop-days high">2</span></td>
+                    <td class="text-right">₹45,000</td>
+                    <td class="text-right"><span class="deduction-amt">₹3,333</span></td>
+                    <td class="text-center"><span class="sync-badge badge-pending">⏳ Pending</span></td>
+                    <td><button class="btn btn-xs btn-light border" style="font-size:.72rem;padding:2px 8px;" onclick="showEmpDetail('Arunkumar Kathiresan','0028',2,3.5,0,45000,3333)"><i class="fa fa-eye"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#7950f2;">SJ</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">6741</span> Subhash J</div><div style="font-size:.72rem;color:#868e96;">JR BDM · Tiruchengode</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days zero">0</span></td>
+                    <td class="text-center text-muted">1</td>
+                    <td class="text-center text-muted">0.5</td>
+                    <td class="text-center"><span class="lop-days zero">0</span></td>
+                    <td class="text-right">₹28,000</td>
+                    <td class="text-right"><span class="deduction-amt zero">₹0</span></td>
+                    <td class="text-center"><span class="sync-badge badge-nolop">— No LOP</span></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#2f9e44;">SK</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">0007</span> Sathyamoorthy K</div><div style="font-size:.72rem;color:#868e96;">Mgr Operations · Head Office</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days zero">0</span></td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center text-muted">2</td>
+                    <td class="text-center"><span class="lop-days zero">0</span></td>
+                    <td class="text-right">₹72,000</td>
+                    <td class="text-right"><span class="deduction-amt zero">₹0</span></td>
+                    <td class="text-center"><span class="sync-badge badge-nolop">— No LOP</span></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#f76707;">PR</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">0289</span> Karthikeyan R</div><div style="font-size:.72rem;color:#868e96;">BDM · Krishnagiri</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days high">3</span></td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center"><span class="lop-days high">3</span></td>
+                    <td class="text-right">₹38,000</td>
+                    <td class="text-right"><span class="deduction-amt">₹4,222</span></td>
+                    <td class="text-center"><span class="sync-badge badge-pending">⏳ Pending</span></td>
+                    <td><button class="btn btn-xs btn-light border" style="font-size:.72rem;padding:2px 8px;" onclick="showEmpDetail('Karthikeyan Rajan','0289',3,0,0,38000,4222)"><i class="fa fa-eye"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#e64980;">VR</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">0083</span> Vijayalakshmi R</div><div style="font-size:.72rem;color:#868e96;">HO Accounts · Head Office</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days">1</span></td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center"><span class="lop-days">1</span></td>
+                    <td class="text-right">₹32,000</td>
+                    <td class="text-right"><span class="deduction-amt">₹1,185</span></td>
+                    <td class="text-center"><span class="sync-badge badge-pending">⏳ Pending</span></td>
+                    <td><button class="btn btn-xs btn-light border" style="font-size:.72rem;padding:2px 8px;" onclick="showEmpDetail('Vijayalakshmi Ramanathan','0083',1,0,0,32000,1185)"><i class="fa fa-eye"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="emp-mini">
+                        <div class="emp-av-xs" style="background:#0c8599;">PS</div>
+                        <div><div class="font-w600"><span class="emp-code-sm">0142</span> Priya S</div><div style="font-size:.72rem;color:#868e96;">BDM · Chennai Regional</div></div>
+                      </div>
+                    </td>
+                    <td class="text-center"><span class="lop-days">0.5</span></td>
+                    <td class="text-center text-muted">0</td>
+                    <td class="text-center text-muted">1</td>
+                    <td class="text-center"><span class="lop-days">0.5</span></td>
+                    <td class="text-right">₹24,000</td>
+                    <td class="text-right"><span class="deduction-amt">₹444</span></td>
+                    <td class="text-center"><span class="sync-badge badge-skipped">⚠ Not mapped</span></td>
+                    <td><button class="btn btn-xs btn-outline-warning" style="font-size:.72rem;padding:2px 8px;" onclick="alert('Add Zoho Payroll Employee ID for Priya Sundaram in the employee mapping table.')"><i class="fa fa-link mr-1"></i>Map ID</button></td>
+                  </tr>
+                  <tr>
+                    <td colspan="9" class="text-center text-muted py-2" style="font-size:.78rem;background:#fafafa;">
+                      + 6 more employees with LOP &nbsp;·&nbsp; <a href="#" style="color:#0665d0;">Show all 12</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="block-content py-2 px-3" style="background:#fafafa;border-top:1px solid #e9ecef;">
+            <span style="font-size:.78rem;color:#6c757d;">
+              <i class="fa fa-info-circle mr-1"></i>
+              LOP Deduction = (LOP days ÷ 27 working days) × Monthly CTC &nbsp;·&nbsp;
+              <strong style="color:#c92a2a;">1 employee not mapped</strong> to Zoho Payroll — deduction will be skipped for them.
+            </span>
+          </div>
+        </div>
+
+      </div><!-- /period-0 -->
+
+      <!-- ── Period 1: Last period (synced successfully) ────────── -->
+      <div id="period-1" style="display:none;">
+
+        <div class="info-banner mb-3">
+          <i class="fa fa-check-circle mt-1" style="color:#2b8a3e;flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;color:#2b8a3e;">Sync completed successfully</div>
+            <div style="font-size:.78rem;color:#2b8a3e;margin-top:2px;">Auto-run on <strong>26 May 2026 at 00:05</strong> · 9 employees pushed to Zoho Payroll · Total deduction: ₹21,840 · Duration: 4.2s</div>
+          </div>
+        </div>
+
+        <div class="row gutters-sm mb-3">
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#e7f5ff;"><span>👥</span></div><div><div class="stat-val" style="color:#1864ab;">9</div><div class="stat-lbl">Employees with LOP</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#fff5f5;"><span>📅</span></div><div><div class="stat-val" style="color:#c92a2a;">14.5</div><div class="stat-lbl">Total LOP Days</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#d3f9d8;"><span>✅</span></div><div><div class="stat-val" style="color:#2b8a3e;">9 / 9</div><div class="stat-lbl">Synced to Zoho</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#fff9db;"><span>💰</span></div><div><div class="stat-val" style="color:#856404;">₹21,840</div><div class="stat-lbl">Total Deducted</div></div></div>
+          </div>
+        </div>
+
+        <div class="block block-rounded block-bordered">
+          <div class="block-header block-header-default">
+            <h3 class="block-title">Employee LOP Summary &nbsp;<span class="badge badge-success" style="font-size:.72rem;">Synced</span></h3>
+            <div class="block-options"><span class="text-muted" style="font-size:.78rem;">Period: 26 Apr – 25 May 2026 &nbsp;·&nbsp; Working days: 26</span></div>
+          </div>
+          <div class="block-content p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th class="text-center">LOP Days</th>
+                    <th class="text-right">Deduction</th>
+                    <th class="text-center">Zoho Status</th>
+                    <th>Zoho Ref</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="emp-mini"><div class="emp-av-xs" style="background:#4dabf7;">AK</div><div><div class="font-w600"><span class="emp-code-sm">0028</span> Arunkumar K</div></div></div></td>
+                    <td class="text-center font-w600 text-danger">1.5</td>
+                    <td class="text-right font-w600">₹2,596</td>
+                    <td class="text-center"><span class="sync-badge badge-synced">✓ Synced</span></td>
+                    <td style="font-size:.75rem;color:#868e96;font-family:monospace;">ZPR-20260526-00028</td>
+                  </tr>
+                  <tr>
+                    <td><div class="emp-mini"><div class="emp-av-xs" style="background:#f76707;">PR</div><div><div class="font-w600"><span class="emp-code-sm">0289</span> Karthikeyan R</div></div></div></td>
+                    <td class="text-center font-w600 text-danger">2</td>
+                    <td class="text-right font-w600">₹2,923</td>
+                    <td class="text-center"><span class="sync-badge badge-synced">✓ Synced</span></td>
+                    <td style="font-size:.75rem;color:#868e96;font-family:monospace;">ZPR-20260526-00289</td>
+                  </tr>
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-2" style="font-size:.78rem;background:#fafafa;">+ 7 more &nbsp;·&nbsp; <a href="#">Show all</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /period-1 -->
+
+      <!-- ── Period 2: Mar–Apr (failed 1) ──────────────────────── -->
+      <div id="period-2" style="display:none;">
+        <div class="err-banner mb-3">
+          <i class="fa fa-exclamation-circle mt-1" style="color:#c92a2a;flex-shrink:0;"></i>
+          <div style="flex:1;">
+            <div style="font-size:.85rem;font-weight:600;color:#c92a2a;">Sync completed with 1 failure</div>
+            <div style="font-size:.78rem;color:#c92a2a;margin-top:2px;">Auto-run on 26 Apr 2026 at 00:05 · 4 of 5 employees synced · 1 failed (Zoho API timeout) · Retried manually on 26 Apr 09:30 — still failing. Requires manual entry in Zoho Payroll.</div>
+          </div>
+          <button class="btn btn-sm btn-outline-danger ml-2" style="white-space:nowrap;font-size:.78rem;" onclick="alert('Retry sync for Selvaraj Murugan — will attempt to push to Zoho Payroll again.')">Retry Failed</button>
+        </div>
+
+        <div class="row gutters-sm mb-3">
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#e7f5ff;"><span>👥</span></div><div><div class="stat-val" style="color:#1864ab;">5</div><div class="stat-lbl">Employees with LOP</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#d3f9d8;"><span>✅</span></div><div><div class="stat-val" style="color:#2b8a3e;">4 / 5</div><div class="stat-lbl">Synced</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#fff5f5;"><span>❌</span></div><div><div class="stat-val" style="color:#c92a2a;">1</div><div class="stat-lbl">Failed</div></div></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card"><div class="stat-icon" style="background:#fff9db;"><span>💰</span></div><div><div class="stat-val" style="color:#856404;">₹14,320</div><div class="stat-lbl">Synced Amount</div></div></div>
+          </div>
+        </div>
+
+        <div class="block block-rounded block-bordered">
+          <div class="block-header block-header-default">
+            <h3 class="block-title">Employee LOP Summary &nbsp;<span class="badge badge-danger" style="font-size:.72rem;">1 Failed</span></h3>
+          </div>
+          <div class="block-content p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr><th>Employee</th><th class="text-center">LOP Days</th><th class="text-right">Deduction</th><th class="text-center">Zoho Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="emp-mini"><div class="emp-av-xs" style="background:#4dabf7;">AK</div><div><div class="font-w600"><span class="emp-code-sm">0028</span> Arunkumar K</div></div></div></td>
+                    <td class="text-center font-w600 text-danger">1</td>
+                    <td class="text-right font-w600">₹1,731</td>
+                    <td class="text-center"><span class="sync-badge badge-synced">✓ Synced</span></td>
+                    <td></td>
+                  </tr>
+                  <tr style="background:#fff5f5;">
+                    <td><div class="emp-mini"><div class="emp-av-xs" style="background:#868e96;">SM</div><div><div class="font-w600"><span class="emp-code-sm">0612</span> Selvaraj M</div><div style="font-size:.72rem;color:#c92a2a;">Zoho API timeout — manual entry needed</div></div></div></td>
+                    <td class="text-center font-w600 text-danger">2</td>
+                    <td class="text-right font-w600">₹2,308</td>
+                    <td class="text-center"><span class="sync-badge badge-failed">✗ Failed</span></td>
+                    <td><button class="btn btn-xs btn-outline-danger" style="font-size:.72rem;padding:2px 8px;">Retry</button></td>
+                  </tr>
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-2" style="font-size:.78rem;background:#fafafa;">+ 3 more synced &nbsp;·&nbsp; <a href="#">Show all</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /period-2 -->
+
+      <!-- ── Period 3 placeholder ───────────────────────────────── -->
+      <div id="period-3" style="display:none;">
+        <div class="info-banner mb-3">
+          <i class="fa fa-check-circle mt-1" style="color:#2b8a3e;flex-shrink:0;"></i>
+          <div><div style="font-size:.85rem;font-weight:600;color:#2b8a3e;">Sync completed successfully</div><div style="font-size:.78rem;color:#2b8a3e;margin-top:2px;">Auto-run on 26 Mar 2026 at 00:05 · 7 employees · ₹18,640 total deduction · Duration: 3.9s</div></div>
+        </div>
+        <p class="text-muted text-center py-4"><i class="fa fa-check-circle fa-2x text-success d-block mb-2"></i>All records for this period synced successfully. No action required.</p>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <!-- ── Run Sync Modal ──────────────────────────────────────────── -->
+  <div class="modal fade" id="modalRunSync" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w600"><i class="fa fa-sync-alt mr-2 text-primary"></i>Run Payroll Sync</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+        </div>
+        <div class="modal-body">
+
+          <div id="syncConfirmView">
+            <div class="warn-banner mb-3">
+              <i class="fa fa-exclamation-triangle" style="color:#f59f00;flex-shrink:0;margin-top:2px;"></i>
+              <div style="font-size:.83rem;color:#856404;">Pay period ends <strong>25 Jun 2026</strong>. Running sync now will push current LOP data. Any absences resolved after this will not reflect. Recommended to run after period close.</div>
+            </div>
+            <div style="background:#f8f9fa;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+              <div class="d-flex justify-content-between mb-1" style="font-size:.83rem;"><span class="text-muted">Pay Period</span><span class="font-w600">26 May – 25 Jun 2026</span></div>
+              <div class="d-flex justify-content-between mb-1" style="font-size:.83rem;"><span class="text-muted">Employees to push</span><span class="font-w600">11 <small class="text-muted">(1 skipped — not mapped)</small></span></div>
+              <div class="d-flex justify-content-between mb-1" style="font-size:.83rem;"><span class="text-muted">Total LOP Days</span><span class="font-w600 text-danger">18.5 days</span></div>
+              <div class="d-flex justify-content-between" style="font-size:.83rem;"><span class="text-muted">Estimated Deduction</span><span class="font-w600">₹34,218</span></div>
+            </div>
+            <div class="form-group mb-0">
+              <label class="font-w600" style="font-size:.83rem;">Notes <span class="text-muted font-w400">(optional — logged with sync run)</span></label>
+              <input type="text" class="form-control" id="syncNotes" placeholder="e.g. Manual run before period close">
+            </div>
+          </div>
+
+          <div id="syncProgressView" style="display:none;">
+            <div class="sync-steps" id="syncStepsContainer">
+              <!-- rendered by JS -->
+            </div>
+            <div id="syncDoneMsg" style="display:none;text-align:center;padding:16px 0;">
+              <div style="font-size:2.5rem;margin-bottom:8px;">✅</div>
+              <div class="font-w700" style="font-size:1rem;">Sync Complete</div>
+              <div class="text-muted mt-1" style="font-size:.82rem;">11 employees pushed · ₹34,218 deducted · 1 skipped (not mapped)</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" id="syncModalFooter">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="startSync()"><i class="fa fa-sync-alt mr-1"></i>Start Sync</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sync History Modal ──────────────────────────────────────── -->
+  <div class="modal fade" id="modalSyncLog" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:560px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w600"><i class="fa fa-history mr-2 text-primary"></i>Sync History</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+        </div>
+        <div class="modal-body p-0">
+          <table class="table mb-0">
+            <thead><tr><th>Pay Period</th><th>Run At</th><th class="text-center">Employees</th><th class="text-center">Status</th><th class="text-right">Deduction</th></tr></thead>
+            <tbody>
+              <tr><td><div class="font-w600" style="font-size:.83rem;">26 Apr – 25 May 2026</div></td><td class="text-muted" style="font-size:.78rem;">26 May 2026 00:05 <div style="font-size:.72rem;">Auto-scheduled</div></td><td class="text-center">9</td><td class="text-center"><span class="sync-badge badge-synced">✓ Success</span></td><td class="text-right font-w600">₹21,840</td></tr>
+              <tr><td><div class="font-w600" style="font-size:.83rem;">26 Mar – 25 Apr 2026</div></td><td class="text-muted" style="font-size:.78rem;">26 Apr 2026 00:05 <div style="font-size:.72rem;">Auto-scheduled</div></td><td class="text-center">5</td><td class="text-center"><span class="sync-badge badge-failed">✗ 1 Failed</span></td><td class="text-right font-w600">₹14,320</td></tr>
+              <tr><td><div class="font-w600" style="font-size:.83rem;">26 Feb – 25 Mar 2026</div></td><td class="text-muted" style="font-size:.78rem;">26 Mar 2026 00:05 <div style="font-size:.72rem;">Auto-scheduled</div></td><td class="text-center">7</td><td class="text-center"><span class="sync-badge badge-synced">✓ Success</span></td><td class="text-right font-w600">₹18,640</td></tr>
+              <tr><td><div class="font-w600" style="font-size:.83rem;">26 Jan – 25 Feb 2026</div></td><td class="text-muted" style="font-size:.78rem;">26 Feb 2026 00:05 <div style="font-size:.72rem;">Auto-scheduled</div></td><td class="text-center">4</td><td class="text-center"><span class="sync-badge badge-synced">✓ Success</span></td><td class="text-right font-w600">₹9,120</td></tr>
+              <tr><td><div class="font-w600" style="font-size:.83rem;">26 Dec – 25 Jan 2026</div></td><td class="text-muted" style="font-size:.78rem;">26 Jan 2026 00:05 <div style="font-size:.72rem;">Auto-scheduled</div></td><td class="text-center">6</td><td class="text-center"><span class="sync-badge badge-synced">✓ Success</span></td><td class="text-right font-w600">₹13,480</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Employee Detail Modal ───────────────────────────────────── -->
+  <div class="modal fade" id="modalEmpDetail" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-w600" id="empDetailTitle">LOP Breakdown</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+        </div>
+        <div class="modal-body" id="empDetailBody"></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-container -->
+
+<script src="../assets/jquery.min.js"></script>
+<script src="../assets/bootstrap.bundle.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script>
+
+  // ── Period tab switching ─────────────────────────────────────────
+  function switchPeriod(idx, el) {
+    document.querySelectorAll('.period-tab').forEach(function(t){ t.classList.remove('active'); });
+    el.classList.add('active');
+    for (var i = 0; i < 4; i++) {
+      document.getElementById('period-' + i).style.display = (i === idx) ? '' : 'none';
+    }
+  }
+
+  // ── Employee detail modal ────────────────────────────────────────
+  function showEmpDetail(name, code, lopDays, clDays, odDays, ctc, deduction) {
+    document.getElementById('empDetailTitle').textContent = code + ' — ' + name;
+    var workingDays = 27;
+    var html =
+      '<div style="background:#f8f9fa;border-radius:8px;padding:14px 16px;margin-bottom:14px;">' +
+      '<div class="d-flex justify-content-between mb-2" style="font-size:.83rem;"><span class="text-muted">Pay Period</span><span class="font-w600">26 May – 25 Jun 2026</span></div>' +
+      '<div class="d-flex justify-content-between mb-2" style="font-size:.83rem;"><span class="text-muted">Working Days in Period</span><span class="font-w600">' + workingDays + '</span></div>' +
+      '<div class="d-flex justify-content-between mb-2" style="font-size:.83rem;"><span class="text-muted">Absent (unresolved)</span><span class="font-w600 text-danger">' + lopDays + ' day(s)</span></div>' +
+      '<div class="d-flex justify-content-between mb-2" style="font-size:.83rem;"><span class="text-muted">Casual Leave Taken</span><span class="font-w600">' + (clDays || 0) + ' day(s) <small class="text-success">(paid)</small></span></div>' +
+      '<div class="d-flex justify-content-between mb-2" style="font-size:.83rem;"><span class="text-muted">On Duty Days</span><span class="font-w600">' + (odDays || 0) + ' day(s) <small class="text-info">(present)</small></span></div>' +
+      '</div>' +
+      '<div style="background:#fff5f5;border:1px solid #ffa8a8;border-radius:8px;padding:14px 16px;">' +
+      '<div class="d-flex justify-content-between mb-1" style="font-size:.83rem;"><span class="font-w600">Monthly CTC</span><span class="font-w600">₹' + ctc.toLocaleString() + '</span></div>' +
+      '<div class="d-flex justify-content-between mb-1" style="font-size:.83rem;color:#6c757d;"><span>Per day value</span><span>₹' + Math.round(ctc / workingDays).toLocaleString() + '</span></div>' +
+      '<div class="d-flex justify-content-between mb-1" style="font-size:.83rem;color:#6c757d;"><span>Formula</span><span>(' + lopDays + ' ÷ ' + workingDays + ') × ₹' + ctc.toLocaleString() + '</span></div>' +
+      '<hr style="margin:8px 0;">' +
+      '<div class="d-flex justify-content-between" style="font-size:.95rem;"><span class="font-w700">LOP Deduction</span><span class="font-w800 text-danger">₹' + deduction.toLocaleString() + '</span></div>' +
+      '</div>';
+    document.getElementById('empDetailBody').innerHTML = html;
+    $('#modalEmpDetail').modal('show');
+  }
+
+  // ── Run Sync simulation ──────────────────────────────────────────
+  var SYNC_STEPS = [
+    { title: 'Calculating LOP for all employees', meta: 'Reading attendance_logs and leave_requests for period 26 May – 25 Jun…' },
+    { title: 'Authenticating with Zoho Payroll API', meta: 'OAuth 2.0 token refresh…' },
+    { title: 'Pushing employee records', meta: 'Sending 11 employee deduction payloads…' },
+    { title: 'Verifying Zoho responses', meta: 'Checking acknowledgements from Zoho…' },
+    { title: 'Writing sync log', meta: 'Saving results to hr_payroll_sync_logs…' },
+  ];
+
+  function startSync() {
+    document.getElementById('syncConfirmView').style.display = 'none';
+    document.getElementById('syncProgressView').style.display = '';
+    document.getElementById('syncModalFooter').innerHTML = '<span class="text-muted" style="font-size:.82rem;"><i class="fa fa-spinner fa-spin mr-1"></i>Syncing…</span>';
+
+    var container = document.getElementById('syncStepsContainer');
+    container.innerHTML = '';
+    SYNC_STEPS.forEach(function(s, i) {
+      var div = document.createElement('div');
+      div.className = 'sync-step';
+      div.id = 'sstep-' + i;
+      div.innerHTML =
+        '<div class="step-dot waiting" id="sdot-' + i + '">' + (i + 1) + '</div>' +
+        '<div><div class="step-title" style="color:#adb5bd;">' + s.title + '</div><div class="step-meta" id="smeta-' + i + '">' + s.meta + '</div></div>';
+      container.appendChild(div);
+    });
+
+    runSyncStep(0);
+  }
+
+  function runSyncStep(idx) {
+    if (idx >= SYNC_STEPS.length) {
+      document.getElementById('syncDoneMsg').style.display = '';
+      document.getElementById('syncModalFooter').innerHTML =
+        '<button type="button" class="btn btn-success" data-dismiss="modal" onclick="markPeriodSynced()"><i class="fa fa-check mr-1"></i>Done</button>';
+      return;
+    }
+    var dot   = document.getElementById('sdot-' + idx);
+    var title = document.getElementById('sstep-' + idx).querySelector('.step-title');
+    var meta  = document.getElementById('smeta-' + idx);
+
+    dot.className = 'step-dot running';
+    title.style.color = '#212529';
+
+    var delay = idx === 2 ? 1800 : 900;
+    setTimeout(function() {
+      dot.className = 'step-dot done';
+      dot.innerHTML = '✓';
+      if (idx === 2) meta.textContent = '11 pushed · 1 skipped (not mapped)';
+      if (idx === 3) meta.textContent = 'All 11 acknowledged · 0 errors';
+      runSyncStep(idx + 1);
+    }, delay);
+  }
+
+  function markPeriodSynced() {
+    // Replace the warning banner with a success banner in period-0
+    var warn = document.querySelector('#period-0 .warn-banner');
+    if (warn) {
+      warn.className = 'info-banner mb-3';
+      warn.innerHTML =
+        '<i class="fa fa-check-circle mt-1" style="color:#2b8a3e;flex-shrink:0;"></i>' +
+        '<div><div style="font-size:.85rem;font-weight:600;color:#2b8a3e;">Sync completed successfully</div>' +
+        '<div style="font-size:.78rem;color:#2b8a3e;margin-top:2px;">Manual run on 22 Jun 2026 · 11 employees pushed · ₹34,218 deducted · 1 skipped</div></div>';
+    }
+    // Update pending badges
+    document.querySelectorAll('#period-0 .badge-pending').forEach(function(b){ b.className = 'sync-badge badge-synced'; b.textContent = '✓ Synced'; });
+    document.getElementById('syncConfirmView').style.display = '';
+    document.getElementById('syncProgressView').style.display = 'none';
+    document.getElementById('syncDoneMsg').style.display = 'none';
+  }
+
+  // Reset modal on close
+  $('#modalRunSync').on('hidden.bs.modal', function() {
+    document.getElementById('syncConfirmView').style.display = '';
+    document.getElementById('syncProgressView').style.display = 'none';
+    document.getElementById('syncDoneMsg').style.display = 'none';
+    document.getElementById('syncModalFooter').innerHTML =
+      '<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>' +
+      '<button type="button" class="btn btn-primary" onclick="startSync()"><i class="fa fa-sync-alt mr-1"></i>Start Sync</button>';
+    document.getElementById('syncNotes').value = '';
+  });
+
+</script>
+</body>
+</html>

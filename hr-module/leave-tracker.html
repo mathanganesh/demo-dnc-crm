@@ -9,38 +9,71 @@
   <link rel="stylesheet" href="../assets/select2.min.css">
   <link rel="stylesheet" href="../assets/app.css">
   <style>
-    .leave-type-header { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: #6c757d; }
-    .balance-cell { text-align: center; }
-    .balance-cell .entitled { font-size: 0.78rem; color: #6c757d; }
-    .balance-cell .used { font-size: 0.78rem; color: #e74c3c; font-weight: 600; }
-    .balance-cell .bal { font-size: 0.9rem; font-weight: 700; color: #2c3e50; }
-    .balance-bar { height: 4px; border-radius: 2px; background: #e9ecef; margin-top: 3px; }
-    .balance-bar-fill { height: 4px; border-radius: 2px; background: #4dabf7; }
-    .balance-bar-fill.low { background: #e74c3c; }
-    .balance-bar-fill.mid { background: #f59f00; }
-    .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
-    .tab-pane { padding-top: 1.25rem; }
+    /* ── Leave Tracker Styles ─────────────────────────────────── */
     .nav-tabs .nav-link.active { font-weight: 600; color: #0665d0; border-bottom: 2px solid #0665d0; background: transparent; }
     .nav-tabs .nav-link { color: #6c757d; border: none; padding: 0.6rem 1.2rem; }
     .nav-tabs { border-bottom: 1px solid #dee2e6; }
-    .leave-badge { font-size: 0.72rem; padding: 0.25em 0.55em; border-radius: 4px; font-weight: 600; letter-spacing: 0.02em; }
-    .leave-badge-cl { background: #d3f9d8; color: #2b8a3e; }
-    .leave-badge-sl { background: #fff3bf; color: #856404; }
-    .leave-badge-el { background: #d0ebff; color: #1864ab; }
-    .leave-badge-lop { background: #ffe3e3; color: #c92a2a; }
-    .leave-badge-ml { background: #f3d9fa; color: #862e9c; }
-    .leave-badge-od { background: #e3fafc; color: #0c8599; }
-    .leave-badge-co { background: #fff4e6; color: #d9480f; }
-    .status-pending { background: #fff3bf; color: #856404; }
-    .status-approved { background: #d3f9d8; color: #2b8a3e; }
-    .status-rejected { background: #ffe3e3; color: #c92a2a; }
-    .employee-avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
-    .customize-balance-row td { vertical-align: middle; }
-    .filter-bar { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
-    .days-badge { display: inline-block; background: #e7f5ff; color: #1864ab; border-radius: 4px; padding: 0.15em 0.55em; font-size: 0.8rem; font-weight: 700; }
-    .table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #495057; background: #f8f9fa; }
-    .table td { vertical-align: middle; font-size: 0.875rem; }
-    .action-btn { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
+
+    /* Employee search state */
+    .emp-search-state { padding: 60px 0 40px; text-align: center; }
+    .emp-search-box { max-width: 520px; margin: 0 auto; }
+    .emp-search-box input { font-size: 1rem; border-radius: 10px; padding: .6rem 1rem; }
+    .emp-list-results { max-width: 520px; margin: 8px auto 0; background: #fff; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1); overflow: hidden; display: none; }
+    .emp-list-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f1f3f5; transition: background .1s; }
+    .emp-list-item:last-child { border-bottom: none; }
+    .emp-list-item:hover { background: #f0f4ff; }
+    .emp-avatar-sm { width: 34px; height: 34px; border-radius: 50%; background: #4dabf7; color: #fff; font-weight: 700; font-size: .8rem; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .emp-item-meta { font-size: .78rem; color: #868e96; }
+
+    /* Employee header strip */
+    .emp-header-strip { background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 14px 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
+    .emp-avatar-lg { width: 44px; height: 44px; border-radius: 50%; background: #4dabf7; color: #fff; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .emp-code-pill { font-family: monospace; background: #dce6ff; color: #1e3a8a; padding: 2px 7px; border-radius: 4px; font-size: .75rem; font-weight: 700; }
+
+
+    /* Status pills */
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .status-absent  { background: #ffe3e3; color: #c92a2a; }
+    .status-onduty  { background: #e3fafc; color: #0c8599; }
+    .status-missed  { background: #fff3bf; color: #856404; }
+    .status-present { background: #d3f9d8; color: #2b8a3e; }
+    .status-cl      { background: #d3f9d8; color: #2b8a3e; }
+    .status-weekend { background: #f1f3f5; color: #adb5bd; }
+    .status-holiday { background: #f3d9fa; color: #862e9c; }
+
+    /* Week navigator */
+    .week-nav { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px 16px; margin-bottom: 0; }
+    .week-nav-label { font-weight: 700; font-size: .9rem; color: #212529; }
+    .week-nav .btn { font-size: .8rem; }
+
+    /* Day rows */
+    .week-days-table { width: 100%; border-collapse: collapse; }
+    .week-days-table th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: #868e96; padding: 8px 12px; background: #f8f9fa; border-bottom: 2px solid #e9ecef; font-weight: 600; }
+    .week-days-table td { padding: 11px 12px; border-bottom: 1px solid #f1f3f5; vertical-align: middle; font-size: .855rem; }
+    .week-days-table tr:last-child td { border-bottom: none; }
+    .week-days-table tr.row-weekend td { background: #fafafa; color: #adb5bd; }
+    .week-days-table tr.row-today td { background: #f0f4ff; }
+    .week-days-table tr.row-today td .day-name { color: #1971c2; font-weight: 700; }
+    .week-days-table tr.row-absent td .day-name { color: #c92a2a; }
+    .day-name  { font-weight: 600; color: #343a40; min-width: 36px; display: inline-block; }
+    .day-date  { color: #6c757d; font-size: .8rem; }
+    .punch-times { display: flex; align-items: center; gap: 6px; font-size: .8rem; }
+    .punch-in  { color: #2b8a3e; font-weight: 600; }
+    .punch-out { color: #c92a2a; font-weight: 600; }
+    .punch-sep { color: #dee2e6; }
+    .duration-text { font-size: .78rem; color: #868e96; }
+
+    /* Mini balance strip */
+    .mini-balance { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 0 0 8px 8px; border-top: none; padding: 10px 16px; }
+    .mini-bal-item { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+    .mini-bal-label { color: #6c757d; }
+    .mini-bal-avail { font-weight: 700; color: #2b8a3e; }
+    .mini-bal-used  { font-weight: 700; color: #e67700; }
+
+    /* Leave requests tab */
+    .table th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: #495057; background: #f8f9fa; }
+    .table td { vertical-align: middle; font-size: .875rem; }
+    .req-row-meta { font-size: .78rem; color: #868e96; }
   </style>
 </head>
 <body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
@@ -116,6 +149,8 @@ function authCheck(){
         <li class="nav-main-heading">Reports</li>
         <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
         <li class="nav-main-item"><a class="nav-main-link" href="leave-report.html"><i class="nav-main-link-icon fa fa-chart-pie"></i><span class="nav-main-link-name">Leave Reports</span></a></li>
+        <li class="nav-main-heading">Integrations</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
         <li class="nav-main-heading">Configuration</li>
         <li class="nav-main-item"><a class="nav-main-link" href="pay-period.html"><i class="nav-main-link-icon fa fa-calendar-alt"></i><span class="nav-main-link-name">Pay Period</span></a></li>
       </ul>
@@ -148,6 +183,736 @@ function authCheck(){
   <!-- Main Container -->
   <main id="main-container">
     <div class="content">
+
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h2 class="h4 font-w700 mb-0">Leave Tracker</h2>
+          <p class="text-muted mb-0" style="font-size:.85rem;">Search for an employee to view their leave summary and absent records</p>
+        </div>
+      </div>
+
+      <!-- ── STATE 1: Employee Search ─────────────────────────────── -->
+      <div id="state-search">
+        <div class="block block-rounded block-bordered">
+          <div class="emp-search-state">
+            <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+            <h5 class="font-w600 mb-1">Select an Employee</h5>
+            <p class="text-muted mb-4" style="font-size:.875rem;">Search by name or employee code</p>
+            <div class="emp-search-box">
+              <div class="input-group input-group-lg">
+                <input type="text" id="empSearchInput" class="form-control" placeholder="e.g. Arunkumar or 0028…" autocomplete="off">
+                <div class="input-group-append">
+                  <span class="input-group-text"><i class="fa fa-search"></i></span>
+                </div>
+              </div>
+              <!-- dropdown results -->
+              <div class="emp-list-results" id="empListResults">
+                <div class="emp-list-item" onclick="selectEmployee(28,'Arunkumar Kathiresan','AK','BDM','Business','Head Office')">
+                  <span class="emp-avatar-sm">AK</span>
+                  <div>
+                    <div class="font-w600" style="font-size:.88rem;"><span class="emp-code-pill mr-1">0028</span> Arunkumar Kathiresan</div>
+                    <div class="emp-item-meta">BDM · Business · Head Office</div>
+                  </div>
+                </div>
+                <div class="emp-list-item" onclick="selectEmployee(6741,'Subhash Jayachandran','SJ','JR BDM','Business','Tiruchengode')">
+                  <span class="emp-avatar-sm" style="background:#7950f2;">SJ</span>
+                  <div>
+                    <div class="font-w600" style="font-size:.88rem;"><span class="emp-code-pill mr-1">6741</span> Subhash Jayachandran</div>
+                    <div class="emp-item-meta">JR BDM · Business · Tiruchengode</div>
+                  </div>
+                </div>
+                <div class="emp-list-item" onclick="selectEmployee(12,'Roja Govindasamy','RG','HO HR','Human Resources','Head Office')">
+                  <span class="emp-avatar-sm" style="background:#e64980;">RG</span>
+                  <div>
+                    <div class="font-w600" style="font-size:.88rem;"><span class="emp-code-pill mr-1">0012</span> Roja Govindasamy</div>
+                    <div class="emp-item-meta">HO HR · Human Resources · Head Office</div>
+                  </div>
+                </div>
+                <div class="emp-list-item" onclick="selectEmployee(7,'Sathyamoorthy Kannayiram','SK','Manager Operations','Management','Head Office')">
+                  <span class="emp-avatar-sm" style="background:#2f9e44;">SK</span>
+                  <div>
+                    <div class="font-w600" style="font-size:.88rem;"><span class="emp-code-pill mr-1">0007</span> Sathyamoorthy Kannayiram</div>
+                    <div class="emp-item-meta">Manager Operations · Management · Head Office</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STATE 2: Employee Leave Tracker ─────────────────────── -->
+      <div id="state-tracker" style="display:none;">
+
+        <!-- Employee header strip -->
+        <div class="emp-header-strip mb-3">
+          <button class="btn btn-sm btn-light border mr-2" onclick="resetToSearch()"><i class="fa fa-arrow-left mr-1"></i> Back</button>
+          <span class="emp-avatar-lg" id="trackerAvatarBg"><span id="trackerAvatarText">AK</span></span>
+          <div class="flex-grow-1">
+            <div class="font-w700" style="font-size:1rem;" id="trackerName">Arunkumar Kathiresan</div>
+            <div style="font-size:.8rem;color:#868e96;" id="trackerMeta">BDM · Business · Head Office</div>
+          </div>
+          <div class="d-flex align-items-center gap-2 ml-auto">
+            <span class="text-muted mr-2" style="font-size:.8rem;">Period</span>
+            <select class="form-control form-control-sm" style="width:auto;">
+              <option selected>01-Jan-2026 – 31-Dec-2026</option>
+              <option>01-Jan-2025 – 31-Dec-2025</option>
+            </select>
+            <button class="btn btn-sm btn-primary ml-2" data-toggle="modal" data-target="#modalApplyLeave">
+              <i class="fa fa-plus mr-1"></i> Apply Leave
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="block block-rounded block-bordered">
+          <div class="block-header block-header-default" style="padding-bottom:0;">
+            <ul class="nav nav-tabs w-100 border-0" id="leaveTabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#tabSummary" data-toggle="tab"><i class="fa fa-list-alt mr-1"></i>Leave Summary</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#tabRequests" data-toggle="tab"><i class="fa fa-inbox mr-1"></i>Leave Requests</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="tab-content p-3">
+
+            <!-- ── Tab: Leave Summary (week view) ────────────────── -->
+            <div class="tab-pane show active" id="tabSummary">
+
+              <!-- Week navigator -->
+              <div class="week-nav">
+                <button class="btn btn-sm btn-light border" id="btnPrevWeek" onclick="changeWeek(-1)">
+                  <i class="fa fa-chevron-left mr-1"></i> Prev Week
+                </button>
+                <div class="text-center">
+                  <div class="week-nav-label" id="weekLabel">—</div>
+                  <div style="font-size:.72rem;color:#868e96;" id="weekSubLabel"></div>
+                </div>
+                <button class="btn btn-sm btn-light border" id="btnNextWeek" onclick="changeWeek(1)">
+                  Next Week <i class="fa fa-chevron-right ml-1"></i>
+                </button>
+              </div>
+
+              <!-- Day rows table -->
+              <div class="table-responsive" style="border:1px solid #e9ecef;border-top:none;border-radius:0 0 8px 8px;">
+                <table class="week-days-table" id="weekDaysTable">
+                  <thead>
+                    <tr>
+                      <th style="width:80px;">Day</th>
+                      <th style="width:90px;">Date</th>
+                      <th style="width:140px;">Status</th>
+                      <th>Check-in</th>
+                      <th>Check-out</th>
+                      <th style="width:90px;">Duration</th>
+                      <th>Remark</th>
+                      <th style="width:130px;" class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="weekDaysTbody">
+                    <!-- Rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mini leave balance strip -->
+              <div class="mini-balance mt-0" style="border-radius:0 0 6px 6px;border-top:1px solid #e9ecef;">
+                <div class="mini-bal-item">
+                  <span style="font-size:.9rem;">☀️</span>
+                  <span class="mini-bal-label">Casual Leave —</span>
+                  <span class="mini-bal-avail">8 available</span>
+                  <span class="text-muted">/</span>
+                  <span class="mini-bal-used">3.5 booked</span>
+                </div>
+                <div style="width:1px;background:#dee2e6;align-self:stretch;"></div>
+                <div class="mini-bal-item">
+                  <span style="font-size:.9rem;">🏢</span>
+                  <span class="mini-bal-label">On Duty —</span>
+                  <span class="mini-bal-used">5 booked</span>
+                  <span style="font-size:.72rem;color:#0c8599;margin-left:4px;">(counts as Present)</span>
+                </div>
+                <div class="ml-auto">
+                  <span style="font-size:.72rem;color:#868e96;"><span id="absentCount" class="font-w700" style="color:#c92a2a;">2</span> unresolved absent day(s) in 2026</span>
+                </div>
+              </div>
+
+            </div><!-- /tabSummary -->
+
+            <!-- ── Tab: Leave Requests ─────────────────────────── -->
+            <div class="tab-pane" id="tabRequests">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Leave Type</th>
+                      <th>From</th>
+                      <th>To</th>
+                      <th class="text-center">Days</th>
+                      <th>Applied On</th>
+                      <th>Status</th>
+                      <th>Remark</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;padding:.3em .6em;">Casual Leave</span></td>
+                      <td>12 Jun 2026</td>
+                      <td>12 Jun 2026</td>
+                      <td class="text-center font-w600">0.5</td>
+                      <td class="text-muted req-row-meta">11 Jun 2026</td>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;">Approved</span></td>
+                      <td class="text-muted req-row-meta">Half day — personal work</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;padding:.3em .6em;">Casual Leave</span></td>
+                      <td>02 Jun 2026</td>
+                      <td>03 Jun 2026</td>
+                      <td class="text-center font-w600">2</td>
+                      <td class="text-muted req-row-meta">01 Jun 2026</td>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;">Approved</span></td>
+                      <td class="text-muted req-row-meta">Family function</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge" style="background:#e3fafc;color:#0c8599;font-size:.72rem;padding:.3em .6em;">On Duty</span></td>
+                      <td>18 May 2026</td>
+                      <td>18 May 2026</td>
+                      <td class="text-center font-w600">0.5</td>
+                      <td class="text-muted req-row-meta">19 May 2026</td>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;">Approved</span></td>
+                      <td class="text-muted req-row-meta">Field work — Salem branch visit</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge" style="background:#e3fafc;color:#0c8599;font-size:.72rem;padding:.3em .6em;">On Duty</span></td>
+                      <td>18 Mar 2026</td>
+                      <td>20 Mar 2026</td>
+                      <td class="text-center font-w600">3</td>
+                      <td class="text-muted req-row-meta">17 Mar 2026</td>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;">Approved</span></td>
+                      <td class="text-muted req-row-meta">District training camp</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge" style="background:#d3f9d8;color:#2b8a3e;font-size:.72rem;padding:.3em .6em;">Casual Leave</span></td>
+                      <td>15 Feb 2026</td>
+                      <td>15 Feb 2026</td>
+                      <td class="text-center font-w600">1</td>
+                      <td class="text-muted req-row-meta">14 Feb 2026</td>
+                      <td><span class="badge" style="background:#fff3bf;color:#856404;font-size:.72rem;">Pending</span></td>
+                      <td class="text-muted req-row-meta">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div><!-- /tabRequests -->
+
+          </div><!-- /tab-content -->
+        </div><!-- /block -->
+
+      </div><!-- /state-tracker -->
+
+      <!-- ─────────────── Update Status Modal ─────────────────── -->
+      <div class="modal fade" id="modalUpdateStatus" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title font-w600"><i class="fa fa-edit mr-2 text-primary"></i>Update Attendance Status</h5>
+              <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+            </div>
+            <div class="modal-body">
+
+              <!-- Date info -->
+              <div class="d-flex align-items-center mb-3 p-3" style="background:#f8f9fa;border-radius:8px;">
+                <i class="fa fa-calendar-day fa-lg text-primary mr-3"></i>
+                <div>
+                  <div class="font-w700" id="modalDate">28 May 2026 · Thursday</div>
+                  <div class="text-muted" style="font-size:.8rem;">Duration marked: <span id="modalDuration">0.5 day</span></div>
+                </div>
+              </div>
+
+              <!-- Status options -->
+              <div class="font-w600 mb-2" style="font-size:.85rem;">Mark this day as: <span class="text-danger">*</span></div>
+
+              <div class="mb-2">
+                <label class="d-flex align-items-start p-3 mb-2 rounded" style="cursor:pointer;border:2px solid #e9ecef;transition:border-color .15s;" id="optOnDutyLabel">
+                  <input type="radio" name="updateStatus" value="onduty" class="mt-1 mr-3" onchange="highlightOption()">
+                  <div>
+                    <div class="font-w600" style="color:#0c8599;"><i class="fa fa-map-marker-alt mr-1"></i>On Duty</div>
+                    <div class="text-muted" style="font-size:.78rem;">Employee was working outside the office (field visit, travel, training etc.) — counts as Present</div>
+                  </div>
+                </label>
+                <label class="d-flex align-items-start p-3 rounded" style="cursor:pointer;border:2px solid #e9ecef;transition:border-color .15s;" id="optMissedLabel">
+                  <input type="radio" name="updateStatus" value="missed" class="mt-1 mr-3" onchange="highlightOption()">
+                  <div>
+                    <div class="font-w600" style="color:#856404;"><i class="fa fa-clock mr-1"></i>Missed Punching Machine</div>
+                    <div class="text-muted" style="font-size:.78rem;">Employee was present but did not tap the attendance machine — counts as Present</div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Notes -->
+              <div class="mt-3">
+                <label class="font-w600" style="font-size:.85rem;">Notes / Reason <span class="text-muted font-w400">(optional)</span></label>
+                <textarea class="form-control" id="updateNotes" rows="2" placeholder="e.g. Field visit to Salem branch, machine was down…"></textarea>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="saveStatusUpdate()"><i class="fa fa-check mr-1"></i>Save &amp; Mark Present</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── Apply Leave Modal ───────────────────── -->
+      <div class="modal fade" id="modalApplyLeave" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title font-w600"><i class="fa fa-umbrella-beach mr-2 text-primary"></i>Apply Leave</h5>
+              <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+            </div>
+            <div class="modal-body">
+
+              <!-- Leave type -->
+              <div class="form-group">
+                <label class="font-w600" style="font-size:.85rem;">Leave Type <span class="text-danger">*</span></label>
+                <select class="form-control" id="leaveType">
+                  <option value="cl">Casual Leave</option>
+                  <option value="od">On Duty</option>
+                </select>
+              </div>
+
+              <!-- From / To dates with half-day selectors -->
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-group mb-2">
+                    <label class="font-w600" style="font-size:.85rem;">From Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="leaveFrom" value="2026-06-23" onchange="recalcLeave()">
+                  </div>
+                  <div class="form-group">
+                    <label class="font-w600" style="font-size:.78rem;color:#6c757d;">Start</label>
+                    <div class="d-flex gap-2">
+                      <label class="mr-3" style="cursor:pointer;font-size:.85rem;">
+                        <input type="radio" name="startHalf" value="full" checked onchange="recalcLeave()"> Full day
+                      </label>
+                      <label style="cursor:pointer;font-size:.85rem;">
+                        <input type="radio" name="startHalf" value="second" onchange="recalcLeave()"> Second half
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group mb-2">
+                    <label class="font-w600" style="font-size:.85rem;">To Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="leaveTo" value="2026-06-23" onchange="recalcLeave()">
+                  </div>
+                  <div class="form-group">
+                    <label class="font-w600" style="font-size:.78rem;color:#6c757d;">End</label>
+                    <div class="d-flex gap-2">
+                      <label class="mr-3" style="cursor:pointer;font-size:.85rem;">
+                        <input type="radio" name="endHalf" value="full" checked onchange="recalcLeave()"> Full day
+                      </label>
+                      <label style="cursor:pointer;font-size:.85rem;">
+                        <input type="radio" name="endHalf" value="first" onchange="recalcLeave()"> First half
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live calculation summary -->
+              <div id="leaveCalcBox" style="background:#f0f4ff;border:1px solid #c5d5f5;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span style="font-size:.82rem;color:#1864ab;font-weight:600;" id="leaveTotalLabel">Total: 1 working day</span>
+                  <span id="leaveWarnTag" style="display:none;font-size:.72rem;background:#fff3bf;color:#856404;padding:2px 8px;border-radius:10px;font-weight:600;"></span>
+                </div>
+                <!-- Day-by-day preview -->
+                <div id="leaveDayPreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;"></div>
+              </div>
+
+              <!-- Reason -->
+              <div class="form-group mb-0">
+                <label class="font-w600" style="font-size:.85rem;">Reason</label>
+                <textarea class="form-control" id="leaveReason" rows="2" placeholder="Brief reason for leave…"></textarea>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-paper-plane mr-1"></i>Submit Request</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <script src="../assets/jquery.min.js"></script>
+  <script src="../assets/bootstrap.bundle.min.js"></script>
+  <script src="../assets/oneui.app.min.js"></script>
+  <script>
+    // ── Week data ────────────────────────────────────────────────
+    // Each week: array of 7 days Mon→Sun
+    // status: present | absent | onduty | missed | cl | holiday | weekend
+    var WEEKS = [
+      { label: 'Mon 16 Jun – Sun 22 Jun 2026', sub: 'Current week',
+        days: [
+          {day:'Mon', date:'16 Jun', status:'present', in:'09:47', out:'18:12', dur:'8h 25m'},
+          {day:'Tue', date:'17 Jun', status:'present', in:'09:52', out:'18:05', dur:'8h 13m'},
+          {day:'Wed', date:'18 Jun', status:'present', in:'10:02', out:'18:30', dur:'8h 28m'},
+          {day:'Thu', date:'19 Jun', status:'absent',  dur:'1 day',   id:'abs-19jun'},
+          {day:'Fri', date:'20 Jun', status:'absent',  dur:'0.5 day', id:'abs-20jun'},
+          {day:'Sat', date:'21 Jun', status:'weekend'},
+          {day:'Sun', date:'22 Jun', status:'weekend', note:'Today'},
+        ]
+      },
+      { label: 'Mon 09 Jun – Sun 15 Jun 2026', sub: '1 week ago',
+        days: [
+          {day:'Mon', date:'09 Jun', status:'present', in:'09:55', out:'18:20', dur:'8h 25m'},
+          {day:'Tue', date:'10 Jun', status:'present', in:'10:05', out:'18:15', dur:'8h 10m'},
+          {day:'Wed', date:'11 Jun', status:'present', in:'09:50', out:'18:00', dur:'8h 10m'},
+          {day:'Thu', date:'12 Jun', status:'cl',      dur:'0.5 day', note:'Half Day CL — personal work'},
+          {day:'Fri', date:'13 Jun', status:'present', in:'09:45', out:'18:10', dur:'8h 25m'},
+          {day:'Sat', date:'14 Jun', status:'weekend'},
+          {day:'Sun', date:'15 Jun', status:'weekend'},
+        ]
+      },
+      { label: 'Mon 02 Jun – Sun 08 Jun 2026', sub: '2 weeks ago',
+        days: [
+          {day:'Mon', date:'02 Jun', status:'cl',      dur:'1 day', note:'CL — family function'},
+          {day:'Tue', date:'03 Jun', status:'cl',      dur:'1 day', note:'CL — family function'},
+          {day:'Wed', date:'04 Jun', status:'present', in:'09:48', out:'18:10', dur:'8h 22m'},
+          {day:'Thu', date:'05 Jun', status:'present', in:'09:52', out:'18:15', dur:'8h 23m'},
+          {day:'Fri', date:'06 Jun', status:'present', in:'10:00', out:'18:30', dur:'8h 30m'},
+          {day:'Sat', date:'07 Jun', status:'weekend'},
+          {day:'Sun', date:'08 Jun', status:'weekend'},
+        ]
+      },
+      { label: 'Mon 26 May – Sun 01 Jun 2026', sub: '3 weeks ago',
+        days: [
+          {day:'Mon', date:'26 May', status:'present', in:'09:50', out:'18:15', dur:'8h 25m'},
+          {day:'Tue', date:'27 May', status:'absent',  dur:'1 day',   id:'abs-27may'},
+          {day:'Wed', date:'28 May', status:'absent',  dur:'0.5 day', id:'abs-28may'},
+          {day:'Thu', date:'29 May', status:'present', in:'09:55', out:'18:10', dur:'8h 15m'},
+          {day:'Fri', date:'30 May', status:'present', in:'09:45', out:'18:00', dur:'8h 15m'},
+          {day:'Sat', date:'31 May', status:'weekend'},
+          {day:'Sun', date:'01 Jun', status:'weekend'},
+        ]
+      },
+      { label: 'Mon 19 May – Sun 25 May 2026', sub: '4 weeks ago',
+        days: [
+          {day:'Mon', date:'19 May', status:'onduty',  dur:'1 day', note:'Field work — Salem branch visit'},
+          {day:'Tue', date:'20 May', status:'missed',  dur:'1 day', note:'Machine not reachable — logged manually'},
+          {day:'Wed', date:'21 May', status:'present', in:'10:00', out:'18:15', dur:'8h 15m'},
+          {day:'Thu', date:'22 May', status:'present', in:'09:48', out:'18:10', dur:'8h 22m'},
+          {day:'Fri', date:'23 May', status:'present', in:'09:50', out:'18:05', dur:'8h 15m'},
+          {day:'Sat', date:'24 May', status:'weekend'},
+          {day:'Sun', date:'25 May', status:'weekend'},
+        ]
+      },
+      { label: 'Mon 12 May – Sun 18 May 2026', sub: '5 weeks ago',
+        days: [
+          {day:'Mon', date:'12 May', status:'present', in:'09:45', out:'18:10', dur:'8h 25m'},
+          {day:'Tue', date:'13 May', status:'present', in:'09:58', out:'18:20', dur:'8h 22m'},
+          {day:'Wed', date:'14 May', status:'present', in:'09:50', out:'18:15', dur:'8h 25m'},
+          {day:'Thu', date:'15 May', status:'holiday', note:'Tamil Nadu Election — Public Holiday'},
+          {day:'Fri', date:'16 May', status:'present', in:'09:42', out:'18:05', dur:'8h 23m'},
+          {day:'Sat', date:'17 May', status:'weekend'},
+          {day:'Sun', date:'18 May', status:'weekend'},
+        ]
+      },
+    ];
+
+    // Mutated status for absent rows that have been updated in this session
+    var updatedRows = {};
+
+    var currentWeekIdx = 0;
+
+    function renderWeek() {
+      var week = WEEKS[currentWeekIdx];
+      document.getElementById('weekLabel').textContent    = week.label;
+      document.getElementById('weekSubLabel').textContent = week.sub || '';
+      document.getElementById('btnPrevWeek').disabled = (currentWeekIdx >= WEEKS.length - 1);
+      document.getElementById('btnNextWeek').disabled = (currentWeekIdx <= 0);
+
+      var tbody = document.getElementById('weekDaysTbody');
+      tbody.innerHTML = '';
+
+      week.days.forEach(function(d, i) {
+        var rowId  = currentWeekIdx + '_' + i;
+        var status = updatedRows[rowId] ? updatedRows[rowId] : d;
+        var tr = document.createElement('tr');
+
+        // Row class
+        if (status.status === 'weekend') tr.className = 'row-weekend';
+        else if (status.status === 'absent') tr.className = 'row-absent';
+        else if (d.note === 'Today') tr.className = 'row-today';
+
+        var statusPill = statusHTML(status);
+        var inCell     = punchCell('in',  status);
+        var outCell    = punchCell('out', status);
+        var durCell    = status.dur  ? '<span class="duration-text">' + status.dur  + '</span>' : '<span class="text-muted">—</span>';
+        var remarkCell = remarkHTML(status);
+        var actionCell = actionHTML(status, rowId, d.date, d.day, d.dur);
+
+        tr.innerHTML =
+          '<td><span class="day-name">' + d.day + '</span></td>' +
+          '<td><span class="day-date">' + d.date + '</span></td>' +
+          '<td>' + statusPill + '</td>' +
+          '<td>' + inCell    + '</td>' +
+          '<td>' + outCell   + '</td>' +
+          '<td>' + durCell   + '</td>' +
+          '<td>' + remarkCell + '</td>' +
+          '<td class="text-center">' + actionCell + '</td>';
+
+        tbody.appendChild(tr);
+      });
+
+      // Recount unresolved absents across all weeks
+      var total = 0;
+      WEEKS.forEach(function(w, wi) {
+        w.days.forEach(function(d, di) {
+          var rid = wi + '_' + di;
+          var s = updatedRows[rid] ? updatedRows[rid].status : d.status;
+          if (s === 'absent') total++;
+        });
+      });
+      document.getElementById('absentCount').textContent = total;
+    }
+
+    function statusHTML(s) {
+      var map = {
+        present: '<span class="status-pill status-present"><i class="fa fa-check-circle"></i> Present</span>',
+        absent:  '<span class="status-pill status-absent"><i class="fa fa-times-circle"></i> Absent</span>',
+        onduty:  '<span class="status-pill status-onduty"><i class="fa fa-map-marker-alt"></i> On Duty</span>',
+        missed:  '<span class="status-pill status-missed"><i class="fa fa-clock"></i> Missed Punch</span>',
+        cl:      '<span class="status-pill status-cl"><i class="fa fa-umbrella-beach"></i> Casual Leave</span>',
+        holiday: '<span class="status-pill status-holiday"><i class="fa fa-star"></i> Holiday</span>',
+        weekend: '<span class="status-pill status-weekend">Weekend</span>',
+      };
+      return map[s.status] || '—';
+    }
+
+    function punchCell(type, s) {
+      if (s.status === 'present') {
+        var t = type === 'in' ? s.in : s.out;
+        var cls = type === 'in' ? 'punch-in' : 'punch-out';
+        return '<span class="' + cls + '">' + t + '</span>';
+      }
+      return '<span class="text-muted">—</span>';
+    }
+
+    function remarkHTML(s) {
+      if (s.note && s.status !== 'weekend') {
+        var ico = s.status === 'onduty' ? 'fa-map-marker-alt' :
+                  s.status === 'missed' ? 'fa-clock' :
+                  s.status === 'holiday' ? 'fa-star' :
+                  s.status === 'cl' ? 'fa-umbrella-beach' : 'fa-info-circle';
+        return '<span style="font-size:.78rem;color:#495057;"><i class="fa ' + ico + ' mr-1 text-muted"></i>' + s.note + '</span>';
+      }
+      return '<span class="text-muted">—</span>';
+    }
+
+    function actionHTML(status, rowId, date, day, dur) {
+      if (status.status === 'absent') {
+        return '<button class="btn btn-sm btn-outline-danger" style="font-size:.75rem;" onclick="openUpdateModal(\'' + rowId + '\',\'' + date + '\',\'' + day + '\',\'' + (dur||'1 day') + '\')">Update Status</button>';
+      }
+      return '';
+    }
+
+    function changeWeek(dir) {
+      currentWeekIdx += dir;
+      renderWeek();
+    }
+
+    // ── Employee search ──────────────────────────────────────────
+    document.getElementById('empSearchInput').addEventListener('input', function() {
+      var q = this.value.toLowerCase().trim();
+      var results = document.getElementById('empListResults');
+      if (!q) { results.style.display = 'none'; return; }
+      var shown = 0;
+      results.querySelectorAll('.emp-list-item').forEach(function(item) {
+        var vis = item.textContent.toLowerCase().includes(q);
+        item.style.display = vis ? '' : 'none';
+        if (vis) shown++;
+      });
+      results.style.display = shown ? 'block' : 'none';
+    });
+
+    document.getElementById('empSearchInput').addEventListener('focus', function() {
+      if (this.value.trim()) document.getElementById('empListResults').style.display = 'block';
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#empSearchInput') && !e.target.closest('#empListResults'))
+        document.getElementById('empListResults').style.display = 'none';
+    });
+
+    function selectEmployee(code, name, initials, desig, dept, branch) {
+      document.getElementById('state-search').style.display = 'none';
+      document.getElementById('state-tracker').style.display = 'block';
+      document.getElementById('trackerName').textContent = name;
+      document.getElementById('trackerMeta').textContent = desig + ' · ' + dept + ' · ' + branch;
+      document.getElementById('trackerAvatarText').textContent = initials;
+      document.getElementById('empListResults').style.display = 'none';
+      currentWeekIdx = 0;
+      updatedRows = {};
+      renderWeek();
+    }
+
+    function resetToSearch() {
+      document.getElementById('state-search').style.display = 'block';
+      document.getElementById('state-tracker').style.display = 'none';
+      document.getElementById('empSearchInput').value = '';
+    }
+
+    // ── Update status modal ──────────────────────────────────────
+    var pendingUpdate = null;
+
+    function openUpdateModal(rowId, date, day, duration) {
+      pendingUpdate = { rowId: rowId, date: date, day: day, dur: duration };
+      document.getElementById('modalDate').textContent     = date + ' · ' + day;
+      document.getElementById('modalDuration').textContent = duration;
+      document.querySelectorAll('[name="updateStatus"]').forEach(function(r){ r.checked = false; });
+      document.getElementById('updateNotes').value = '';
+      document.getElementById('optOnDutyLabel').style.borderColor = '#e9ecef';
+      document.getElementById('optMissedLabel').style.borderColor = '#e9ecef';
+      $('#modalUpdateStatus').modal('show');
+    }
+
+    function highlightOption() {
+      var val = document.querySelector('[name="updateStatus"]:checked').value;
+      document.getElementById('optOnDutyLabel').style.borderColor = val === 'onduty' ? '#0c8599' : '#e9ecef';
+      document.getElementById('optMissedLabel').style.borderColor = val === 'missed'  ? '#f59f00' : '#e9ecef';
+    }
+
+    // ── Apply Leave calculator ───────────────────────────────────
+    // All Saturdays work; only Sunday is non-working (plus public holidays,
+    // but for this prototype we just exclude Sundays).
+    function recalcLeave() {
+      var fromVal = document.getElementById('leaveFrom').value;
+      var toVal   = document.getElementById('leaveTo').value;
+      if (!fromVal || !toVal) return;
+
+      var from = new Date(fromVal);
+      var to   = new Date(toVal);
+
+      // Swap silently if from > to
+      if (from > to) {
+        document.getElementById('leaveTo').value = fromVal;
+        to = new Date(fromVal);
+      }
+
+      var startHalf = document.querySelector('[name="startHalf"]:checked').value; // full | second
+      var endHalf   = document.querySelector('[name="endHalf"]:checked').value;   // full | first
+
+      // Single-day: disable "To" half if same date, show three-way
+      var sameDay = (from.toDateString() === to.toDateString());
+
+      // Build list of working days between from and to (Sun = 0 excluded)
+      var days = [];
+      var cur = new Date(from);
+      var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var skipped = 0;
+
+      while (cur <= to) {
+        var dow = cur.getDay();
+        if (dow === 0) {           // Sunday → skip
+          skipped++;
+        } else {
+          days.push({
+            label: DAYS[dow] + ' ' + cur.getDate() + ' ' + MONTHS[cur.getMonth()],
+            dow: dow,
+            isFirst: days.length === 0,
+            isLast: false,         // filled below
+            dateStr: cur.toDateString(),
+          });
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+      if (days.length === 0) {
+        document.getElementById('leaveTotalLabel').textContent = 'Selected range falls on Sunday(s) only';
+        document.getElementById('leaveDayPreview').innerHTML = '';
+        document.getElementById('leaveWarnTag').style.display = 'none';
+        return;
+      }
+      days[days.length - 1].isLast = true;
+
+      // Calculate total
+      var total = days.length;
+      if (!sameDay) {
+        if (startHalf === 'second') total -= 0.5;
+        if (endHalf   === 'first')  total -= 0.5;
+      } else {
+        // Same day: start half dominates, end half ignored
+        if (startHalf === 'second') total = 0.5;
+      }
+
+      // Format total nicely
+      var totalStr = total % 1 === 0 ? total + (total === 1 ? ' working day' : ' working days')
+                                     : total + ' working days';
+
+      document.getElementById('leaveTotalLabel').textContent = 'Total: ' + totalStr;
+
+      // Warning if Sundays were skipped
+      var warnTag = document.getElementById('leaveWarnTag');
+      if (skipped > 0) {
+        warnTag.style.display = '';
+        warnTag.textContent = skipped + ' Sunday' + (skipped > 1 ? 's' : '') + ' excluded';
+      } else {
+        warnTag.style.display = 'none';
+      }
+
+      // Day-by-day pill preview
+      var preview = document.getElementById('leaveDayPreview');
+      preview.innerHTML = '';
+      days.forEach(function(d, idx) {
+        var halfLabel = '';
+        var bg = '#dce6ff'; var color = '#1864ab';
+        if (sameDay) {
+          halfLabel = startHalf === 'second' ? ' (2nd half)' : startHalf === 'full' ? '' : ' (1st half)';
+        } else {
+          if (d.isFirst && startHalf === 'second') { halfLabel = ' (2nd half)'; bg = '#fff3bf'; color = '#856404'; }
+          if (d.isLast  && endHalf   === 'first')  { halfLabel = ' (1st half)'; bg = '#fff3bf'; color = '#856404'; }
+        }
+        var pill = document.createElement('span');
+        pill.style.cssText = 'display:inline-flex;align-items:center;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:10px;background:' + bg + ';color:' + color + ';';
+        pill.textContent = d.label + halfLabel;
+        preview.appendChild(pill);
+      });
+    }
+
+    // Trigger on modal open
+    $('#modalApplyLeave').on('show.bs.modal', function() {
+      recalcLeave();
+    });
+
+    function saveStatusUpdate() {
+      var statusEl = document.querySelector('[name="updateStatus"]:checked');
+      if (!statusEl) { alert('Please select a status.'); return; }
+      var val   = statusEl.value;
+      var notes = document.getElementById('updateNotes').value.trim();
+
+      if (pendingUpdate) {
+        updatedRows[pendingUpdate.rowId] = {
+          status: val === 'onduty' ? 'onduty' : 'missed',
+          dur:    pendingUpdate.dur,
+          note:   notes || (val === 'onduty' ? 'On Duty — field work' : 'Missed punching machine'),
+        };
+        renderWeek();
+      }
+      $('#modalUpdateStatus').modal('hide');
+    }
+  </script>
+
+</div><!-- END #page-container -->
+</body>
+</html>
 
       <!-- Page Header -->
       <div class="d-flex align-items-center justify-content-between mb-2">

@@ -10,169 +10,237 @@
   body {
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     background: #0f172a;
-    color: #1e293b;
+    color: #fff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
-  /* ── Hero ─────────────────────────────────────────────────── */
-  .hero {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
-    color: #fff;
-    padding: 72px 24px 64px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    flex: 1;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 60% 30%, rgba(59,130,246,.15) 0%, transparent 70%);
+  /* ── Page background ──────────────────────────────────────── */
+  .page-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1a2d4a 50%, #0f172a 100%);
     pointer-events: none;
   }
-  .hero-badge {
-    display: inline-block;
-    background: rgba(59,130,246,.2);
-    border: 1px solid rgba(59,130,246,.4);
-    color: #93c5fd;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 20px;
-    margin-bottom: 22px;
-  }
-  .hero h1 {
-    font-size: clamp(26px, 5vw, 46px);
-    font-weight: 800;
-    letter-spacing: -.02em;
-    line-height: 1.15;
-    margin-bottom: 14px;
-  }
-  .hero h1 span { color: #60a5fa; }
-  .hero p {
-    font-size: 16px;
-    color: #94a3b8;
-    max-width: 480px;
-    margin: 0 auto 56px;
-    line-height: 1.6;
+  .page-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 20%, rgba(59,130,246,.12) 0%, transparent 100%),
+      radial-gradient(ellipse 50% 40% at 20% 80%, rgba(16,185,129,.08) 0%, transparent 100%);
   }
 
-  /* ── Module Cards ─────────────────────────────────────────── */
-  .modules {
-    display: flex;
-    gap: 28px;
-    justify-content: center;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-    max-width: 960px;
-    margin: 0 auto 56px;
-    padding: 0 16px;
-  }
-  .module-card {
-    background: rgba(255,255,255,.05);
-    border: 1.5px solid rgba(255,255,255,.10);
-    border-radius: 20px;
-    padding: 36px 32px 30px;
-    width: 280px;
-    text-decoration: none;
-    color: #fff;
-    transition: transform .18s ease, background .18s, border-color .18s;
+  /* ── Wrapper ──────────────────────────────────────────────── */
+  .wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
+  }
+
+  /* ── Header ───────────────────────────────────────────────── */
+  .site-header {
+    padding: 32px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .site-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: #fff;
+    letter-spacing: -.03em;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #e2e8f0; }
+  .logo-text small { display: block; font-size: 11px; font-weight: 400; color: #64748b; margin-top: 1px; }
+  .header-badge {
+    font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: #64748b;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── Hero text ────────────────────────────────────────────── */
+  .hero-text {
+    padding: 56px 0 48px;
+    text-align: center;
+  }
+  .hero-text h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -.025em;
+    line-height: 1.12;
+    margin-bottom: 16px;
+  }
+  .hero-text h1 em { font-style: normal; color: #60a5fa; }
+  .hero-text p {
+    font-size: 16px;
+    color: #94a3b8;
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* ── Module grid ──────────────────────────────────────────── */
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .module-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 18px;
+    padding: 28px 28px 24px;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: transform .18s ease, border-color .18s, box-shadow .18s;
     position: relative;
     overflow: hidden;
   }
   .module-card::before {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--glow);
+    position: absolute; inset: 0;
+    background: var(--card-glow, none);
     opacity: 0;
     transition: opacity .2s;
     pointer-events: none;
   }
-  .module-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+  .module-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--card-accent);
+    box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  }
   .module-card:hover::before { opacity: 1; }
-  .module-card.crm  { --accent:#3b82f6; --glow:radial-gradient(ellipse at 20% 20%, rgba(59,130,246,.1) 0%, transparent 70%); }
-  .module-card.hr   { --accent:#10b981; --glow:radial-gradient(ellipse at 20% 20%, rgba(16,185,129,.1) 0%, transparent 70%); }
 
-  .module-icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
+  .module-card.crm {
+    --card-accent: #3b82f6;
+    --card-glow: radial-gradient(ellipse 80% 60% at 10% 10%, rgba(59,130,246,.1) 0%, transparent 70%);
+  }
+  .module-card.hr {
+    --card-accent: #10b981;
+    --card-glow: radial-gradient(ellipse 80% 60% at 10% 10%, rgba(16,185,129,.1) 0%, transparent 70%);
+  }
+
+  /* Card header row */
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .card-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    border-radius: 12px;
     background: var(--icon-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
   }
-  .module-card.crm .module-icon { --icon-bg:rgba(59,130,246,.15); }
-  .module-card.hr  .module-icon { --icon-bg:rgba(16,185,129,.15); }
+  .module-card.crm .card-icon { --icon-bg: rgba(59,130,246,.15); }
+  .module-card.hr  .card-icon { --icon-bg: rgba(16,185,129,.15); }
 
-  .module-card h2 { font-size: 20px; font-weight: 700; margin: 0; }
-  .module-card .module-desc { font-size: 13.5px; color: #94a3b8; line-height: 1.55; }
-  .module-card .module-tag {
-    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 20px; margin-top: 2px;
+  .card-title { flex: 1; }
+  .card-tag {
+    display: inline-block;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; padding: 2px 9px;
+    border-radius: 20px; margin-bottom: 6px;
   }
-  .module-card.crm .module-tag { background: rgba(59,130,246,.2); color: #93c5fd; }
-  .module-card.hr  .module-tag { background: rgba(16,185,129,.2); color: #6ee7b7; }
+  .module-card.crm .card-tag { background: rgba(59,130,246,.18); color: #93c5fd; }
+  .module-card.hr  .card-tag { background: rgba(16,185,129,.18); color: #6ee7b7; }
 
-  .module-pages {
-    display: flex; flex-direction: column; gap: 6px; width: 100%;
-    border-top: 1px solid rgba(255,255,255,.08); padding-top: 14px; margin-top: 4px;
+  .card-title h2 {
+    font-size: 18px; font-weight: 700;
+    line-height: 1.25; color: #f1f5f9;
+  }
+
+  /* Description */
+  .card-desc {
+    font-size: 13px; color: #94a3b8; line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* Page links */
+  .card-pages {
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding-top: 16px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    flex: 1;
   }
   .page-link {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12.5px; color: #94a3b8; text-decoration: none;
-    padding: 5px 8px; border-radius: 7px;
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: #64748b; text-decoration: none;
+    padding: 6px 8px; border-radius: 8px;
     transition: background .12s, color .12s;
+    white-space: nowrap;
+    overflow: hidden;
   }
-  .page-link:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
-  .page-link span { font-size: 14px; }
+  .page-link:hover { background: rgba(255,255,255,.06); color: #cbd5e1; }
+  .page-link .pl-icon { font-size: 13px; flex-shrink: 0; }
+  .page-link .pl-label { overflow: hidden; text-overflow: ellipsis; }
 
-  .module-cta {
+  /* CTA footer */
+  .card-cta {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding-top: 16px;
+  }
+  .cta-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13px; font-weight: 700; color: var(--accent);
-    margin-top: 4px;
+    font-size: 13px; font-weight: 700;
+    color: #fff;
+    background: var(--card-accent);
+    border: none; border-radius: 8px;
+    padding: 8px 18px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity .15s;
   }
-  .module-cta::after { content: '→'; }
+  .cta-btn:hover { opacity: .88; color: #fff; }
+  .card-count {
+    font-size: 11px; color: #475569;
+  }
 
-  /* ── Divider ──────────────────────────────────────────────── */
-  .section-divider {
+  /* ── Divider strip ────────────────────────────────────────── */
+  .tech-strip {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .tech-pill {
+    font-size: 11px; color: #475569;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  .site-footer {
     position: relative; z-index: 1;
-    text-align: center; margin-bottom: 48px;
-  }
-  .section-divider h2 {
-    font-size: 13px; font-weight: 600; letter-spacing: .1em;
-    text-transform: uppercase; color: #475569;
-    display: inline-flex; align-items: center; gap: 12px;
-  }
-  .section-divider h2::before,
-  .section-divider h2::after {
-    content: '';
-    display: inline-block; width: 60px; height: 1px;
-    background: rgba(255,255,255,.08);
-  }
-
-  /* ── Bottom strip ─────────────────────────────────────────── */
-  .bottom-strip {
-    background: rgba(0,0,0,.3);
     border-top: 1px solid rgba(255,255,255,.06);
-    padding: 20px 24px;
+    padding: 18px 24px;
     text-align: center;
-    font-size: 12px;
-    color: #475569;
+    font-size: 11.5px;
+    color: #334155;
   }
-  .bottom-strip a { color: #60a5fa; text-decoration: none; }
-  .bottom-strip a:hover { text-decoration: underline; }
+  .site-footer a { color: #3b82f6; text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -222,60 +290,97 @@ function authCheck(){
 }
 </script>
 
-<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
-<div class="hero">
-  <div class="hero-badge">Internal Prototypes · 2026</div>
-  <h1>DNC CHITS<br><span>Digital Initiatives</span></h1>
-  <p>Interactive prototypes for rosca-digital platform modules — built for design review and engineering planning.</p>
+<div class="page-bg"></div>
 
+<!-- ── Main wrapper ───────────────────────────────────────────────────────── -->
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="site-header">
+    <div class="site-logo">
+      <div class="logo-mark">D</div>
+      <div class="logo-text">
+        DNC CHITS
+        <small>Pvt Ltd</small>
+      </div>
+    </div>
+    <div class="header-badge">Internal Prototypes · 2026</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero-text">
+    <h1>Digital Initiatives<br><em>Prototype Hub</em></h1>
+    <p>Interactive UI prototypes for rosca-digital platform modules — built for design review and engineering planning.</p>
+  </div>
+
+  <!-- Module cards -->
   <div class="modules">
 
-    <!-- CRM Module -->
-    <a href="crm/index.html" class="module-card crm">
-      <div class="module-icon">📋</div>
-      <div>
-        <div class="module-tag">CRM</div>
-        <h2 style="margin-top:6px;">Lead Management</h2>
+    <!-- CRM -->
+    <div class="module-card crm">
+      <div class="card-header">
+        <div class="card-icon">📋</div>
+        <div class="card-title">
+          <span class="card-tag">CRM</span>
+          <h2>Lead Management</h2>
+        </div>
       </div>
-      <p class="module-desc">Capture, track and convert prospects into chit fund subscribers. Lead lifecycle, follow-ups, flags and conversion flow.</p>
-      <div class="module-pages">
-        <a href="crm/leads-list.html" class="page-link" onclick="event.stopPropagation()"><span>📄</span> Leads List</a>
-        <a href="crm/lead-detail.html" class="page-link" onclick="event.stopPropagation()"><span>🔍</span> Lead Detail</a>
-        <a href="crm/create-lead.html" class="page-link" onclick="event.stopPropagation()"><span>➕</span> Create Lead</a>
-        <a href="crm/reports.html" class="page-link" onclick="event.stopPropagation()"><span>📊</span> CRM Reports</a>
-        <a href="crm/docs.html" class="page-link" onclick="event.stopPropagation()"><span>📐</span> Documentation</a>
+      <p class="card-desc">Capture, track and convert prospects into chit fund subscribers. Full lead lifecycle — follow-ups, flags, interactions and conversion flow.</p>
+      <div class="card-pages">
+        <a href="crm/leads-list.html" class="page-link"><span class="pl-icon">📄</span><span class="pl-label">Leads List</span></a>
+        <a href="crm/lead-detail.html" class="page-link"><span class="pl-icon">🔍</span><span class="pl-label">Lead Detail</span></a>
+        <a href="crm/create-lead.html" class="page-link"><span class="pl-icon">➕</span><span class="pl-label">Create Lead</span></a>
+        <a href="crm/reports.html" class="page-link"><span class="pl-icon">📊</span><span class="pl-label">CRM Reports</span></a>
+        <a href="crm/docs.html" class="page-link"><span class="pl-icon">📐</span><span class="pl-label">Documentation</span></a>
+        <a href="crm/prototype.html" class="page-link"><span class="pl-icon">🚀</span><span class="pl-label">Full Preview</span></a>
       </div>
-      <div class="module-cta">Open CRM Hub </div>
-    </a>
+      <div class="card-cta">
+        <a href="crm/index.html" class="cta-btn">Open CRM Hub →</a>
+        <span class="card-count">6 screens</span>
+      </div>
+    </div>
 
-    <!-- HR Module -->
-    <a href="hr-module/index.html" class="module-card hr">
-      <div class="module-icon">👥</div>
-      <div>
-        <div class="module-tag">HR Module</div>
-        <h2 style="margin-top:6px;">Employee & Attendance</h2>
+    <!-- HR -->
+    <div class="module-card hr">
+      <div class="card-header">
+        <div class="card-icon">👥</div>
+        <div class="card-title">
+          <span class="card-tag">HR Module</span>
+          <h2>Employee &amp; Attendance</h2>
+        </div>
       </div>
-      <p class="module-desc">Employee directory, attendance tracking, leave management, shifts and holiday configuration — integrated with existing Rosca entities.</p>
-      <div class="module-pages">
-        <a href="hr-module/employee-list.html" class="page-link" onclick="event.stopPropagation()"><span>👤</span> Employee Directory</a>
-        <a href="hr-module/attendance.html" class="page-link" onclick="event.stopPropagation()"><span>📅</span> Attendance</a>
-        <a href="hr-module/leave-tracker.html" class="page-link" onclick="event.stopPropagation()"><span>🏖️</span> Leave Tracker</a>
-        <a href="hr-module/shifts.html" class="page-link" onclick="event.stopPropagation()"><span>🕐</span> Shifts</a>
-        <a href="hr-module/holidays.html" class="page-link" onclick="event.stopPropagation()"><span>🎉</span> Holidays</a>
+      <p class="card-desc">Employee directory, attendance tracking, leave management, shift configuration and holiday calendar — built on existing Rosca entities.</p>
+      <div class="card-pages">
+        <a href="hr-module/employee-list.html" class="page-link"><span class="pl-icon">👤</span><span class="pl-label">Employees</span></a>
+        <a href="hr-module/attendance.html" class="page-link"><span class="pl-icon">📅</span><span class="pl-label">Attendance</span></a>
+        <a href="hr-module/leave-tracker.html" class="page-link"><span class="pl-icon">🏖️</span><span class="pl-label">Leave Tracker</span></a>
+        <a href="hr-module/shifts.html" class="page-link"><span class="pl-icon">🕐</span><span class="pl-label">Shifts</span></a>
+        <a href="hr-module/holidays.html" class="page-link"><span class="pl-icon">🎉</span><span class="pl-label">Holidays</span></a>
+        <a href="hr-module/attendance-report.html" class="page-link"><span class="pl-icon">📊</span><span class="pl-label">Reports</span></a>
+        <a href="hr-module/payroll-sync.html" class="page-link"><span class="pl-icon">🔄</span><span class="pl-label">Payroll Sync</span></a>
       </div>
-      <div class="module-cta">Open HR Hub </div>
-    </a>
+      <div class="card-cta">
+        <a href="hr-module/index.html" class="cta-btn">Open HR Hub →</a>
+        <span class="card-count">8 screens</span>
+      </div>
+    </div>
 
   </div>
 
-  <div class="section-divider">
-    <h2>rosca-digital · Laravel 12 · MySQL</h2>
+  <!-- Tech strip -->
+  <div class="tech-strip">
+    <span class="tech-pill">Laravel 12</span>
+    <span class="tech-pill">MySQL 8</span>
+    <span class="tech-pill">965 Active Employees</span>
+    <span class="tech-pill">56 Branches</span>
+    <span class="tech-pill">37 Regions / Divisions</span>
+    <span class="tech-pill">rosca-digital</span>
   </div>
 
 </div>
 
-<!-- ── Bottom strip ───────────────────────────────────────────────────────── -->
-<div class="bottom-strip">
+<!-- Footer -->
+<div class="site-footer">
   DNC CHITS Pvt Ltd &nbsp;·&nbsp; Internal use only &nbsp;·&nbsp;
   <a href="crm/docs.html">CRM Docs</a> &nbsp;·&nbsp;
   <a href="hr-module/index.html">HR Module</a>
