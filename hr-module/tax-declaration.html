@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tax Declarations — DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .td-card { background:#fff; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.07); border:0; }
+    .section-label { font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; }
+    .regime-card { border:2px solid #e2e8f0; border-radius:10px; padding:1rem 1.1rem; cursor:pointer; transition:border-color 0.15s,background 0.12s; flex:1; }
+    .regime-card:hover { border-color:#90cdf4; background:#f7faff; }
+    .regime-card.selected { border-color:#2196F3; background:#ebf4ff; }
+    .regime-card .rc-title { font-size:0.9rem; font-weight:700; color:#1a202c; margin-bottom:0.25rem; }
+    .regime-card .rc-tag { font-size:0.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+    .rc-tag-new { background:#c6f6d5; color:#276749; }
+    .rc-tag-old { background:#e9d8fd; color:#553c9a; }
+    .regime-card .rc-desc { font-size:0.78rem; color:#718096; margin-top:0.3rem; }
+    .decl-table { font-size:0.83rem; }
+    .decl-table thead th { background:#f7fafc; font-size:0.67rem; text-transform:uppercase; letter-spacing:0.07em; color:#a0aec0; font-weight:700; border-top:0; padding:0.6rem 0.9rem; }
+    .decl-table tbody td { padding:0.55rem 0.9rem; vertical-align:middle; border-top:1px solid #f0f4f8; }
+    .section-code { font-size:0.72rem; font-weight:700; color:#553c9a; background:#e9d8fd; padding:1px 6px; border-radius:4px; font-family:monospace; }
+    .cap-badge { font-size:0.7rem; color:#718096; font-weight:600; }
+    .amt-input { width:120px; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:0.82rem; text-align:right; font-variant-numeric:tabular-nums; }
+    .amt-input:focus { border-color:#2196F3; outline:none; box-shadow:0 0 0 2px rgba(33,150,243,0.12); }
+    .proof-zone { display:flex; align-items:center; gap:0.5rem; }
+    .proof-btn { font-size:0.7rem; padding:3px 9px; border-radius:5px; white-space:nowrap; }
+    .proof-chip { font-size:0.7rem; font-weight:700; padding:2px 7px; border-radius:10px; }
+    .chip-uploaded { background:#c6f6d5; color:#276749; }
+    .chip-pending { background:#fed7d7; color:#9b2c2c; }
+    .tds-bar { background:#1a202c; color:#fff; border-radius:10px; padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .tds-bar .tb-block { text-align:center; }
+    .tds-bar .tb-num { font-size:1.25rem; font-weight:800; font-variant-numeric:tabular-nums; }
+    .tds-bar .tb-lbl { font-size:0.67rem; text-transform:uppercase; letter-spacing:0.06em; color:#a0aec0; margin-top:0.15rem; }
+    .diff-pill { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:700; padding:3px 10px; border-radius:12px; }
+    .diff-recover { background:#fed7d7; color:#9b2c2c; }
+    .diff-itr { background:#bee3f8; color:#2a69ac; }
+    .diff-ok { background:#c6f6d5; color:#276749; }
+    .status-badge { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.8rem; font-weight:700; padding:0.3rem 0.85rem; border-radius:20px; }
+    .status-provisional { background:#feebc8; color:#c05621; }
+    .status-declared { background:#bee3f8; color:#2a69ac; }
+    .status-proof-pending { background:#fefcbf; color:#975a16; }
+    .status-proof-done { background:#c6f6d5; color:#276749; }
+    .status-finalized { background:#e9d8fd; color:#553c9a; }
+    .phase-indicator { display:flex; gap:0; margin-bottom:1.5rem; }
+    .phase-step { flex:1; padding:0.65rem 1rem; background:#f7fafc; border:1px solid #e2e8f0; font-size:0.78rem; text-align:center; position:relative; }
+    .phase-step:first-child { border-radius:8px 0 0 8px; }
+    .phase-step:last-child { border-radius:0 8px 8px 0; }
+    .phase-step.done { background:#c6f6d5; border-color:#9ae6b4; color:#276749; font-weight:700; }
+    .phase-step.active { background:#ebf4ff; border-color:#90cdf4; color:#2a69ac; font-weight:700; }
+    .phase-step .ps-num { font-size:0.65rem; color:inherit; opacity:0.7; display:block; margin-bottom:0.1rem; }
+    .info-box { background:#ebf8ff; border-left:3px solid #2196F3; border-radius:0 8px 8px 0; padding:0.65rem 1rem; font-size:0.81rem; color:#2b6cb0; margin-bottom:1.25rem; }
+    .change-history-row { font-size:0.8rem; padding:0.5rem 0; border-bottom:1px solid #f0f4f8; }
+    .change-history-row:last-child { border-bottom:0; }
+    .ch-old { color:#9b2c2c; text-decoration:line-through; }
+    .ch-new { color:#276749; font-weight:600; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+<!-- Auth Wall -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()" style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Continue →</button>
+  </div>
+</div>
+<script>
+(function(){var KEY='crm_auth_ok',DAYS=7;try{var ts=localStorage.getItem(KEY);if(ts&&Date.now()-parseInt(ts)<DAYS*86400000){document.getElementById('auth-wall').style.display='none';return;}}catch(e){}setTimeout(function(){var el=document.getElementById('auth-input');if(el)el.focus();},100);})();
+function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-input').value;if(val===PASS){try{localStorage.setItem('crm_auth_ok',Date.now());}catch(e){}document.getElementById('auth-wall').style.display='none';}else{document.getElementById('auth-err').textContent='Incorrect password. Try again.';document.getElementById('auth-input').value='';document.getElementById('auth-input').focus();}}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Payroll</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-run.html"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Pay Runs</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-employee.html"><i class="nav-main-link-icon fa fa-user-tie"></i><span class="nav-main-link-name">Employee Payroll</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="salary-components.html"><i class="nav-main-link-icon fa fa-sliders-h"></i><span class="nav-main-link-name">Salary Components</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="loans.html"><i class="nav-main-link-icon fa fa-hand-holding-usd"></i><span class="nav-main-link-name">Loans</span></a></li>
+        <li class="nav-main-heading">Reports &amp; Tools</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-cog"></i><span class="nav-main-link-name">Settings</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="breadcrumb-nav d-none d-sm-block" style="font-size:0.8rem;color:#a0aec0;">
+          <span class="text-primary font-weight-600">Payroll</span>
+          <i class="fa fa-angle-right mx-2" style="font-size:0.7rem;"></i>
+          <span class="text-dark font-weight-600">Tax Declarations</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="dropdown d-inline-block ml-1">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Employee + FY selector bar -->
+      <div class="td-card p-3 mb-4">
+        <div class="d-flex align-items-center flex-wrap" style="gap:1rem;">
+          <div style="flex:1;min-width:220px;">
+            <div class="section-label text-muted mb-1">Employee</div>
+            <select class="form-control form-control-sm" id="emp-select" onchange="loadEmployee(this.value)" style="max-width:320px;">
+              <option value="">— Select employee —</option>
+              <option value="5151" selected>DEVI JAYASANKAR G — #5151</option>
+              <option value="5175">RAJARAMAN RAJAGOPALAN — #5175</option>
+              <option value="247">SENDHILKUMAR RAJAMANICKAM M — #247</option>
+              <option value="377">PRABHU RAJ SENTHIL KUMAR N — #377</option>
+              <option value="5107">SIVAKUMAR NATARAJ — #5107</option>
+            </select>
+          </div>
+          <div>
+            <div class="section-label text-muted mb-1">Financial Year</div>
+            <select class="form-control form-control-sm" id="fy-select" onchange="loadEmployee(document.getElementById('emp-select').value)" style="width:110px;">
+              <option value="2026-27" selected>2026-27</option>
+              <option value="2025-26">2025-26</option>
+            </select>
+          </div>
+          <div id="status-area" class="ml-auto"></div>
+        </div>
+      </div>
+
+      <!-- Main declaration content -->
+      <div id="decl-content">
+        <!-- Loaded by JS -->
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script>
+
+// ── Sample employee data ──────────────────────────────────────────────────────
+var EMPLOYEES = {
+  '5151': { name:'DEVI JAYASANKAR G',          desig:'Branch Executive',  annual:307812, basic:12100, hra:3630, regime:'new',  status:'declared',      epf:1800 },
+  '5175': { name:'RAJARAMAN RAJAGOPALAN',       desig:'Asst Branch Head',  annual:350712, basic:14000, hra:4200, regime:'old',  status:'proof_pending', epf:1800 },
+  '247':  { name:'SENDHILKUMAR RAJAMANICKAM M', desig:'Regional Team',     annual:332676, basic:13000, hra:3900, regime:'old',  status:'proof_submitted',epf:1800 },
+  '377':  { name:'PRABHU RAJ SENTHIL KUMAR N',  desig:'Dept Head',         annual:600000, basic:23000, hra:6900, regime:'new',  status:'provisional',   epf:1800 },
+  '5107': { name:'SIVAKUMAR NATARAJ',            desig:'Regional Manager',  annual:629760, basic:24000, hra:7200, regime:'old',  status:'finalized',     epf:1800 },
+};
+
+// Declared investments per employee (old regime only)
+var DECLARATIONS = {
+  '5175': { '80C':150000, 'HRA':132000, '80D_SELF':15000 },
+  '247':  { '80C':120000, 'HRA':96000,  '80D_SELF':25000, '80D_PARENT':50000 },
+  '5107': { '80C':150000, 'HRA':144000, '80D_SELF':25000, '80CCD_1B':50000, '24B':180000 },
+};
+
+// Proof amounts (submitted employees)
+var PROOFS = {
+  '247':  { '80C':110000, 'HRA':96000, '80D_SELF':25000, '80D_PARENT':50000 },
+  '5107': { '80C':150000, 'HRA':144000, '80D_SELF':25000, '80CCD_1B':50000, '24B':180000 },
+};
+
+// Section catalog
+var SECTIONS = [
+  { code:'HRA',       label:'HRA Exemption',           cap:'Calculated', capNote:'Least of: actual HRA, rent−10% of Basic, 50% of Basic' },
+  { code:'80C',       label:'Section 80C',              cap:'₹1,50,000',  capNote:'EPF + PPF + ELSS + LIC + home loan principal' },
+  { code:'80D_SELF',  label:'Sec 80D — Self & Family',  cap:'₹25,000',    capNote:'Health insurance premium' },
+  { code:'80D_PARENT',label:'Sec 80D — Parents',        cap:'₹25,000–50,000', capNote:'₹50,000 if parent is senior citizen' },
+  { code:'80CCD_1B',  label:'Sec 80CCD(1B) — NPS',      cap:'₹50,000',    capNote:'Additional NPS contribution (employee)' },
+  { code:'24B',       label:'Sec 24(b) — Home Loan Int.', cap:'₹2,00,000', capNote:'Self-occupied property' },
+  { code:'80E',       label:'Sec 80E — Education Loan', cap:'No cap',     capNote:'First 8 years of repayment' },
+  { code:'80G',       label:'Sec 80G — Donations',      cap:'50–100%',    capNote:'Depends on approved institution' },
+  { code:'80TTA',     label:'Sec 80TTA — Savings Int.', cap:'₹10,000',    capNote:'Savings account interest' },
+];
+
+function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+function calcTDS(emp, regime, decl) {
+  var annual = emp.annual;
+  var taxable;
+  if (regime === 'new') {
+    taxable = annual - 75000;
+  } else {
+    var d = decl || {};
+    var hraExempt = Math.min(d['HRA'] || 0, emp.hra * 12, Math.max(0, emp.hra * 12 - emp.basic * 12 * 0.1));
+    taxable = annual
+      - 50000
+      - hraExempt
+      - Math.min(d['80C'] || 0, 150000)
+      - Math.min((d['80D_SELF']||0) + (d['80D_PARENT']||0), 75000)
+      - Math.min(d['80CCD_1B'] || 0, 50000)
+      - Math.min(d['24B'] || 0, 200000)
+      - (d['80E'] || 0)
+      - (d['80G'] || 0)
+      - Math.min(d['80TTA'] || 0, 10000);
+  }
+  taxable = Math.max(0, taxable);
+  var tax = 0;
+  if (regime === 'new') {
+    if (taxable > 1500000) tax = 150000 + (taxable - 1500000) * 0.30;
+    else if (taxable > 1200000) tax = 90000 + (taxable - 1200000) * 0.20;
+    else if (taxable > 1000000) tax = 70000 + (taxable - 1000000) * 0.15;
+    else if (taxable > 700000)  tax = 40000 + (taxable - 700000) * 0.10;
+    else if (taxable > 300000)  tax = (taxable - 300000) * 0.05;
+    if (taxable <= 700000) tax = 0; // rebate 87A
+  } else {
+    if (taxable > 1000000) tax = 112500 + (taxable - 1000000) * 0.30;
+    else if (taxable > 500000) tax = 12500 + (taxable - 500000) * 0.20;
+    else if (taxable > 250000) tax = (taxable - 250000) * 0.05;
+    if (taxable <= 500000) tax = 0; // rebate 87A
+  }
+  tax = tax * 1.04; // 4% cess
+  return { annual: Math.round(tax), monthly: Math.round(tax / 12) };
+}
+
+function statusHtml(s) {
+  var map = {
+    'provisional':     ['status-provisional', 'Provisional'],
+    'declared':        ['status-declared',     'Declaration Submitted'],
+    'proof_pending':   ['status-proof-pending','Proof Pending'],
+    'proof_submitted': ['status-proof-done',   'Proof Submitted'],
+    'finalized':       ['status-finalized',    'Finalized'],
+  };
+  var v = map[s] || ['status-provisional','Unknown'];
+  return '<span class="status-badge '+v[0]+'"><i class="fa fa-circle" style="font-size:0.5rem;"></i> '+v[1]+'</span>';
+}
+
+function phaseHtml(status) {
+  var phases = [
+    { key:'phase1', label:'Phase 1 — Projected Declaration', states:['declared','proof_pending','proof_submitted','finalized'] },
+    { key:'phase2', label:'Phase 2 — Investment Proof',       states:['proof_submitted','finalized'] },
+    { key:'finalized', label:'Finalized',                      states:['finalized'] },
+  ];
+  return '<div class="phase-indicator">' + phases.map(function(p){
+    var done = p.states.indexOf(status) >= 0;
+    var active = !done && (
+      (p.key === 'phase1' && status === 'provisional') ||
+      (p.key === 'phase2' && status === 'proof_pending') ||
+      (p.key === 'finalized' && status === 'proof_submitted')
+    );
+    var cls = done ? 'done' : (active ? 'active' : '');
+    var icon = done ? '<i class="fa fa-check mr-1"></i>' : (active ? '<i class="fa fa-circle-notch fa-spin mr-1"></i>' : '');
+    return '<div class="phase-step '+cls+'">'+icon+p.label+'</div>';
+  }).join('') + '</div>';
+}
+
+function loadEmployee(empId) {
+  var contentEl = document.getElementById('decl-content');
+  var statusEl  = document.getElementById('status-area');
+
+  if (!empId) {
+    contentEl.innerHTML = '<div class="text-center text-muted py-5" style="font-size:0.9rem;"><i class="fa fa-user-circle fa-2x d-block mb-3" style="opacity:0.3;"></i>Select an employee to view their tax declaration</div>';
+    statusEl.innerHTML = '';
+    return;
+  }
+
+  var emp = EMPLOYEES[empId];
+  if (!emp) return;
+
+  var fy = document.getElementById('fy-select').value;
+  var regime = emp.regime;
+  var status = emp.status;
+  var decl = DECLARATIONS[empId] || {};
+  var proofs = PROOFS[empId] || null;
+
+  statusEl.innerHTML = statusHtml(status);
+
+  var tdsDecl = calcTDS(emp, regime, decl);
+  var tdsProof = proofs ? calcTDS(emp, regime, proofs) : null;
+
+  var html = '';
+
+  // Phase indicator
+  html += phaseHtml(status);
+
+  // Regime choice block
+  html += '<div class="td-card p-4 mb-4">';
+  html += '<div class="section-label text-muted mb-3">Tax Regime — FY '+fy+'</div>';
+  html += '<div class="d-flex" style="gap:1rem;flex-wrap:wrap;">';
+
+  var newSel = regime === 'new' ? 'selected' : '';
+  var oldSel = regime === 'old' ? 'selected' : '';
+  html += '<div class="regime-card '+newSel+'" onclick="selectRegime(\''+empId+'\',\'new\')">';
+  html += '<div class="d-flex align-items-center mb-1"><div class="rc-title mr-2">New Tax Regime</div><span class="rc-tag rc-tag-new">Default</span></div>';
+  html += '<div class="rc-desc">Lower tax rates. Standard Deduction ₹75,000. No investment exemptions (80C, 80D, HRA not applicable).</div>';
+  html += '<div style="margin-top:0.5rem;font-size:0.75rem;color:#276749;font-weight:600;">Monthly TDS at this regime: '+fmt(calcTDS(emp,'new',{}).monthly)+'</div>';
+  html += '</div>';
+
+  html += '<div class="regime-card '+oldSel+'" onclick="selectRegime(\''+empId+'\',\'old\')">';
+  html += '<div class="d-flex align-items-center mb-1"><div class="rc-title mr-2">Old Tax Regime</div><span class="rc-tag rc-tag-old">Opt-in via Form 10-IEA</span></div>';
+  html += '<div class="rc-desc">Higher rates but allows HRA exemption, 80C (max ₹1.5L), 80D, home loan interest, and other deductions.</div>';
+  html += '<div style="margin-top:0.5rem;font-size:0.75rem;color:#553c9a;font-weight:600;">Monthly TDS with max deductions: '+fmt(calcTDS(emp,'old',decl).monthly)+'</div>';
+  html += '</div>';
+  html += '</div>';
+
+  if (status === 'provisional') {
+    html += '<div class="info-box mt-3"><i class="fa fa-info-circle mr-2"></i><strong>Provisional</strong> — No Form 12BB on file. Monthly TDS is calculated on full gross (new regime defaults apply). Submit the projected declaration to update TDS.</div>';
+  }
+  html += '</div>';
+
+  // For new regime: just show a note and the TDS bar
+  if (regime === 'new') {
+    html += '<div class="td-card p-4 mb-4">';
+    html += '<div class="section-label text-muted mb-2">TDS Summary</div>';
+    html += '<div class="tds-bar mt-2">';
+    html += '<div class="tb-block"><div class="tb-num text-primary">'+fmt(emp.annual)+'</div><div class="tb-lbl">Annual Gross</div></div>';
+    html += '<div style="color:#4a5568;font-size:1.2rem;">−</div>';
+    html += '<div class="tb-block"><div class="tb-num" style="color:#48bb78;">'+fmt(75000)+'</div><div class="tb-lbl">Std. Deduction</div></div>';
+    html += '<div style="color:#4a5568;font-size:1.2rem;">=</div>';
+    html += '<div class="tb-block"><div class="tb-num text-warning">'+fmt(Math.max(0,emp.annual-75000))+'</div><div class="tb-lbl">Taxable Income</div></div>';
+    html += '<div style="color:#4a5568;font-size:1.2rem;">=</div>';
+    html += '<div class="tb-block"><div class="tb-num text-danger">'+fmt(tdsDecl.annual)+'</div><div class="tb-lbl">Annual Tax</div></div>';
+    html += '<div class="tb-block" style="background:#2196F3;border-radius:8px;padding:0.5rem 1rem;"><div class="tb-num" style="color:#fff;">'+fmt(tdsDecl.monthly)+'</div><div class="tb-lbl" style="color:rgba(255,255,255,0.75);">Monthly TDS</div></div>';
+    html += '</div>';
+    html += '<div class="info-box mt-3"><i class="fa fa-info-circle mr-2"></i>No investment declaration required for <strong>New Regime</strong>. The ₹75,000 Standard Deduction is automatically applied. Employee cannot claim HRA, 80C, 80D, or other exemptions.</div>';
+    html += '</div>';
+  } else {
+    // Old regime — Phase 1: Declaration table
+    var phase1Locked = (status === 'proof_submitted' || status === 'finalized');
+    html += '<div class="td-card mb-4">';
+    html += '<div class="p-3 border-bottom d-flex align-items-center justify-content-between">';
+    html += '<div><div class="section-label text-muted">Phase 1 — Projected Investments (Form 12BB)</div><div style="font-size:0.75rem;color:#a0aec0;margin-top:0.15rem;">Enter estimated investment amounts for FY '+fy+'. TDS is deducted monthly based on these projections.</div></div>';
+    if (!phase1Locked) {
+      html += '<button class="btn btn-sm btn-primary" onclick="submitDeclaration(\''+empId+'\')"><i class="fa fa-paper-plane mr-1"></i> Submit Declaration</button>';
+    } else {
+      html += '<span class="status-badge status-declared"><i class="fa fa-check mr-1"></i> Submitted</span>';
+    }
+    html += '</div>';
+
+    html += '<div style="overflow-x:auto;"><table class="table decl-table mb-0">';
+    html += '<thead><tr><th style="width:36%">Section</th><th>Statutory Cap</th><th style="width:140px;text-align:right;">Declared Amount</th></tr></thead><tbody>';
+
+    SECTIONS.forEach(function(s) {
+      var val = decl[s.code] || '';
+      var disabled = phase1Locked ? 'disabled' : '';
+      html += '<tr>';
+      html += '<td><div style="font-weight:600;color:#1a202c;font-size:0.83rem;">'+s.label+'</div>'
+             +'<div style="font-size:0.7rem;color:#a0aec0;">'+s.capNote+'</div></td>';
+      html += '<td><span class="cap-badge">'+s.cap+'</span></td>';
+      html += '<td style="text-align:right;">'
+             +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:0.3rem;">'
+             +'<span style="font-size:0.72rem;color:#a0aec0;">₹</span>'
+             +'<input type="number" class="amt-input" id="decl-'+s.code+'-'+empId+'" value="'+val+'" min="0" placeholder="0" '+disabled+' onchange="recalcLive(\''+empId+'\')">'
+             +'</div></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // Live TDS summary
+    html += '<div class="p-3 border-top">';
+    html += '<div class="tds-bar" id="tds-bar-'+empId+'">';
+    html += tdsBarHtml(emp, regime, decl, null);
+    html += '</div></div>';
+    html += '</div>';
+
+    // Phase 2: Proof submission
+    var phase2Available = (status === 'proof_pending' || status === 'proof_submitted' || status === 'finalized');
+    if (phase2Available) {
+      var phase2Locked = (status === 'finalized');
+      html += '<div class="td-card mb-4">';
+      html += '<div class="p-3 border-bottom d-flex align-items-center justify-content-between">';
+      html += '<div><div class="section-label text-muted">Phase 2 — Investment Proof</div><div style="font-size:0.75rem;color:#a0aec0;margin-top:0.15rem;">Submit actual proof before FY close (typically January–February). Shortfall TDS is recovered in March.</div></div>';
+      if (!phase2Locked && status === 'proof_pending') {
+        html += '<button class="btn btn-sm btn-success" onclick="submitProof(\''+empId+'\')"><i class="fa fa-check mr-1"></i> Submit Proof</button>';
+      } else if (status !== 'proof_pending') {
+        html += '<span class="status-badge status-proof-done"><i class="fa fa-check mr-1"></i> Proof Submitted</span>';
+      }
+      html += '</div>';
+
+      html += '<div style="overflow-x:auto;"><table class="table decl-table mb-0">';
+      html += '<thead><tr><th style="width:30%">Section</th><th style="text-align:right;">Declared</th><th style="text-align:right;">Proof Amount</th><th>Document</th><th>Diff</th></tr></thead><tbody>';
+
+      SECTIONS.forEach(function(s) {
+        var dAmt = decl[s.code] || 0;
+        if (!dAmt && !( proofs && proofs[s.code])) return;
+        var pAmt = proofs ? (proofs[s.code] || 0) : null;
+        var disabled = phase2Locked ? 'disabled' : '';
+        var diffHtml = '';
+        if (pAmt !== null) {
+          var diff = pAmt - dAmt;
+          if (diff < 0) diffHtml = '<span class="diff-pill diff-recover"><i class="fa fa-arrow-down mr-1"></i>'+fmt(Math.abs(diff))+' recover</span>';
+          else if (diff > 0) diffHtml = '<span class="diff-pill diff-itr"><i class="fa fa-external-link-alt mr-1" style="font-size:0.65rem;"></i>'+fmt(diff)+' via ITR</span>';
+          else diffHtml = '<span class="diff-pill diff-ok"><i class="fa fa-check mr-1"></i>Match</span>';
+        }
+        var uploaded = proofs && proofs[s.code];
+        html += '<tr>';
+        html += '<td><div style="font-weight:600;color:#1a202c;font-size:0.83rem;">'+s.label+'</div></td>';
+        html += '<td style="text-align:right;color:#718096;font-variant-numeric:tabular-nums;">'+fmt(dAmt)+'</td>';
+        html += '<td style="text-align:right;">'
+               +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:0.3rem;">'
+               +'<span style="font-size:0.72rem;color:#a0aec0;">₹</span>'
+               +'<input type="number" class="amt-input" value="'+(pAmt||'')+'" min="0" placeholder="0" '+disabled+' style="width:110px;">'
+               +'</div></td>';
+        html += '<td><div class="proof-zone">'
+               +(uploaded
+                 ? '<span class="proof-chip chip-uploaded"><i class="fa fa-paperclip mr-1"></i>Uploaded</span>'
+                 : '<button class="btn btn-xs btn-light border proof-btn" onclick="mockUpload(this)"><i class="fa fa-upload mr-1"></i>Upload</button><span class="proof-chip chip-pending ml-1">Pending</span>')
+               +'</div></td>';
+        html += '<td>'+diffHtml+'</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      if (tdsProof) {
+        html += '<div class="p-3 border-top">';
+        html += '<div style="font-size:0.78rem;font-weight:700;color:#2d3748;margin-bottom:0.5rem;">Year-end TDS reconciliation</div>';
+        var annualDiff = tdsProof.annual - tdsDecl.annual;
+        html += '<div class="d-flex" style="gap:1rem;flex-wrap:wrap;">';
+        html += '<div><div style="font-size:0.7rem;color:#a0aec0;">TDS on declared amounts</div><div style="font-weight:700;font-variant-numeric:tabular-nums;">'+fmt(tdsDecl.annual)+'/yr = '+fmt(tdsDecl.monthly)+'/mo</div></div>';
+        html += '<div><div style="font-size:0.7rem;color:#a0aec0;">TDS on proof amounts</div><div style="font-weight:700;font-variant-numeric:tabular-nums;color:'+( annualDiff>0?'#2196F3':'#e53e3e')+'"">'+fmt(tdsProof.annual)+'/yr = '+fmt(tdsProof.monthly)+'/mo</div></div>';
+        if (annualDiff > 0) {
+          html += '<div><div style="font-size:0.7rem;color:#a0aec0;">Additional TDS</div><div class="diff-pill diff-itr">+'+fmt(annualDiff)+' — Employee claims via ITR</div></div>';
+        } else if (annualDiff < 0) {
+          html += '<div><div style="font-size:0.7rem;color:#a0aec0;">TDS shortfall</div><div class="diff-pill diff-recover">'+fmt(Math.abs(annualDiff))+' — Recovered in Mar payroll</div></div>';
+        } else {
+          html += '<div><div style="font-size:0.7rem;color:#a0aec0;">Difference</div><div class="diff-pill diff-ok">No difference</div></div>';
+        }
+        html += '</div></div>';
+      }
+      html += '</div>';
+    }
+  }
+
+  // Change history (audit log mock)
+  html += '<div class="td-card p-3 mb-4">';
+  html += '<div class="d-flex align-items-center justify-content-between mb-2">';
+  html += '<div class="section-label text-muted">Change History</div>';
+  html += '<span style="font-size:0.72rem;color:#a0aec0;">Last 5 of max 100 entries</span>';
+  html += '</div>';
+  var history = [
+    { ts:'2026-07-08 09:32', user:'Mathan Raj',   event:'updated', field:'tax_regime',    old:'new',     nw:'old' },
+    { ts:'2026-07-08 09:30', user:'Mathan Raj',   event:'updated', field:'80C declared',  old:'1,20,000',nw:'1,50,000' },
+    { ts:'2026-07-08 09:28', user:'Mathan Raj',   event:'updated', field:'status',        old:'provisional', nw:'declaration_submitted' },
+    { ts:'2026-04-02 11:10', user:'Priya (HR)',   event:'created', field:'declaration',   old:null,      nw:'FY 2026-27 created' },
+  ];
+  history.forEach(function(h) {
+    html += '<div class="change-history-row">';
+    html += '<span style="font-size:0.7rem;color:#a0aec0;min-width:140px;display:inline-block;">'+h.ts+'</span>';
+    html += '<span style="font-size:0.77rem;font-weight:600;color:#4a5568;margin-right:0.4rem;">'+h.user+'</span>';
+    html += '<span style="font-size:0.75rem;color:#718096;">'+h.event+' <strong>'+h.field+'</strong>';
+    if (h.old) html += ' <span class="ch-old">'+h.old+'</span> → <span class="ch-new">'+h.nw+'</span>';
+    else html += ': <span class="ch-new">'+h.nw+'</span>';
+    html += '</span></div>';
+  });
+  html += '</div>';
+
+  contentEl.innerHTML = html;
+}
+
+function tdsBarHtml(emp, regime, decl, proof) {
+  var d = proof || decl;
+  var tds = calcTDS(emp, regime, d);
+  var annualGross = emp.annual;
+  var deductions = regime === 'new' ? 75000 : Object.values(d||{}).reduce(function(a,b){return a+b;},0) + 50000;
+  var taxable = Math.max(0, annualGross - deductions);
+  return '<div class="tb-block"><div class="tb-num text-primary">'+fmt(annualGross)+'</div><div class="tb-lbl">Annual Gross</div></div>'
+       + '<div style="color:#718096;font-size:1.2rem;">−</div>'
+       + '<div class="tb-block"><div class="tb-num" style="color:#48bb78;">'+fmt(deductions)+'</div><div class="tb-lbl">Deductions</div></div>'
+       + '<div style="color:#718096;font-size:1.2rem;">=</div>'
+       + '<div class="tb-block"><div class="tb-num text-warning">'+fmt(taxable)+'</div><div class="tb-lbl">Taxable Income</div></div>'
+       + '<div style="color:#718096;font-size:1.2rem;">=</div>'
+       + '<div class="tb-block"><div class="tb-num text-danger">'+fmt(tds.annual)+'</div><div class="tb-lbl">Annual Tax</div></div>'
+       + '<div class="tb-block" style="background:#2196F3;border-radius:8px;padding:0.5rem 1rem;"><div class="tb-num" style="color:#fff;">'+fmt(tds.monthly)+'</div><div class="tb-lbl" style="color:rgba(255,255,255,0.75);">Monthly TDS</div></div>';
+}
+
+function recalcLive(empId) {
+  var emp = EMPLOYEES[empId];
+  if (!emp) return;
+  var decl = {};
+  SECTIONS.forEach(function(s) {
+    var inp = document.getElementById('decl-'+s.code+'-'+empId);
+    if (inp && inp.value) decl[s.code] = parseInt(inp.value) || 0;
+  });
+  var barEl = document.getElementById('tds-bar-'+empId);
+  if (barEl) barEl.innerHTML = tdsBarHtml(emp, emp.regime, decl, null);
+}
+
+function selectRegime(empId, regime) {
+  EMPLOYEES[empId].regime = regime;
+  loadEmployee(empId);
+}
+
+function submitDeclaration(empId) {
+  EMPLOYEES[empId].status = 'proof_pending';
+  var decl = {};
+  SECTIONS.forEach(function(s) {
+    var inp = document.getElementById('decl-'+s.code+'-'+empId);
+    if (inp && inp.value) decl[s.code] = parseInt(inp.value) || 0;
+  });
+  DECLARATIONS[empId] = decl;
+  loadEmployee(empId);
+  showToast('Declaration submitted for FY 2026-27');
+}
+
+function submitProof(empId) {
+  EMPLOYEES[empId].status = 'proof_submitted';
+  loadEmployee(empId);
+  showToast('Investment proof submitted successfully');
+}
+
+function mockUpload(btn) {
+  var chip = btn.nextElementSibling;
+  btn.remove();
+  if (chip) { chip.className = 'proof-chip chip-uploaded'; chip.innerHTML = '<i class="fa fa-paperclip mr-1"></i>Uploaded'; }
+  showToast('Document uploaded');
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a202c;color:#fff;padding:0.7rem 1.25rem;border-radius:8px;font-size:0.84rem;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:opacity 0.4s;';
+  t.innerHTML = '<i class="fa fa-check-circle text-success mr-2"></i>' + msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 2800);
+}
+
+// Init with first employee
+loadEmployee('5151');
+
+</script>
+</body>
+</html>

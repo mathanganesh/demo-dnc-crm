@@ -47,6 +47,64 @@
     .loan-stat-row .ls-item { }
     .loan-stat-row .ls-lbl { color:#a0aec0; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; display:block; }
     .loan-stat-row .ls-val { font-weight:700; color:#2d3748; font-variant-numeric:tabular-nums; }
+    /* Tax Declaration edit mode */
+    .td-view-mode .if-input input[type=text] { background:#f7fafc; border-color:#e2e8f0; color:#2d3748; cursor:default; pointer-events:none; }
+    .td-edit-mode .if-input input[type=text] { background:#fff; border-color:#90cdf4; color:#1a202c; box-shadow:0 0 0 2px rgba(33,150,243,0.10); cursor:text; pointer-events:all; }
+    .td-edit-mode .inv-field { border-color:#bee3f8; background:#f7fbff; }
+    .edit-save-bar { position:sticky; bottom:0; background:#fff; border-top:2px solid #2196F3; padding:0.75rem 1.5rem; display:flex; align-items:center; justify-content:space-between; box-shadow:0 -4px 16px rgba(33,150,243,0.10); z-index:10; border-radius:0 0 12px 12px; }
+    .edit-save-bar.hidden { display:none; }
+    .regime-pill { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.75rem; font-weight:700; padding:3px 10px; border-radius:12px; cursor:pointer; }
+    .regime-pill-new { background:#c6f6d5; color:#276749; }
+    .regime-pill-old { background:#e9d8fd; color:#553c9a; }
+    .regime-switch-row { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; background:#f7fafc; border-radius:8px; margin-bottom:1rem; }
+    .regime-opt { display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.82rem; font-weight:600; padding:0.35rem 0.75rem; border-radius:8px; border:2px solid #e2e8f0; transition:all 0.12s; }
+    .regime-opt.selected-new { border-color:#48bb78; background:#f0fff4; color:#276749; }
+    .regime-opt.selected-old { border-color:#9f7aea; background:#faf5ff; color:#553c9a; }
+    .regime-opt input[type=radio] { display:none; }
+    .tds-calc-row { display:flex; justify-content:space-between; padding:0.3rem 0; font-size:0.82rem; border-bottom:1px dashed #e8ecf0; }
+    .tds-calc-row:last-child { border-bottom:0; }
+    .tds-calc-row.total-row { font-weight:700; border-top:1px solid #2d3748; border-bottom:0; padding-top:0.45rem; margin-top:0.2rem; }
+    .proof-section { background:#fffbeb; border:1px solid #f6e05e; border-radius:8px; padding:0.75rem 1rem; margin-top:1rem; font-size:0.8rem; color:#975a16; }
+    /* Proof upload table */
+    .proof-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+    .proof-table thead th { background:#f7fafc; font-size:0.67rem; text-transform:uppercase; letter-spacing:0.07em; color:#a0aec0; font-weight:700; padding:0.55rem 0.9rem; border-top:0; border-bottom:1px solid #e2e8f0; }
+    .proof-table tbody td { padding:0.6rem 0.9rem; vertical-align:middle; border-bottom:1px solid #f0f4f8; }
+    .proof-table tbody tr:last-child td { border-bottom:0; }
+    .proof-amt-input { width:110px; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:0.82rem; text-align:right; font-variant-numeric:tabular-nums; }
+    .proof-amt-input:focus { border-color:#90cdf4; outline:none; box-shadow:0 0 0 2px rgba(33,150,243,0.1); }
+    .proof-chip { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+    .chip-uploaded  { background:#c6f6d5; color:#276749; }
+    .chip-pending   { background:#fed7d7; color:#9b2c2c; }
+    .diff-pill-proof { display:inline-flex; align-items:center; gap:0.25rem; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+    .diff-recover { background:#fed7d7; color:#9b2c2c; }
+    .diff-itr     { background:#bee3f8; color:#2a69ac; }
+    .diff-ok      { background:#c6f6d5; color:#276749; }
+    .diff-na      { background:#f7fafc; color:#a0aec0; }
+    .upload-btn   { font-size:0.72rem; padding:3px 10px; border-radius:6px; white-space:nowrap; cursor:pointer; }
+    .upload-filename { font-size:0.7rem; color:#718096; margin-top:0.2rem; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    /* Change Log */
+    .cl-table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+    .cl-table thead th { background:#1a202c; color:#a0aec0; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; padding:0.65rem 1rem; white-space:nowrap; }
+    .cl-table tbody tr { border-bottom:1px solid #f0f4f8; }
+    .cl-table tbody tr:hover { background:#f7fafc; }
+    .cl-table td { padding:0.75rem 1rem; vertical-align:top; }
+    .cl-time { font-size:0.78rem; color:#4a5568; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .cl-user { font-size:0.8rem; font-weight:600; color:#2d3748; white-space:nowrap; }
+    .cl-type-created  { background:#c6f6d5; color:#276749; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:10px; white-space:nowrap; }
+    .cl-type-updated  { background:#bee3f8; color:#2a69ac; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:10px; white-space:nowrap; }
+    .cl-type-deleted  { background:#fed7d7; color:#9b2c2c; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:10px; white-space:nowrap; }
+    .cl-changes { list-style:disc; padding-left:1.1rem; margin:0; }
+    .cl-changes li { margin-bottom:0.2rem; font-size:0.8rem; color:#4a5568; line-height:1.5; }
+    .cl-changes li strong { color:#2d3748; }
+    .cl-val { color:#2196F3; font-weight:600; }
+    .cl-filter-bar { display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .cl-filter-bar select, .cl-filter-bar input { font-size:0.8rem; border:1px solid #e2e8f0; border-radius:6px; padding:0.3rem 0.6rem; color:#4a5568; }
+    .cl-section-badge { font-size:0.68rem; font-weight:700; padding:1px 7px; border-radius:4px; margin-left:0.35rem; }
+    .cl-sec-payroll  { background:#ebf4ff; color:#2b6cb0; }
+    .cl-sec-tax      { background:#faf5ff; color:#553c9a; }
+    .cl-sec-salary   { background:#f0fff4; color:#276749; }
+    .cl-sec-loan     { background:#fffbeb; color:#975a16; }
+    .cl-sec-profile  { background:#f7fafc; color:#718096; }
     /* Payslip preview */
     .payslip-preview { background:#f7fafc; border:1px solid #e8ecf0; border-radius:10px; padding:1.25rem; font-size:0.82rem; }
     .pp-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:2px solid #2196F3; }
@@ -102,11 +160,10 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
         <li class="nav-main-item"><a class="nav-main-link" href="payroll-run.html"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Pay Runs</span></a></li>
         <li class="nav-main-item"><a class="nav-main-link active" href="payroll-employee.html"><i class="nav-main-link-icon fa fa-user-tie"></i><span class="nav-main-link-name">Employee Payroll</span></a></li>
         <li class="nav-main-item"><a class="nav-main-link" href="salary-components.html"><i class="nav-main-link-icon fa fa-sliders-h"></i><span class="nav-main-link-name">Salary Components</span></a></li>
-        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="loans.html"><i class="nav-main-link-icon fa fa-hand-holding-usd"></i><span class="nav-main-link-name">Loans</span></a></li>
+        <li class="nav-main-heading">Reports &amp; Tools</li>
         <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
-        <li class="nav-main-heading">Integrations</li>
         <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
-        <li class="nav-main-heading">Configuration</li>
         <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-cog"></i><span class="nav-main-link-name">Settings</span></a></li>
       </ul>
     </div>
@@ -170,9 +227,10 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
           <ul class="nav nav-tabs" id="empPayTabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab-overview"><i class="fa fa-info-circle mr-1"></i> Overview</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-salary"><i class="fa fa-rupee-sign mr-1"></i> Salary Details</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-investments"><i class="fa fa-file-invoice-dollar mr-1"></i> Investments</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-investments"><i class="fa fa-file-invoice mr-1"></i> Tax Declaration</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-payslips"><i class="fa fa-file-pdf mr-1"></i> Payslips &amp; Forms</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-loans"><i class="fa fa-hand-holding-usd mr-1"></i> Loans</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-changelog"><i class="fa fa-history mr-1"></i> Change Log</a></li>
           </ul>
         </div>
       </div>
@@ -287,89 +345,191 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
         <!-- ===== INVESTMENTS ===== -->
         <div class="tab-pane fade" id="tab-investments">
           <div class="row">
+
+            <!-- Left: Declaration form -->
             <div class="col-md-8 mb-4">
-              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-file-invoice-dollar text-primary mr-2"></i>Investment Declaration — FY 2026-27</div>
-                  <div style="display:flex;gap:0.5rem;">
-                    <span style="font-size:0.72rem;background:#c6f6d5;color:#276749;font-weight:700;padding:2px 8px;border-radius:10px;">New Regime</span>
-                    <button class="btn btn-sm btn-light border"><i class="fa fa-edit mr-1"></i> Edit</button>
+              <div class="block td-view-mode" id="decl-block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;">
+                <div style="padding:1rem 1.5rem;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-file-invoice text-primary mr-2"></i>Tax Declaration — FY 2026-27</div>
+                    <div style="font-size:0.72rem;color:#a0aec0;margin-top:0.15rem;">Form 12BB &nbsp;·&nbsp; Declaration submitted 05 Apr 2026</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span id="regime-display-pill" class="regime-pill regime-pill-new"><i class="fa fa-check-circle mr-1"></i>New Regime</span>
+                    <span style="background:#c6f6d5;color:#276749;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;"><i class="fa fa-circle mr-1" style="font-size:0.4rem;"></i>Declaration Submitted</span>
+                    <button class="btn btn-sm btn-light border" id="edit-btn" onclick="enterEditMode()"><i class="fa fa-pencil-alt mr-1"></i> Edit</button>
                   </div>
                 </div>
 
-                <div class="section-heading">Housing</div>
-                <div class="inv-field">
-                  <span class="if-lbl">Is employee staying in a rented house?</span>
-                  <span style="font-size:0.82rem;font-weight:600;color:#276749;"><i class="fa fa-check-circle mr-1"></i> Yes</span>
-                </div>
-                <div class="inv-field">
-                  <span class="if-lbl">Rent paid per month</span>
-                  <div class="if-input"><input type="text" value="6,500"><span style="font-size:0.75rem;color:#a0aec0;">/month</span></div>
-                </div>
-                <div class="inv-field">
-                  <span class="if-lbl">Is there a home loan?</span>
-                  <span style="font-size:0.82rem;font-weight:600;color:#718096;"><i class="fa fa-times-circle mr-1"></i> No</span>
-                </div>
+                <div style="padding:1.25rem 1.5rem;" id="decl-form-body">
 
-                <div class="section-heading">Section 80C Investments (Max ₹1,50,000)</div>
-                <div class="inv-field">
-                  <span class="if-lbl">Life Insurance Premium</span>
-                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
-                </div>
-                <div class="inv-field">
-                  <span class="if-lbl">PPF Contribution</span>
-                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
-                </div>
-                <div class="inv-field">
-                  <span class="if-lbl">NSC/ELSS/Mutual Funds</span>
-                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
-                </div>
-                <div class="inv-field" style="background:#f7fafc;">
-                  <span class="if-lbl font-weight-700">EPF Employee Contribution (Auto)</span>
-                  <span style="font-size:0.82rem;font-weight:700;color:#2196F3;font-variant-numeric:tabular-nums;">₹21,600 / year</span>
-                </div>
-                <div class="inv-field" style="background:#f7fafc;">
-                  <span class="if-lbl font-weight-700">Total 80C (Max ₹1,50,000)</span>
-                  <span style="font-size:0.82rem;font-weight:700;color:#276749;font-variant-numeric:tabular-nums;">₹21,600 / year</span>
-                </div>
+                  <!-- Regime choice (only visible in edit mode) -->
+                  <div id="regime-edit-row" class="regime-switch-row" style="display:none;">
+                    <span style="font-size:0.78rem;font-weight:700;color:#4a5568;margin-right:0.25rem;">Tax Regime:</span>
+                    <label class="regime-opt selected-new" id="opt-new" onclick="selectRegime('new')">
+                      <input type="radio" name="regime" value="new" checked>
+                      <i class="fa fa-circle" style="font-size:0.55rem;color:#48bb78;"></i> New Regime
+                    </label>
+                    <label class="regime-opt" id="opt-old" onclick="selectRegime('old')">
+                      <input type="radio" name="regime" value="old">
+                      <i class="fa fa-circle" style="font-size:0.55rem;color:#9f7aea;"></i> Old Regime
+                    </label>
+                    <span style="font-size:0.72rem;color:#a0aec0;margin-left:0.25rem;">Changing regime recalculates TDS from current month</span>
+                  </div>
 
-                <div class="section-heading">Section 80D — Health Insurance (Max ₹1,00,000)</div>
-                <div class="inv-field">
-                  <span class="if-lbl">Health Insurance Premium Paid</span>
-                  <div class="if-input"><input type="text" value="15,840"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
-                </div>
+                  <!-- New regime notice (view mode) -->
+                  <div id="new-regime-notice" style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:0.65rem 1rem;font-size:0.81rem;color:#276749;margin-bottom:1.25rem;">
+                    <i class="fa fa-info-circle mr-2"></i><strong>New Regime selected.</strong> Standard Deduction ₹75,000 applies automatically. HRA, 80C, 80D and other exemptions do not apply. No investment declaration required.
+                  </div>
 
-                <div class="section-heading">Other Declarations</div>
-                <div class="inv-field">
-                  <span class="if-lbl">Rental income from other property?</span>
-                  <span style="font-size:0.82rem;font-weight:600;color:#718096;"><i class="fa fa-times-circle mr-1"></i> No</span>
+                  <!-- Old regime sections (hidden in new regime) -->
+                  <div id="old-regime-sections" style="display:none;">
+
+                    <div class="section-heading">Housing &amp; HRA</div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Rent paid per month</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-rent" value="6500"><span style="font-size:0.75rem;color:#a0aec0;">/month</span></div>
+                    </div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Home Loan Interest (Sec 24b)</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-24b" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+
+                    <div class="section-heading">Section 80C — Investments (Max ₹1,50,000)</div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Life Insurance Premium (LIC)</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-lic" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+                    <div class="inv-field">
+                      <span class="if-lbl">PPF Contribution</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-ppf" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+                    <div class="inv-field">
+                      <span class="if-lbl">ELSS / NSC / Mutual Funds</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-elss" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+                    <div class="inv-field" style="background:#f7fafc;">
+                      <span class="if-lbl" style="font-weight:700;">EPF Employee Contribution <span style="font-weight:400;font-size:0.72rem;color:#a0aec0;">(auto-included)</span></span>
+                      <span style="font-size:0.82rem;font-weight:700;color:#2196F3;font-variant-numeric:tabular-nums;">₹21,600 / yr</span>
+                    </div>
+                    <div class="inv-field" style="background:#f0fff4;">
+                      <span class="if-lbl" style="font-weight:700;color:#276749;">Total 80C <span style="font-weight:400;font-size:0.72rem;">(cap ₹1,50,000)</span></span>
+                      <span id="total-80c" style="font-size:0.85rem;font-weight:800;color:#276749;font-variant-numeric:tabular-nums;">₹21,600</span>
+                    </div>
+
+                    <div class="section-heading">Section 80D — Health Insurance</div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Premium — Self &amp; Family <span style="font-size:0.72rem;color:#a0aec0;">(max ₹25,000)</span></span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-80d-self" value="15840"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Premium — Parents <span style="font-size:0.72rem;color:#a0aec0;">(max ₹25,000 / ₹50,000 sr.citizen)</span></span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-80d-par" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+
+                    <div class="section-heading">Other Sections</div>
+                    <div class="inv-field">
+                      <span class="if-lbl">NPS — Additional (Sec 80CCD(1B)) <span style="font-size:0.72rem;color:#a0aec0;">(max ₹50,000)</span></span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-nps" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+                    <div class="inv-field">
+                      <span class="if-lbl">Education Loan Interest (Sec 80E)</span>
+                      <div class="if-input"><span style="font-size:0.75rem;color:#a0aec0;">₹</span><input type="text" id="f-80e" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                    </div>
+
+                  </div><!-- /old-regime-sections -->
+
+                  <!-- Phase 2: Investment Proof Upload -->
+                  <div id="proof-upload-section" style="display:none;margin-top:1.25rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+                      <div>
+                        <div style="font-size:0.85rem;font-weight:700;color:#1a202c;"><i class="fa fa-paperclip text-primary mr-2"></i>Phase 2 — Investment Proof</div>
+                        <div style="font-size:0.72rem;color:#a0aec0;margin-top:0.1rem;">Attach actual proof documents. Shortfall vs declared amount will be recovered in March payroll.</div>
+                      </div>
+                      <span id="proof-status-badge" class="proof-chip chip-pending">Proof Pending</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                      <table class="proof-table">
+                        <thead>
+                          <tr>
+                            <th style="width:34%;">Section</th>
+                            <th style="text-align:right;">Declared</th>
+                            <th style="text-align:right;">Proof Amount</th>
+                            <th>Document</th>
+                            <th>Diff</th>
+                          </tr>
+                        </thead>
+                        <tbody id="proof-tbody"></tbody>
+                      </table>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:0.85rem;">
+                      <button class="btn btn-sm btn-success font-weight-700" onclick="submitAllProofs()"><i class="fa fa-check mr-1"></i>Submit All Proofs</button>
+                    </div>
+                  </div>
+
+                  <!-- New regime: no proof needed -->
+                  <div id="proof-new-regime-note" style="margin-top:1.25rem;background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:0.65rem 1rem;font-size:0.8rem;color:#276749;">
+                    <i class="fa fa-check-circle mr-1"></i><strong>No proof required.</strong> New Regime employees do not submit investment declarations — no documents to attach.
+                  </div>
+
+                  <!-- Save/Cancel bar (edit mode only) -->
+                  <div class="edit-save-bar hidden" id="save-bar">
+                    <div style="font-size:0.8rem;color:#718096;"><i class="fa fa-pencil-alt mr-1 text-primary"></i>Unsaved changes — TDS will recalculate on save</div>
+                    <div style="display:flex;gap:0.5rem;">
+                      <button class="btn btn-sm btn-light border" onclick="cancelEdit()">Cancel</button>
+                      <button class="btn btn-sm btn-primary font-weight-700" onclick="saveDeclaration()"><i class="fa fa-check mr-1"></i>Save Declaration</button>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
 
+            <!-- Right: TDS worksheet -->
             <div class="col-md-4 mb-4">
               <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;margin-bottom:1rem;">
-                <div class="section-heading">TDS Worksheet — May 2026</div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">Annual Gross</span><span class="val">₹3,62,400</span></div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">Std. Deduction</span><span class="val text-danger">- ₹75,000</span></div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">HRA Exemption</span><span class="val text-danger">- ₹0</span></div>
-                <div style="border-top:1px solid #e8ecf0;margin:0.5rem 0;"></div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">Income Chargeable</span><span class="val font-weight-700">₹2,87,400</span></div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">Tax (New Regime)</span><span class="val"><span style="background:#c6f6d5;color:#276749;font-size:0.72rem;font-weight:700;padding:2px 6px;border-radius:4px;">₹0</span> <span style="font-size:0.72rem;color:#a0aec0;">Below ₹4L threshold</span></span></div>
-                <div style="border-top:1px solid #e8ecf0;margin:0.5rem 0;"></div>
-                <div class="info-row"><span class="lbl" style="min-width:160px;">Monthly TDS</span><span class="val font-weight-700 text-primary">₹0</span></div>
+                <div class="section-heading">TDS Worksheet — Jul 2026</div>
+                <div class="tds-calc-row"><span>Annual Gross</span><span id="ws-gross" style="font-variant-numeric:tabular-nums;font-weight:600;">₹3,62,400</span></div>
+                <div class="tds-calc-row" id="ws-std-row"><span>Std. Deduction</span><span style="color:#e53e3e;">− ₹75,000</span></div>
+                <div class="tds-calc-row" id="ws-hra-row" style="display:none;"><span>HRA Exemption</span><span id="ws-hra" style="color:#e53e3e;">− ₹0</span></div>
+                <div class="tds-calc-row" id="ws-80c-row" style="display:none;"><span>80C Investments</span><span id="ws-80c" style="color:#e53e3e;">− ₹0</span></div>
+                <div class="tds-calc-row" id="ws-80d-row" style="display:none;"><span>80D Health Ins.</span><span id="ws-80d" style="color:#e53e3e;">− ₹0</span></div>
+                <div class="tds-calc-row" id="ws-other-row" style="display:none;"><span>Other deductions</span><span id="ws-other" style="color:#e53e3e;">− ₹0</span></div>
+                <div style="border-top:1px solid #e8ecf0;margin:0.4rem 0;"></div>
+                <div class="tds-calc-row total-row"><span>Taxable Income</span><span id="ws-taxable" style="font-variant-numeric:tabular-nums;color:#c05621;">₹2,87,400</span></div>
+                <div class="tds-calc-row total-row"><span>Annual Tax + Cess</span><span id="ws-annual-tax" style="font-variant-numeric:tabular-nums;">₹0</span></div>
+                <div style="background:#1a202c;color:#fff;border-radius:8px;padding:0.6rem 0.9rem;display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
+                  <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Monthly TDS</span>
+                  <span id="ws-monthly-tds" style="font-size:1.1rem;font-weight:800;color:#48bb78;font-variant-numeric:tabular-nums;">₹0</span>
+                </div>
               </div>
 
               <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
-                <div class="section-heading">Tax Regime Comparison</div>
-                <div style="font-size:0.78rem;color:#718096;line-height:1.6;">
-                  <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;"><span>Taxable income</span><span style="font-weight:700;color:#1a202c;">₹2,87,400</span></div>
-                  <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;padding:0.25rem 0.5rem;background:#f0fff4;border-radius:4px;"><span style="font-weight:600;color:#276749;">New Regime</span><span style="font-weight:700;color:#276749;">₹0 tax</span></div>
-                  <div style="display:flex;justify-content:space-between;padding:0.25rem 0.5rem;background:#f7fafc;border-radius:4px;"><span>Old Regime</span><span style="font-weight:700;">₹1,874 tax</span></div>
-                  <div style="font-size:0.7rem;color:#a0aec0;margin-top:0.6rem;"><i class="fa fa-info-circle mr-1"></i> New Regime is optimal for this employee</div>
+                <div class="section-heading">Regime Comparison</div>
+                <div style="font-size:0.78rem;color:#718096;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;padding:0.3rem 0.6rem;border-radius:6px;" id="cmp-new" style="">
+                    <span style="font-weight:600;">New Regime</span>
+                    <span id="cmp-new-tax" style="font-weight:700;font-variant-numeric:tabular-nums;">₹0 / yr</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;padding:0.3rem 0.6rem;border-radius:6px;" id="cmp-old">
+                    <span style="font-weight:600;">Old Regime</span>
+                    <span id="cmp-old-tax" style="font-weight:700;font-variant-numeric:tabular-nums;">₹1,874 / yr</span>
+                  </div>
+                  <div id="cmp-verdict" style="font-size:0.7rem;color:#a0aec0;margin-top:0.6rem;"><i class="fa fa-check-circle text-success mr-1"></i>New Regime is optimal for this employee</div>
+                </div>
+              </div>
+
+              <!-- Change history -->
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;margin-top:1rem;">
+                <div class="section-heading">Change History</div>
+                <div style="font-size:0.78rem;">
+                  <div style="padding:0.4rem 0;border-bottom:1px solid #f0f4f8;color:#4a5568;"><span style="color:#a0aec0;display:inline-block;width:110px;font-size:0.7rem;">07 Jul 2026</span> Mathan Raj updated <strong>80D Self</strong> ₹12,000 → ₹15,840</div>
+                  <div style="padding:0.4rem 0;border-bottom:1px solid #f0f4f8;color:#4a5568;"><span style="color:#a0aec0;display:inline-block;width:110px;font-size:0.7rem;">05 Apr 2026</span> Declaration created for FY 2026-27</div>
+                  <div style="padding:0.4rem 0;color:#a0aec0;font-size:0.72rem;">Showing 2 of 2 entries (max 100)</div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -483,18 +643,22 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
         <!-- ===== LOANS ===== -->
         <div class="tab-pane fade" id="tab-loans">
           <div class="row">
+
+            <!-- Left: loan list + new application form -->
             <div class="col-md-8 mb-4">
-              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+
+              <!-- Active loan -->
+              <div class="block mb-3" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-hand-holding-usd text-primary mr-2"></i>Active Loans</div>
-                  <button class="btn btn-sm btn-primary"><i class="fa fa-plus mr-1"></i> New Loan</button>
+                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-hand-holding-usd text-primary mr-2"></i>Loan History</div>
+                  <button class="btn btn-sm btn-primary" id="newLoanToggleBtn" onclick="toggleLoanForm()"><i class="fa fa-plus mr-1"></i> New Loan</button>
                 </div>
 
                 <div class="loan-card" style="border-color:#bee3f8;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
-                      <div class="loan-title">LOAN-00384 &nbsp;<span style="background:#bee3f8;color:#2a69ac;font-size:0.7rem;font-weight:700;padding:1px 6px;border-radius:4px;">Advance Salary</span></div>
-                      <div class="loan-sub">Disbursed: —  ·  0% interest  ·  8 instalments remaining</div>
+                      <div class="loan-title">LOAN-00384 &nbsp;<span style="background:#bee3f8;color:#2a69ac;font-size:0.7rem;font-weight:700;padding:1px 6px;border-radius:4px;">Active</span></div>
+                      <div class="loan-sub">Disbursed 01-Dec-2025 · 0% interest · 8 instalments remaining</div>
                     </div>
                     <div style="text-align:right;">
                       <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Outstanding</div>
@@ -502,16 +666,16 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
                     </div>
                   </div>
                   <div class="loan-progress">
-                    <div class="loan-progress-bar" style="width:0%;"></div>
+                    <div class="loan-progress-bar" style="width:25%;"></div>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#a0aec0;margin-bottom:0.5rem;">
-                    <span>0% repaid</span><span>₹30,000 remaining</span>
+                    <span>4 of 12 months paid</span><span>₹30,000 remaining</span>
                   </div>
                   <div class="loan-stat-row">
-                    <div class="ls-item"><span class="ls-lbl">Principal</span><span class="ls-val">₹30,000</span></div>
-                    <div class="ls-item"><span class="ls-lbl">Repaid</span><span class="ls-val">₹0</span></div>
-                    <div class="ls-item"><span class="ls-lbl">Instalment</span><span class="ls-val">₹3,750 / mo</span></div>
-                    <div class="ls-item"><span class="ls-lbl">Next Due</span><span class="ls-val">05 Aug 2026</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Principal</span><span class="ls-val">₹36,000</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Repaid</span><span class="ls-val">₹6,000</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Instalment</span><span class="ls-val">₹3,000 / mo</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Next Due</span><span class="ls-val">Aug 2026</span></div>
                     <div class="ls-item"><span class="ls-lbl">Remaining</span><span class="ls-val">8 months</span></div>
                   </div>
                 </div>
@@ -520,7 +684,7 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
                       <div class="loan-title">LOAN-00285 &nbsp;<span style="background:#f0f0f0;color:#718096;font-size:0.7rem;font-weight:700;padding:1px 6px;border-radius:4px;">Closed</span></div>
-                      <div class="loan-sub">Personal Loan  ·  0% interest  ·  Closed Jan 2026</div>
+                      <div class="loan-sub">Personal Loan · 0% interest · Closed Jan 2026</div>
                     </div>
                     <div style="text-align:right;">
                       <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Total Paid</div>
@@ -534,24 +698,161 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
                     <span>100% repaid</span><span>Fully closed</span>
                   </div>
                 </div>
-
               </div>
+
+              <!-- New Loan Application Form (collapsed by default) -->
+              <div id="newLoanFormCard" style="display:none;">
+                <div class="block" style="border-radius:12px;box-shadow:0 2px 20px rgba(33,150,243,0.13);border:2px solid #bee3f8;padding:1.25rem 1.5rem;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <div style="font-size:0.9rem;font-weight:800;color:#1a202c;"><i class="fa fa-file-signature text-primary mr-2"></i>New Loan Application</div>
+                    <button class="btn btn-sm btn-light border" onclick="toggleLoanForm()" style="font-size:0.72rem;">✕ Close</button>
+                  </div>
+
+                  <!-- Active loan warning -->
+                  <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:8px;padding:0.65rem 0.9rem;font-size:0.78rem;color:#742a2a;margin-bottom:1rem;">
+                    <i class="fa fa-exclamation-triangle mr-1"></i>
+                    <strong>Active loan exists (LOAN-00384).</strong> New application is blocked until the current loan is fully repaid. Outstanding: ₹30,000 (8 months remaining).
+                  </div>
+
+                  <div style="opacity:0.45;pointer-events:none;">
+
+                  <div class="row mb-3">
+                    <div class="col-sm-6">
+                      <label style="font-size:0.78rem;font-weight:700;color:#4a5568;margin-bottom:0.25rem;display:block;">Loan Amount (₹)</label>
+                      <input type="number" class="form-control form-control-sm" id="emp-nl-amount" placeholder="e.g. 50000" min="5000" step="1000" oninput="empCalcLoan()">
+                    </div>
+                    <div class="col-sm-6">
+                      <label style="font-size:0.78rem;font-weight:700;color:#4a5568;margin-bottom:0.25rem;display:block;">Repayment Tenure</label>
+                      <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <input type="range" id="emp-nl-tenure" min="1" max="24" value="12" oninput="empCalcLoan()" style="flex:1;">
+                        <span id="emp-nl-tenure-lbl" style="font-size:0.88rem;font-weight:800;color:#2196F3;min-width:70px;text-align:right;">12 months</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#a0aec0;"><span>1</span><span>24 months</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Live EMI summary strip -->
+                  <div id="emp-nl-summary" style="display:none;background:#ebf8ff;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+                      <div style="text-align:center;">
+                        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#2b6cb0;font-weight:700;">Monthly EMI</div>
+                        <div style="font-size:1.25rem;font-weight:900;color:#2196F3;font-variant-numeric:tabular-nums;" id="emp-nl-emi">—</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#2b6cb0;font-weight:700;">Total Repayment</div>
+                        <div style="font-size:1.25rem;font-weight:900;color:#1a202c;font-variant-numeric:tabular-nums;" id="emp-nl-total">—</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#2b6cb0;font-weight:700;">Loan Closes</div>
+                        <div style="font-size:1.25rem;font-weight:900;color:#276749;font-variant-numeric:tabular-nums;" id="emp-nl-close">—</div>
+                      </div>
+                      <div style="text-align:center;">
+                        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#2b6cb0;font-weight:700;">Interest</div>
+                        <div style="font-size:1.25rem;font-weight:900;color:#276749;">Zero</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Repayment schedule preview -->
+                  <div id="emp-nl-sched-wrap" style="display:none;margin-bottom:1rem;">
+                    <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#718096;margin-bottom:0.4rem;"><i class="fa fa-calendar-alt mr-1"></i>Repayment Schedule Preview</div>
+                    <div style="overflow-x:auto;">
+                      <table style="width:100%;border-collapse:collapse;font-size:0.78rem;" id="emp-nl-sched-table">
+                        <thead>
+                          <tr style="background:#f7fafc;">
+                            <th style="padding:0.4rem 0.6rem;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;font-weight:700;border-bottom:1px solid #e2e8f0;">#</th>
+                            <th style="padding:0.4rem 0.6rem;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;font-weight:700;border-bottom:1px solid #e2e8f0;">Month</th>
+                            <th style="padding:0.4rem 0.6rem;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;font-weight:700;border-bottom:1px solid #e2e8f0;text-align:right;">EMI</th>
+                            <th style="padding:0.4rem 0.6rem;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;font-weight:700;border-bottom:1px solid #e2e8f0;text-align:right;">Outstanding After</th>
+                          </tr>
+                        </thead>
+                        <tbody id="emp-nl-sched-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label style="font-size:0.78rem;font-weight:700;color:#4a5568;margin-bottom:0.25rem;display:block;">Reason for Loan</label>
+                    <textarea class="form-control form-control-sm" rows="2" placeholder="Medical, education, home repair…"></textarea>
+                  </div>
+
+                  </div><!-- /opacity wrapper -->
+
+                  <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.5rem;">
+                    <button class="btn btn-light border" onclick="toggleLoanForm()">Cancel</button>
+                    <button class="btn btn-primary font-weight-700" disabled title="Clear existing loan first">
+                      <i class="fa fa-paper-plane mr-1"></i> Submit for Approval
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
+            <!-- Right: summary + next deduction -->
             <div class="col-md-4 mb-4">
               <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
                 <div class="section-heading">Loan Summary</div>
                 <div class="info-row"><span class="lbl">Total Active Loans</span><span class="val">1</span></div>
                 <div class="info-row"><span class="lbl">Outstanding Balance</span><span class="val text-danger font-weight-700">₹30,000</span></div>
-                <div class="info-row"><span class="lbl">Next Deduction</span><span class="val">₹3,750 &nbsp;(Aug 2026)</span></div>
+                <div class="info-row"><span class="lbl">Monthly Deduction</span><span class="val">₹3,000</span></div>
+                <div class="info-row"><span class="lbl">Next Due Month</span><span class="val">Aug 2026</span></div>
+                <div class="info-row"><span class="lbl">Loan Closes By</span><span class="val">Mar 2027</span></div>
                 <div class="info-row"><span class="lbl">Total Closed Loans</span><span class="val">1</span></div>
                 <div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:0.65rem 0.85rem;font-size:0.78rem;color:#742a2a;margin-top:0.75rem;">
                   <i class="fa fa-info-circle mr-1"></i>
-                  ₹3,750 will be deducted from August 2026 salary automatically.
+                  ₹3,000 will be auto-deducted from August 2026 salary.
+                </div>
+                <div style="margin-top:1rem;">
+                  <a href="loans.html" class="btn btn-sm btn-light border w-100" style="font-size:0.78rem;"><i class="fa fa-external-link-alt mr-1 text-primary"></i>View in Loans Module</a>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- ===== CHANGE LOG ===== -->
+        <div class="tab-pane fade" id="tab-changelog">
+
+          <div class="cl-filter-bar">
+            <span style="font-size:0.78rem;color:#718096;"><i class="fa fa-filter mr-1"></i>Filter:</span>
+            <select id="cl-filter-type" onchange="renderLog()">
+              <option value="">All Types</option>
+              <option value="Created">Created</option>
+              <option value="Updated">Updated</option>
+              <option value="Deleted">Deleted</option>
+            </select>
+            <select id="cl-filter-section" onchange="renderLog()">
+              <option value="">All Sections</option>
+              <option value="Payroll">Payroll</option>
+              <option value="Tax">Tax Declaration</option>
+              <option value="Salary">Salary</option>
+              <option value="Loan">Loan</option>
+              <option value="Profile">Profile</option>
+            </select>
+            <input type="text" id="cl-search" placeholder="Search field or value…" oninput="renderLog()" style="width:200px;">
+            <span id="cl-count" style="margin-left:auto;font-size:0.75rem;color:#a0aec0;"></span>
+          </div>
+
+          <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table class="cl-table">
+                <thead>
+                  <tr>
+                    <th style="width:145px;">Time</th>
+                    <th style="width:95px;">User</th>
+                    <th style="width:90px;">Type</th>
+                    <th>Changes</th>
+                  </tr>
+                </thead>
+                <tbody id="cl-tbody"></tbody>
+              </table>
+            </div>
+            <div id="cl-empty" style="display:none;text-align:center;padding:2.5rem;color:#a0aec0;font-size:0.85rem;">
+              <i class="fa fa-search fa-2x d-block mb-2" style="opacity:0.3;"></i>No entries match the current filter.
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -565,8 +866,521 @@ function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-i
 function setSlip(row, id) {
   document.querySelectorAll('.payslip-row').forEach(function(r){ r.classList.remove('active-slip'); });
   row.classList.add('active-slip');
-  // In a real app this would load the relevant payslip — in the prototype it just highlights the row
 }
+
+// ── Change Log ───────────────────────────────────────────────────────────────
+
+var CHANGE_LOG = [
+  {
+    time: '08-07-26 10:14:22', user: 'Mathan Raj', type: 'Updated', section: 'Tax',
+    changes: [
+      { field: 'Section 80D Self', from: '12,000', to: '15,840' },
+      { field: 'Declaration Status', from: 'Draft', to: 'Declaration Submitted' },
+    ]
+  },
+  {
+    time: '08-07-26 09:51:07', user: 'Mathan Raj', type: 'Updated', section: 'Tax',
+    changes: [
+      { field: 'Tax Regime', from: 'New Regime', to: 'Old Regime' },
+    ]
+  },
+  {
+    time: '05-07-26 14:30:00', user: 'Priya (HR)', type: 'Updated', section: 'Payroll',
+    changes: [
+      { field: 'TDS Override', from: '₹1,288', to: '₹0 (Deferred)' },
+      { field: 'TDS Defer Reason', from: null, to: 'Employee requested deferral — July 2026' },
+    ]
+  },
+  {
+    time: '01-07-26 09:00:00', user: 'System', type: 'Created', section: 'Payroll',
+    changes: [
+      { field: 'Payroll Run', from: null, to: 'July 2026' },
+      { field: 'Gross', from: null, to: '₹30,200' },
+      { field: 'EPF', from: null, to: '₹1,800' },
+      { field: 'TDS', from: null, to: '₹1,288' },
+      { field: 'GTLI', from: null, to: '₹133' },
+      { field: 'Professional Tax', from: null, to: '₹208' },
+      { field: 'Health Insurance', from: null, to: '₹961' },
+      { field: 'Net Pay', from: null, to: '₹25,810' },
+    ]
+  },
+  {
+    time: '15-06-26 11:22:45', user: 'Priya (HR)', type: 'Updated', section: 'Salary',
+    changes: [
+      { field: 'Basic Pay', from: '₹12,500', to: '₹13,000' },
+      { field: 'HRA', from: '₹3,750', to: '₹3,900' },
+      { field: 'Annual Gross', from: '₹3,58,800', to: '₹3,62,400' },
+    ]
+  },
+  {
+    time: '10-06-26 16:05:11', user: 'Mathan Raj', type: 'Updated', section: 'Loan',
+    changes: [
+      { field: 'Loan Amount', from: '₹50,000', to: '₹60,000' },
+      { field: 'EMI', from: '₹3,125', to: '₹3,750' },
+    ]
+  },
+  {
+    time: '05-04-26 09:00:00', user: 'System', type: 'Created', section: 'Tax',
+    changes: [
+      { field: 'Tax Declaration FY', from: null, to: '2026-27' },
+      { field: 'Tax Regime', from: null, to: 'New Regime' },
+      { field: 'Status', from: null, to: 'Provisional' },
+    ]
+  },
+  {
+    time: '01-04-26 09:00:00', user: 'System', type: 'Created', section: 'Payroll',
+    changes: [
+      { field: 'Payroll Run', from: null, to: 'April 2026' },
+      { field: 'Gross', from: null, to: '₹29,575' },
+      { field: 'Net Pay', from: null, to: '₹25,473' },
+    ]
+  },
+  {
+    time: '12-03-26 10:30:00', user: 'Priya (HR)', type: 'Updated', section: 'Profile',
+    changes: [
+      { field: 'Bank Account', from: '****1234', to: '****5678' },
+      { field: 'IFSC Code', from: 'SBIN0001234', to: 'HDFC0002571' },
+    ]
+  },
+  {
+    time: '15-01-26 14:00:00', user: 'System', type: 'Updated', section: 'Payroll',
+    changes: [
+      { field: 'TDS', from: '₹963', to: '₹1,288' },
+      { field: 'TDS Revision Reason', from: null, to: 'Mid-year declaration update' },
+    ]
+  },
+];
+
+var SECTION_CLASS = { Payroll:'cl-sec-payroll', Tax:'cl-sec-tax', Salary:'cl-sec-salary', Loan:'cl-sec-loan', Profile:'cl-sec-profile' };
+var SECTION_LABEL = { Payroll:'Payroll', Tax:'Tax Declaration', Salary:'Salary', Loan:'Loan', Profile:'Profile' };
+
+function renderLog() {
+  var typeFilter    = document.getElementById('cl-filter-type').value;
+  var sectionFilter = document.getElementById('cl-filter-section').value;
+  var search        = (document.getElementById('cl-search').value || '').toLowerCase();
+
+  var filtered = CHANGE_LOG.filter(function(entry) {
+    if (typeFilter    && entry.type    !== typeFilter)    return false;
+    if (sectionFilter && entry.section !== sectionFilter) return false;
+    if (search) {
+      var text = entry.changes.map(function(c){ return (c.field+' '+(c.from||'')+' '+(c.to||'')).toLowerCase(); }).join(' ');
+      if (text.indexOf(search) < 0 && entry.user.toLowerCase().indexOf(search) < 0) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('cl-count').textContent = filtered.length + ' of ' + CHANGE_LOG.length + ' entries';
+
+  var tbody = document.getElementById('cl-tbody');
+  var empty = document.getElementById('cl-empty');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(function(entry) {
+    var typeClass = entry.type === 'Created' ? 'cl-type-created' : entry.type === 'Deleted' ? 'cl-type-deleted' : 'cl-type-updated';
+    var secCls = SECTION_CLASS[entry.section] || 'cl-sec-profile';
+    var secLbl = SECTION_LABEL[entry.section] || entry.section;
+
+    var changes = entry.changes.map(function(c) {
+      if (c.from === null) {
+        return '<li><strong>' + c.field + '</strong> set to <span class="cl-val">' + c.to + '</span></li>';
+      }
+      return '<li><strong>' + c.field + '</strong> changed from <span style="color:#718096;text-decoration:line-through;">' + c.from + '</span> to <span class="cl-val">' + c.to + '</span></li>';
+    }).join('');
+
+    return '<tr>'
+      + '<td class="cl-time">' + entry.time + '</td>'
+      + '<td class="cl-user">' + entry.user + '</td>'
+      + '<td><span class="' + typeClass + '">' + entry.type + '</span><br>'
+      +   '<span class="cl-section-badge ' + secCls + '">' + secLbl + '</span></td>'
+      + '<td><ul class="cl-changes">' + changes + '</ul></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// Init log on tab click
+document.querySelector('a[href="#tab-changelog"]').addEventListener('click', function(){ setTimeout(renderLog, 50); });
+
+// ── Tax Declaration ──────────────────────────────────────────────────────────
+
+var ANNUAL_GROSS = 362400;
+var BASIC        = 30200;
+var HRA_MONTHLY  = 9060; // 30% of basic
+var currentRegime = 'new';
+
+// Original saved values (for cancel)
+var savedValues = {};
+function snapshotValues() {
+  ['f-rent','f-24b','f-lic','f-ppf','f-elss','f-80d-self','f-80d-par','f-nps','f-80e'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) savedValues[id] = el.value;
+  });
+  savedValues.regime = currentRegime;
+}
+
+function enterEditMode() {
+  snapshotValues();
+  var block = document.getElementById('decl-block');
+  block.classList.remove('td-view-mode');
+  block.classList.add('td-edit-mode');
+  document.getElementById('edit-btn').style.display = 'none';
+  document.getElementById('save-bar').classList.remove('hidden');
+  document.getElementById('regime-edit-row').style.display = 'flex';
+  // Enable all inputs
+  block.querySelectorAll('.if-input input[type=text]').forEach(function(inp){ inp.removeAttribute('disabled'); });
+}
+
+function cancelEdit() {
+  // Revert values
+  Object.keys(savedValues).forEach(function(id){
+    if (id === 'regime') { selectRegime(savedValues.regime); return; }
+    var el = document.getElementById(id);
+    if (el) el.value = savedValues[id];
+  });
+  exitEditMode();
+}
+
+function exitEditMode() {
+  var block = document.getElementById('decl-block');
+  block.classList.remove('td-edit-mode');
+  block.classList.add('td-view-mode');
+  document.getElementById('edit-btn').style.display = '';
+  document.getElementById('save-bar').classList.add('hidden');
+  document.getElementById('regime-edit-row').style.display = 'none';
+  block.querySelectorAll('.if-input input[type=text]').forEach(function(inp){ inp.setAttribute('disabled',''); });
+}
+
+function selectRegime(regime) {
+  currentRegime = regime;
+  document.getElementById('opt-new').className = 'regime-opt' + (regime === 'new' ? ' selected-new' : '');
+  document.getElementById('opt-old').className = 'regime-opt' + (regime === 'old' ? ' selected-old' : '');
+  document.getElementById('new-regime-notice').style.display = regime === 'new' ? '' : 'none';
+  document.getElementById('old-regime-sections').style.display = regime === 'old' ? '' : 'none';
+  recalcTDS();
+  renderProofTable();
+}
+
+function parseAmt(id) {
+  var el = document.getElementById(id);
+  if (!el) return 0;
+  return parseInt(el.value.replace(/[^0-9]/g,'')) || 0;
+}
+
+function fmtR(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+function calcTax(taxable, regime) {
+  var tax = 0;
+  if (regime === 'new') {
+    if (taxable > 1500000)      tax = 150000 + (taxable - 1500000) * 0.30;
+    else if (taxable > 1200000) tax = 90000  + (taxable - 1200000) * 0.20;
+    else if (taxable > 1000000) tax = 70000  + (taxable - 1000000) * 0.15;
+    else if (taxable > 700000)  tax = 40000  + (taxable - 700000)  * 0.10;
+    else if (taxable > 300000)  tax = (taxable - 300000) * 0.05;
+    if (taxable <= 700000) tax = 0;
+  } else {
+    if (taxable > 1000000)      tax = 112500 + (taxable - 1000000) * 0.30;
+    else if (taxable > 500000)  tax = 12500  + (taxable - 500000)  * 0.20;
+    else if (taxable > 250000)  tax = (taxable - 250000) * 0.05;
+    if (taxable <= 500000) tax = 0;
+  }
+  return Math.round(tax * 1.04);
+}
+
+function recalcTDS() {
+  var regime = currentRegime;
+  var taxable, stdDed, hraExempt = 0, ded80c = 0, ded80d = 0, dedOther = 0;
+
+  if (regime === 'new') {
+    stdDed  = 75000;
+    taxable = Math.max(0, ANNUAL_GROSS - stdDed);
+    document.getElementById('ws-std-row').innerHTML = '<span>Std. Deduction</span><span style="color:#e53e3e;">− ' + fmtR(stdDed) + '</span>';
+    ['ws-hra-row','ws-80c-row','ws-80d-row','ws-other-row'].forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+  } else {
+    stdDed = 50000;
+    var rentMo = parseAmt('f-rent');
+    var hraReceived = HRA_MONTHLY * 12;
+    hraExempt = Math.min(hraReceived, rentMo * 12, Math.max(0, rentMo * 12 - BASIC * 0.1 * 12));
+
+    var lic = parseAmt('f-lic'), ppf = parseAmt('f-ppf'), elss = parseAmt('f-elss');
+    ded80c = Math.min(lic + ppf + elss + 21600, 150000);
+
+    var d80dSelf = parseAmt('f-80d-self'), d80dPar = parseAmt('f-80d-par');
+    ded80d = Math.min(d80dSelf, 25000) + Math.min(d80dPar, 50000);
+
+    var nps = parseAmt('f-nps'), e80e = parseAmt('f-80e'), b24 = parseAmt('f-24b');
+    dedOther = Math.min(nps, 50000) + e80e + Math.min(b24, 200000);
+
+    taxable = Math.max(0, ANNUAL_GROSS - stdDed - hraExempt - ded80c - ded80d - dedOther);
+
+    document.getElementById('ws-std-row').innerHTML = '<span>Std. Deduction (Old)</span><span style="color:#e53e3e;">− ' + fmtR(stdDed) + '</span>';
+    document.getElementById('ws-hra-row').style.display = '';
+    document.getElementById('ws-hra').textContent = '− ' + fmtR(hraExempt);
+    document.getElementById('ws-80c-row').style.display = ded80c > 0 ? '' : 'none';
+    document.getElementById('ws-80c').textContent = '− ' + fmtR(ded80c);
+    document.getElementById('ws-80d-row').style.display = ded80d > 0 ? '' : 'none';
+    document.getElementById('ws-80d').textContent = '− ' + fmtR(ded80d);
+    document.getElementById('ws-other-row').style.display = dedOther > 0 ? '' : 'none';
+    document.getElementById('ws-other').textContent = '− ' + fmtR(dedOther);
+
+    // Update 80C total display
+    var total80c = document.getElementById('total-80c');
+    if (total80c) total80c.textContent = fmtR(ded80c);
+  }
+
+  var annualTax = calcTax(taxable, regime);
+  var monthlyTds = Math.round(annualTax / 12);
+
+  document.getElementById('ws-taxable').textContent = fmtR(taxable);
+  document.getElementById('ws-annual-tax').textContent = fmtR(annualTax);
+  document.getElementById('ws-monthly-tds').textContent = fmtR(monthlyTds);
+
+  // Comparison panel
+  var newTax = calcTax(Math.max(0, ANNUAL_GROSS - 75000), 'new');
+  var oldTax = calcTax(Math.max(0, ANNUAL_GROSS - 50000 - hraExempt - ded80c - ded80d - dedOther), 'old');
+
+  var cmpNew = document.getElementById('cmp-new');
+  var cmpOld = document.getElementById('cmp-old');
+  document.getElementById('cmp-new-tax').textContent = fmtR(newTax) + ' / yr';
+  document.getElementById('cmp-old-tax').textContent = fmtR(oldTax) + ' / yr';
+
+  var newBetter = newTax <= oldTax;
+  cmpNew.style.background = newBetter ? '#f0fff4' : '#f7fafc';
+  cmpNew.style.color = newBetter ? '#276749' : '';
+  cmpOld.style.background = !newBetter ? '#faf5ff' : '#f7fafc';
+  cmpOld.style.color = !newBetter ? '#553c9a' : '';
+  document.getElementById('cmp-verdict').innerHTML =
+    (newBetter
+      ? '<i class="fa fa-check-circle text-success mr-1"></i>New Regime is optimal for this employee'
+      : '<i class="fa fa-check-circle mr-1" style="color:#9f7aea;"></i>Old Regime saves ₹' + Math.round((newTax-oldTax)/100)*100 / 1 + ' for this employee');
+}
+
+function saveDeclaration() {
+  recalcTDS();
+  var pill = document.getElementById('regime-display-pill');
+  if (currentRegime === 'new') {
+    pill.className = 'regime-pill regime-pill-new';
+    pill.innerHTML = '<i class="fa fa-check-circle mr-1"></i>New Regime';
+  } else {
+    pill.className = 'regime-pill regime-pill-old';
+    pill.innerHTML = '<i class="fa fa-check-circle mr-1"></i>Old Regime';
+  }
+  exitEditMode();
+  showToastEmp('Declaration saved — TDS updated from August 2026 onwards');
+}
+
+function showToastEmp(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a202c;color:#fff;padding:0.7rem 1.25rem;border-radius:8px;font-size:0.84rem;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.25);';
+  t.innerHTML = '<i class="fa fa-check-circle text-success mr-2"></i>' + msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.transition='opacity 0.4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 400); }, 3000);
+}
+
+// ── Proof Upload ─────────────────────────────────────────────────────────────
+
+// Declared amounts per section (mirrors what HR would have entered in Phase 1)
+var DECLARED = {
+  'HRA':       { label:'HRA Exemption',                  amount: 78000 },
+  '80C':       { label:'Section 80C (EPF + LIC + PPF)',  amount: 150000 },
+  '80D_SELF':  { label:'80D — Self & Family Health Ins.', amount: 15840 },
+  '80D_PAR':   { label:'80D — Parents Health Ins.',       amount: 0 },
+  'NPS':       { label:'80CCD(1B) — NPS',                amount: 0 },
+  '24B':       { label:'Sec 24(b) — Home Loan Interest', amount: 0 },
+};
+
+// Proof state: { amount, filename, uploaded }
+var PROOF_STATE = {};
+
+function renderProofTable() {
+  var regime = currentRegime;
+  var proofSection = document.getElementById('proof-upload-section');
+  var newNote      = document.getElementById('proof-new-regime-note');
+
+  if (regime === 'new') {
+    proofSection.style.display = 'none';
+    newNote.style.display = '';
+    return;
+  }
+
+  newNote.style.display = 'none';
+  proofSection.style.display = '';
+
+  var rows = Object.keys(DECLARED).filter(function(k){ return DECLARED[k].amount > 0; });
+  var allUploaded = rows.length > 0 && rows.every(function(k){ return PROOF_STATE[k] && PROOF_STATE[k].uploaded; });
+  document.getElementById('proof-status-badge').className = 'proof-chip ' + (allUploaded ? 'chip-uploaded' : 'chip-pending');
+  document.getElementById('proof-status-badge').textContent = allUploaded ? 'Proof Submitted' : 'Proof Pending';
+
+  var tbody = document.getElementById('proof-tbody');
+  tbody.innerHTML = rows.map(function(key) {
+    var decl = DECLARED[key];
+    var ps   = PROOF_STATE[key] || {};
+    var proofAmt = ps.amount !== undefined ? ps.amount : '';
+    var diffHtml = '';
+    if (ps.uploaded && ps.amount !== undefined) {
+      var diff = ps.amount - decl.amount;
+      if (diff < 0)       diffHtml = '<span class="diff-pill-proof diff-recover"><i class="fa fa-arrow-down mr-1"></i>' + fmtR(Math.abs(diff)) + ' recover</span>';
+      else if (diff > 0)  diffHtml = '<span class="diff-pill-proof diff-itr"><i class="fa fa-external-link-alt mr-1" style="font-size:0.6rem;"></i>' + fmtR(diff) + ' via ITR</span>';
+      else                diffHtml = '<span class="diff-pill-proof diff-ok"><i class="fa fa-check mr-1"></i>Match</span>';
+    } else {
+      diffHtml = '<span class="diff-pill-proof diff-na">—</span>';
+    }
+
+    var fileHtml = ps.uploaded
+      ? '<span class="proof-chip chip-uploaded"><i class="fa fa-paperclip mr-1"></i>Attached</span>'
+        + (ps.filename ? '<div class="upload-filename" title="' + ps.filename + '">' + ps.filename + '</div>' : '')
+        + '<button class="btn btn-xs btn-light border ml-2 upload-btn" onclick="removeProof(\'' + key + '\')" style="color:#9b2c2c;font-size:0.65rem;padding:2px 6px;">Remove</button>'
+      : '<label class="btn btn-sm btn-light border upload-btn" style="margin:0;cursor:pointer;">'
+        + '<i class="fa fa-upload mr-1"></i>Attach'
+        + '<input type="file" style="display:none;" onchange="mockUploadProof(\'' + key + '\', this)">'
+        + '</label>'
+        + '<span class="proof-chip chip-pending ml-1">Not Attached</span>';
+
+    return '<tr id="proof-row-' + key + '">'
+      + '<td style="font-weight:600;color:#2d3748;">' + decl.label + '</td>'
+      + '<td style="text-align:right;color:#718096;font-variant-numeric:tabular-nums;">' + fmtR(decl.amount) + '</td>'
+      + '<td style="text-align:right;">'
+        + '<div style="display:flex;align-items:center;justify-content:flex-end;gap:0.25rem;">'
+        + '<span style="font-size:0.72rem;color:#a0aec0;">₹</span>'
+        + '<input type="number" class="proof-amt-input" id="proof-amt-' + key + '" min="0" value="' + proofAmt + '" placeholder="0" oninput="onProofAmtChange(\'' + key + '\')">'
+        + '</div></td>'
+      + '<td>' + fileHtml + '</td>'
+      + '<td>' + diffHtml + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function mockUploadProof(key, input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!PROOF_STATE[key]) PROOF_STATE[key] = {};
+  PROOF_STATE[key].uploaded  = true;
+  PROOF_STATE[key].filename  = file.name;
+  // If proof amount not yet entered, default to declared amount
+  var amtInput = document.getElementById('proof-amt-' + key);
+  if (amtInput && !amtInput.value) {
+    amtInput.value = DECLARED[key].amount;
+    PROOF_STATE[key].amount = DECLARED[key].amount;
+  }
+  renderProofTable();
+  showToastEmp(file.name + ' attached for ' + DECLARED[key].label);
+}
+
+function onProofAmtChange(key) {
+  var inp = document.getElementById('proof-amt-' + key);
+  if (!PROOF_STATE[key]) PROOF_STATE[key] = {};
+  PROOF_STATE[key].amount = parseInt(inp.value) || 0;
+  // Update diff pill inline without full re-render
+  renderProofTable();
+}
+
+function removeProof(key) {
+  if (PROOF_STATE[key]) { PROOF_STATE[key].uploaded = false; PROOF_STATE[key].filename = null; }
+  renderProofTable();
+  showToastEmp('Attachment removed — ' + DECLARED[key].label);
+}
+
+function submitAllProofs() {
+  var rows = Object.keys(DECLARED).filter(function(k){ return DECLARED[k].amount > 0; });
+  var missing = rows.filter(function(k){ return !PROOF_STATE[k] || !PROOF_STATE[k].uploaded; });
+  if (missing.length) {
+    showToastEmp('Please attach documents for: ' + missing.map(function(k){ return DECLARED[k].label; }).join(', '));
+    return;
+  }
+  document.getElementById('proof-status-badge').className = 'proof-chip chip-uploaded';
+  document.getElementById('proof-status-badge').textContent = 'Proof Submitted';
+  showToastEmp('All proofs submitted — HR will review and finalize TDS');
+}
+
+// ── Loan Application Form ─────────────────────────────────────────────────────
+var LOAN_FORM_OPEN = false;
+var EMP_HAS_ACTIVE_LOAN = true; // mocked: LOAN-00384 is active
+
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toggleLoanForm() {
+  LOAN_FORM_OPEN = !LOAN_FORM_OPEN;
+  var card = document.getElementById('newLoanFormCard');
+  var btn  = document.getElementById('newLoanToggleBtn');
+  if (LOAN_FORM_OPEN) {
+    card.style.display = '';
+    btn.innerHTML = '<i class="fa fa-times mr-1"></i> Close';
+    btn.className = 'btn btn-sm btn-light border';
+    empCalcLoan();
+  } else {
+    card.style.display = 'none';
+    btn.innerHTML = '<i class="fa fa-plus mr-1"></i> New Loan';
+    btn.className = 'btn btn-sm btn-primary';
+  }
+}
+
+function empCalcLoan() {
+  var amount  = parseInt(document.getElementById('emp-nl-amount').value) || 0;
+  var tenure  = parseInt(document.getElementById('emp-nl-tenure').value) || 12;
+
+  document.getElementById('emp-nl-tenure-lbl').textContent = tenure + ' month' + (tenure !== 1 ? 's' : '');
+
+  var summary = document.getElementById('emp-nl-summary');
+  var schedWrap = document.getElementById('emp-nl-sched-wrap');
+
+  if (amount <= 0) { summary.style.display = 'none'; schedWrap.style.display = 'none'; return; }
+
+  var emi = Math.round(amount / tenure);
+  var lastEmi = amount - emi * (tenure - 1); // adjust rounding for last month
+
+  // Close month: start from current month (Jul 2026 = index 6, year 2026)
+  var startMonth = 6; // July = index 6 (0-based)
+  var startYear  = 2026;
+  var closeIdx   = (startMonth + tenure - 1) % 12;
+  var closeYear  = startYear + Math.floor((startMonth + tenure - 1) / 12);
+  var closeLabel = MONTHS[closeIdx] + ' ' + closeYear;
+
+  document.getElementById('emp-nl-emi').textContent   = '₹' + emi.toLocaleString('en-IN');
+  document.getElementById('emp-nl-total').textContent = '₹' + amount.toLocaleString('en-IN');
+  document.getElementById('emp-nl-close').textContent = closeLabel;
+  summary.style.display = '';
+
+  // Build repayment schedule
+  var tbody = document.getElementById('emp-nl-sched-tbody');
+  var rows = '';
+  var outstanding = amount;
+  for (var i = 0; i < tenure; i++) {
+    var mIdx   = (startMonth + i) % 12;
+    var mYear  = startYear + Math.floor((startMonth + i) / 12);
+    var mLabel = MONTHS[mIdx] + ' ' + mYear;
+    var thisEmi = (i === tenure - 1) ? lastEmi : emi;
+    outstanding -= thisEmi;
+    var isFirst = (i === 0);
+    rows += '<tr style="' + (isFirst ? 'background:#fffbeb;' : '') + '">'
+      + '<td style="padding:0.35rem 0.6rem;color:#a0aec0;font-size:0.72rem;border-bottom:1px solid #f0f4f8;">' + (i+1) + '</td>'
+      + '<td style="padding:0.35rem 0.6rem;border-bottom:1px solid #f0f4f8;font-weight:' + (isFirst ? '700' : '400') + ';color:' + (isFirst ? '#c05621' : '#2d3748') + ';">'
+        + mLabel + (isFirst ? ' <span style="font-size:0.65rem;background:#feebc8;color:#c05621;padding:1px 5px;border-radius:3px;font-weight:700;">Due</span>' : '') + '</td>'
+      + '<td style="padding:0.35rem 0.6rem;border-bottom:1px solid #f0f4f8;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">'
+        + '₹' + thisEmi.toLocaleString('en-IN')
+        + (i === tenure - 1 ? ' <span style="font-size:0.65rem;color:#a0aec0;">(final)</span>' : '') + '</td>'
+      + '<td style="padding:0.35rem 0.6rem;border-bottom:1px solid #f0f4f8;text-align:right;font-variant-numeric:tabular-nums;color:' + (outstanding <= 0 ? '#276749' : '#e53e3e') + ';font-weight:600;">'
+        + (outstanding <= 0 ? '<span style="color:#276749;">✓ Closed</span>' : '₹' + outstanding.toLocaleString('en-IN')) + '</td>'
+      + '</tr>';
+  }
+  tbody.innerHTML = rows;
+  schedWrap.style.display = '';
+}
+
+// Init: disable inputs in view mode, run initial calc
+(function(){
+  document.querySelectorAll('#decl-block .if-input input[type=text]').forEach(function(inp){ inp.setAttribute('disabled',''); });
+  recalcTDS();
+  renderProofTable();
+  // Check if navigated from payroll-run via ?tab=taxdecl
+  if (window.location.search.indexOf('tab=taxdecl') >= 0) {
+    var link = document.querySelector('a[href="#tab-investments"]');
+    if (link) link.click();
+  }
+})();
 </script>
 </body>
 </html>
