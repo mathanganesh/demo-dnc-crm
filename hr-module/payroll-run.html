@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pay Runs — July 2026 · DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .stat-card { border-radius: 12px; padding: 1.1rem 1.25rem; border: 0; }
+    .stat-card .s-num { font-size: 1.45rem; font-weight: 800; line-height: 1; margin-bottom: 0.2rem; font-variant-numeric: tabular-nums; }
+    .stat-card .s-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .run-header { background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); border: 0; padding: 1.1rem 1.5rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+    .run-title { font-size: 1.05rem; font-weight: 800; color: #1a202c; }
+    .run-sub { font-size: 0.78rem; color: #718096; margin-top: 0.1rem; }
+    .run-status { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.85rem; border-radius: 20px; }
+    .status-draft { background: #feebc8; color: #c05621; }
+    .status-processing { background: #bee3f8; color: #2a69ac; }
+    .status-done { background: #c6f6d5; color: #276749; }
+
+    /* Two-pane layout */
+    .run-layout { display: grid; grid-template-columns: 1fr; gap: 1.25rem; transition: grid-template-columns 0.25s ease; }
+    .run-layout.panel-open { grid-template-columns: 1fr 380px; }
+    @media (max-width: 991px) { .run-layout.panel-open { grid-template-columns: 1fr; } }
+
+    .emp-table-wrap { border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); background: #fff; overflow: hidden; }
+    .emp-table-wrap table { margin: 0; font-size: 0.84rem; }
+    .emp-table-wrap thead th { background: #f7fafc; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: #a0aec0; font-weight: 700; border-top: 0; padding: 0.65rem 0.75rem; white-space: nowrap; }
+    .emp-table-wrap tbody tr { cursor: pointer; transition: background 0.12s; }
+    .emp-table-wrap tbody tr:hover { background: #ebf4ff; }
+    .emp-table-wrap tbody tr.selected { background: #dbeafe; }
+    .emp-table-wrap tbody td { padding: 0.6rem 0.75rem; vertical-align: middle; border-top: 1px solid #f0f4f8; font-variant-numeric: tabular-nums; }
+    .emp-name-cell { font-weight: 600; color: #1a202c; font-size: 0.84rem; }
+    .emp-id-tag { font-size: 0.7rem; color: #718096; font-weight: 400; }
+    .lop-badge { background: #fed7d7; color: #9b2c2c; font-size: 0.7rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+    .net-amount { font-weight: 700; color: #2196F3; }
+
+    /* Detail panel */
+    .detail-panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.09); overflow: hidden; display: none; }
+    .detail-panel.visible { display: block; }
+    .dp-header { background: #1a202c; color: #fff; padding: 1rem 1.25rem; }
+    .dp-emp-name { font-size: 0.92rem; font-weight: 700; color: #63b3ed; }
+    .dp-emp-sub { font-size: 0.75rem; color: #a0aec0; margin-top: 0.15rem; }
+    .dp-net { text-align: right; }
+    .dp-net-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: #a0aec0; }
+    .dp-net-amt { font-size: 1.5rem; font-weight: 800; color: #48bb78; font-variant-numeric: tabular-nums; }
+    .dp-body { padding: 1rem 1.25rem; max-height: 620px; overflow-y: auto; }
+    .dp-days-row { display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid #f0f4f8; flex-wrap: wrap; }
+    .dp-day-block { flex: 1; min-width: 80px; text-align: center; background: #f7fafc; border-radius: 8px; padding: 0.5rem; }
+    .dp-day-num { font-size: 1.25rem; font-weight: 800; color: #1a202c; font-variant-numeric: tabular-nums; }
+    .dp-day-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; font-weight: 600; }
+    .dp-day-block.lop .dp-day-num { color: #e53e3e; }
+    .dp-section-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 0.6rem; margin-top: 0.9rem; padding-bottom: 0.3rem; border-bottom: 2px solid; display: inline-block; }
+    .dp-section-title.earn { color: #276749; border-color: #48bb78; }
+    .dp-section-title.deduct { color: #9b2c2c; border-color: #fc8181; }
+    .dp-section-title.benefit { color: #2b6cb0; border-color: #63b3ed; }
+    .dp-line { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f7fafc; font-size: 0.83rem; }
+    .dp-line:last-child { border-bottom: 0; }
+    .dp-line .comp-name { color: #4a5568; }
+    .dp-line .comp-amt { font-weight: 600; font-variant-numeric: tabular-nums; color: #1a202c; }
+    .dp-line.total-line { font-weight: 700; border-top: 1px solid #e8ecf0; margin-top: 0.35rem; padding-top: 0.5rem; }
+    .dp-line.total-line .comp-name { color: #1a202c; }
+    .dp-line .comp-sub { font-size: 0.7rem; color: #a0aec0; display: block; }
+    .dp-footer { padding: 0.85rem 1.25rem; border-top: 1px solid #f0f4f8; background: #f7fafc; display: flex; justify-content: space-between; align-items: center; }
+    .dp-netpay-row { display: flex; justify-content: space-between; align-items: center; background: #1a202c; color: #fff; padding: 0.85rem 1.25rem; }
+    .dp-netpay-lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .dp-netpay-amt { font-size: 1.15rem; font-weight: 800; color: #48bb78; font-variant-numeric: tabular-nums; }
+
+    .amount-col { font-variant-numeric: tabular-nums; text-align: right; }
+    .table-pagination { padding: 0.75rem 1rem; border-top: 1px solid #f0f4f8; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: #718096; }
+
+    /* Override indicators */
+    .override-badge { background:#fff3cd; color:#856404; font-size:0.62rem; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; vertical-align:middle; border:1px solid #ffc107; }
+    .dp-line .override-tag { background:#fff3cd; color:#856404; font-size:0.65rem; font-weight:700; padding:1px 5px; border-radius:3px; border:1px solid #ffc107; white-space:nowrap; }
+    .dp-line .auto-strike { text-decoration:line-through; color:#a0aec0; font-size:0.75rem; margin-right:4px; font-variant-numeric:tabular-nums; }
+    .dp-line .override-amt { color:#c05621; font-weight:700; font-variant-numeric:tabular-nums; }
+    .dp-edit-btn { background:none; border:none; color:#a0aec0; cursor:pointer; padding:0 3px; font-size:0.72rem; transition:color 0.15s; }
+    .dp-edit-btn:hover { color:#2196F3; }
+    .dp-override-input { display:none; align-items:center; gap:0.3rem; margin-top:0.3rem; padding:0.35rem 0.6rem; background:#fffbeb; border-radius:6px; border:1px solid #fbbf24; }
+    .dp-override-input input { width:90px; border:1px solid #fbbf24; border-radius:4px; padding:3px 6px; font-size:0.8rem; text-align:right; background:#fff; }
+    .dp-override-input .oi-label { font-size:0.72rem; color:#92400e; font-weight:600; }
+    .row-has-override td:nth-child(2)::after { content:''; display:inline-block; width:7px; height:7px; background:#ed8936; border-radius:50%; margin-left:5px; vertical-align:middle; }
+    /* Import modal */
+    .csv-preview { overflow-x:auto; }
+    .csv-preview table { font-size:0.78rem; min-width:540px; }
+    .csv-preview th { background:#f7fafc; font-size:0.67rem; text-transform:uppercase; letter-spacing:0.06em; color:#a0aec0; font-weight:700; padding:0.4rem 0.65rem; white-space:nowrap; }
+    .csv-preview td { padding:0.4rem 0.65rem; border-top:1px solid #f0f4f8; }
+    .csv-preview td.changed { color:#c05621; font-weight:700; }
+    .csv-preview td.unchanged { color:#a0aec0; }
+    .csv-err { color:#e53e3e; font-size:0.78rem; margin-top:0.5rem; background:#fff5f5; border:1px solid #fed7d7; border-radius:6px; padding:0.5rem 0.75rem; display:none; }
+    .drop-zone { border:2px dashed #cbd5e0; border-radius:10px; padding:2.5rem 1.5rem; text-align:center; cursor:pointer; transition:border-color 0.15s,background 0.15s; }
+    .drop-zone:hover,.drop-zone.drag-over { border-color:#2196F3; background:#ebf4ff; }
+    .drop-zone input[type=file] { display:none; }
+    .drop-zone .dz-icon { font-size:2rem; color:#cbd5e0; margin-bottom:0.5rem; }
+    .drop-zone.drag-over .dz-icon { color:#2196F3; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+<!-- Auth Wall -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()" style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Continue →</button>
+  </div>
+</div>
+<script>
+(function(){var KEY='crm_auth_ok',DAYS=7;try{var ts=localStorage.getItem(KEY);if(ts&&Date.now()-parseInt(ts)<DAYS*86400000){document.getElementById('auth-wall').style.display='none';return;}}catch(e){}setTimeout(function(){var el=document.getElementById('auth-input');if(el)el.focus();},100);})();
+function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-input').value;if(val===PASS){try{localStorage.setItem('crm_auth_ok',Date.now());}catch(e){}document.getElementById('auth-wall').style.display='none';}else{document.getElementById('auth-err').textContent='Incorrect password. Try again.';document.getElementById('auth-input').value='';document.getElementById('auth-input').focus();}}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <!-- Sidebar -->
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Subscribers</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Payroll</li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="payroll-run.html"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Pay Runs</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-employee.html"><i class="nav-main-link-icon fa fa-user-tie"></i><span class="nav-main-link-name">Employee Payroll</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="salary-components.html"><i class="nav-main-link-icon fa fa-sliders-h"></i><span class="nav-main-link-name">Salary Components</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-heading">Integrations</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-cog"></i><span class="nav-main-link-name">Settings</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="breadcrumb-nav d-none d-sm-block" style="font-size:0.8rem;color:#a0aec0;">
+          <span class="text-primary font-weight-600">Payroll</span>
+          <i class="fa fa-angle-right mx-2" style="font-size:0.7rem;"></i>
+          <span class="text-dark font-weight-600">Pay Runs</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-sm btn-primary mr-2"><i class="fa fa-plus mr-1"></i> New Pay Run</button>
+        <div class="dropdown d-inline-block ml-1">
+          <button type="button" class="btn btn-sm btn-dual" data-toggle="dropdown">
+            <i class="far fa-user"></i><span class="d-none d-sm-inline-block ml-1">Mathan Raj</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Summary Cards -->
+      <div class="row mb-4">
+        <div class="col-6 col-md-3 mb-3">
+          <div class="stat-card" style="background:#ebf8ff;">
+            <div class="s-num text-primary">46</div>
+            <div class="s-lbl" style="color:#2b6cb0;">Employees</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="stat-card" style="background:#f0fff4;">
+            <div class="s-num" style="color:#276749;">₹14.8L</div>
+            <div class="s-lbl" style="color:#276749;">Total Gross</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="stat-card" style="background:#fff5f5;">
+            <div class="s-num text-danger">₹1.12L</div>
+            <div class="s-lbl text-danger">Total Deductions</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="stat-card" style="background:#faf5ff;">
+            <div class="s-num" style="color:#553c9a;">₹13.7L</div>
+            <div class="s-lbl" style="color:#553c9a;">Net Payable</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Run Header -->
+      <div class="run-header">
+        <div>
+          <div class="run-title"><i class="fa fa-calendar-alt text-primary mr-2"></i>Regular Payroll — July 2026</div>
+          <div class="run-sub">Pay period: 26 Jun 2026 – 25 Jul 2026 &nbsp;·&nbsp; 31 working days &nbsp;·&nbsp; Created 01 Jul 2026</div>
+        </div>
+        <div class="d-flex align-items-center" style="gap:0.75rem; flex-wrap:wrap;">
+          <span class="run-status status-draft"><i class="fa fa-circle" style="font-size:0.5rem;"></i> Draft — Need Attention</span>
+          <button class="btn btn-sm btn-warning font-weight-700" data-toggle="modal" data-target="#importOverridesModal" style="color:#fff;"><i class="fa fa-file-import mr-1"></i> Import Overrides</button>
+          <button class="btn btn-sm btn-success font-weight-700"><i class="fa fa-check mr-1"></i> Submit &amp; Approve</button>
+          <button class="btn btn-sm btn-light border"><i class="fa fa-download mr-1"></i> Export</button>
+        </div>
+      </div>
+
+      <!-- Two-pane layout -->
+      <div class="run-layout" id="runLayout">
+
+        <!-- Employee Table -->
+        <div class="emp-table-wrap">
+          <div style="padding:0.85rem 1rem; border-bottom:1px solid #f0f4f8; display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-size:0.82rem; font-weight:700; color:#2d3748;">46 Employees</div>
+            <div class="d-flex" style="gap:0.5rem;">
+              <input type="text" class="form-control form-control-sm" placeholder="Search employee..." style="width:200px; font-size:0.8rem;">
+              <select class="form-control form-control-sm" style="width:150px; font-size:0.8rem;" onchange="filterTable(this.value)">
+                <option value="all">All Employees</option>
+                <option value="lop">LOP Pending</option>
+                <option value="override">Has Overrides</option>
+              </select>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="table table-hover table-vcenter" style="min-width:680px;">
+              <thead>
+                <tr>
+                  <th style="width:36px;"><input type="checkbox"></th>
+                  <th>Employee</th>
+                  <th class="text-center">Paid Days</th>
+                  <th class="text-right">Gross</th>
+                  <th class="text-right">TDS</th>
+                  <th class="text-right">EPF</th>
+                  <th class="text-right">Net Pay</th>
+                  <th style="width:40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="empTableBody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-pagination">
+            <span>Showing 1–15 of 46 employees</span>
+            <div style="display:flex; gap:0.35rem;">
+              <button class="btn btn-sm btn-light border px-2">‹</button>
+              <button class="btn btn-sm btn-primary px-3">1</button>
+              <button class="btn btn-sm btn-light border px-3">2</button>
+              <button class="btn btn-sm btn-light border px-3">3</button>
+              <button class="btn btn-sm btn-light border px-2">›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Panel -->
+        <div class="detail-panel" id="detailPanel">
+          <div class="dp-header">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="dp-emp-name" id="dp-name">—</div>
+                <div class="dp-emp-sub" id="dp-sub">—</div>
+              </div>
+              <div class="dp-net">
+                <div class="dp-net-lbl">Net Pay</div>
+                <div class="dp-net-amt" id="dp-netpay">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="dp-body" id="dp-body">
+            <!-- injected -->
+          </div>
+          <div class="dp-footer">
+            <button class="btn btn-sm btn-light border" onclick="closePanel()"><i class="fa fa-times mr-1"></i> Close</button>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn btn-sm btn-outline-secondary"><i class="fa fa-file-pdf mr-1"></i> Payslip</button>
+              <button class="btn btn-sm btn-primary"><i class="fa fa-save mr-1"></i> Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script>
+const EMPLOYEES = [
+  { id:'5151', name:'DEVI JAYASANKAR G',           desig:'Branch Executive',      paidDays:31, lopDays:0,  gross:25651, tds:1414, epf:1800, gtli:133, pt:208, hi:961,  basic:12100, hra:3630, ta:2000, oa:7921 },
+  { id:'5175', name:'RAJARAMAN RAJAGOPALAN',        desig:'Asst Branch Head',      paidDays:30, lopDays:1,  gross:29226, tds:1553, epf:1742, gtli:133, pt:208, hi:961,  basic:14000, hra:4200, ta:2000, oa:9026 },
+  { id:'5264', name:'GAJARAJ VADIVELU R S',          desig:'Branch Executive',      paidDays:27, lopDays:4,  gross:19859, tds:1302, epf:1568, gtli:133, pt:208, hi:961,  basic:9929,  hra:2979, ta:1000, oa:5951 },
+  { id:'5314', name:'VADIVEL VENKATACHALAM S',       desig:'Branch Head',           paidDays:31, lopDays:0,  gross:27355, tds:1197, epf:1800, gtli:133, pt:208, hi:961,  basic:13000, hra:3900, ta:2000, oa:8455 },
+  { id:'12',   name:'ROJA GOVINDASAMY',              desig:'Branch Executive',      paidDays:30, lopDays:1,  gross:23420, tds:933,  epf:1742, gtli:133, pt:208, hi:1320, basic:11000, hra:3300, ta:1600, oa:7520 },
+  { id:'227',  name:'BASKAR DHINAGARAN',             desig:'Asst Branch Head',      paidDays:31, lopDays:0,  gross:34932, tds:1288, epf:1800, gtli:133, pt:208, hi:961,  basic:16500, hra:4950, ta:2000, oa:11482 },
+  { id:'246',  name:'SIVASANKAR MANI B',             desig:'Branch Executive',      paidDays:31, lopDays:0,  gross:29540, tds:559,  epf:1800, gtli:133, pt:208, hi:961,  basic:14000, hra:4200, ta:2000, oa:9340 },
+  { id:'247',  name:'SENDHILKUMAR RAJAMANICKAM M',   desig:'Regional Team',         paidDays:30, lopDays:1,  gross:27723, tds:8553, epf:1771, gtli:133, pt:208, hi:1320, basic:13000, hra:3900, ta:2000, oa:8823 },
+  { id:'256',  name:'SANTHOSH VENKATARAJULU R',      desig:'Branch Head',           paidDays:31, lopDays:0,  gross:46452, tds:630,  epf:1800, gtli:133, pt:208, hi:1320, basic:22000, hra:6600, ta:2000, oa:15852 },
+  { id:'296',  name:'BARANIDHARAN RAMALINGAM R',     desig:'Branch Executive',      paidDays:30, lopDays:1,  gross:23273, tds:435,  epf:1771, gtli:133, pt:208, hi:961,  basic:11000, hra:3300, ta:1600, oa:7373 },
+  { id:'337',  name:'KUMARASAMY P',                  desig:'Asst Branch Head',      paidDays:31, lopDays:0,  gross:30423, tds:1365, epf:1800, gtli:133, pt:208, hi:961,  basic:14500, hra:4350, ta:2000, oa:9573 },
+  { id:'348',  name:'SURESH KUMAR VENKATACHALAM E K',desig:'Branch Executive',      paidDays:29, lopDays:2,  gross:24985, tds:1782, epf:1684, gtli:133, pt:208, hi:961,  basic:12000, hra:3600, ta:2000, oa:7385 },
+  { id:'376',  name:'SHANMUGAM PALANIYAPPAN M',      desig:'Branch Executive',      paidDays:30, lopDays:1,  gross:18723, tds:315,  epf:1874, gtli:133, pt:208, hi:961,  basic:9000,  hra:2700, ta:1600, oa:5423 },
+  { id:'377',  name:'PRABHU RAJ SENTHIL KUMAR N',    desig:'Dept Head',             paidDays:31, lopDays:0,  gross:50000, tds:618,  epf:1800, gtli:133, pt:208, hi:1320, basic:23000, hra:6900, ta:2000, oa:18100 },
+  { id:'5107', name:'SIVAKUMAR NATARAJ',             desig:'Regional Manager',      paidDays:31, lopDays:0,  gross:52480, tds:6899, epf:1800, gtli:133, pt:208, hi:1320, basic:24000, hra:7200, ta:2000, oa:19280 },
+];
+
+// overrides[empId][componentKey] = { auto: number, override: number, source: 'manual'|'import' }
+var OVERRIDES = {};
+
+// Which deductions can be overridden and their auto-calc field on the employee record
+var OVERRIDABLE = [
+  { key:'gtli', label:'GTLI Deduction',    field:'gtli' },
+  { key:'pt',   label:'Professional Tax',  field:'pt'   },
+  { key:'hi',   label:'Health Insurance',  field:'hi'   },
+  { key:'tds',  label:'Income Tax (TDS)',  field:'tds'  },
+];
+
+function fmt(n){ return '₹'+n.toLocaleString('en-IN'); }
+
+function effVal(e, key) {
+  // Return override amount if set, otherwise auto value from employee record
+  if (OVERRIDES[e.id] && OVERRIDES[e.id][key] !== undefined) return OVERRIDES[e.id][key].override;
+  return e[key];
+}
+
+function hasOverride(empId) {
+  return OVERRIDES[empId] && Object.keys(OVERRIDES[empId]).length > 0;
+}
+
+function buildTable(filter) {
+  filter = filter || 'all';
+  var tbody = document.getElementById('empTableBody');
+  tbody.innerHTML = EMPLOYEES.map(function(e,i){
+    if (filter === 'lop' && e.lopDays === 0) return '';
+    if (filter === 'override' && !hasOverride(e.id)) return '';
+    var gtli = effVal(e,'gtli'), pt = effVal(e,'pt'), hi = effVal(e,'hi'), tds = effVal(e,'tds');
+    var net = e.gross - e.epf - tds - gtli - pt - hi;
+    var lopHtml = e.lopDays > 0 ? '<span class="lop-badge ml-1">LOP '+e.lopDays+'d</span>' : '';
+    var ovHtml  = hasOverride(e.id) ? '<span class="override-badge ml-1">Override</span>' : '';
+    var rowClass = hasOverride(e.id) ? ' row-has-override' : '';
+    return '<tr onclick="openPanel('+i+')" id="row-'+i+'" class="'+rowClass+'">'
+      +'<td><input type="checkbox" onclick="event.stopPropagation()"></td>'
+      +'<td><div class="emp-name-cell">'+e.name+ovHtml+'</div><div class="emp-id-tag">#'+e.id+' &middot; '+e.desig+lopHtml+'</div></td>'
+      +'<td class="text-center">'+e.paidDays+'</td>'
+      +'<td class="amount-col">'+fmt(e.gross)+'</td>'
+      +'<td class="amount-col text-danger">'+fmt(tds)+(OVERRIDES[e.id]&&OVERRIDES[e.id].tds!==undefined?'<span class="override-badge ml-1">OVR</span>':'')+'</td>'
+      +'<td class="amount-col text-muted">'+fmt(e.epf)+'</td>'
+      +'<td class="amount-col net-amount">'+fmt(net)+'</td>'
+      +'<td><button class="btn btn-xs btn-light border" style="font-size:0.7rem;padding:2px 7px;" onclick="event.stopPropagation();openPanel('+i+')"><i class="fa fa-angle-right"></i></button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+function filterTable(val){ buildTable(val); }
+
+var currentRow = -1;
+var currentEmpIdx = -1;
+
+function openPanel(i){
+  var e = EMPLOYEES[i];
+  currentEmpIdx = i;
+  var gtli = effVal(e,'gtli'), pt = effVal(e,'pt'), hi = effVal(e,'hi'), tds = effVal(e,'tds');
+  var net = e.gross - e.epf - tds - gtli - pt - hi;
+  var actualDays = 31 - e.lopDays;
+
+  if(currentRow >= 0){ document.getElementById('row-'+currentRow).classList.remove('selected'); }
+  document.getElementById('row-'+i).classList.add('selected');
+  currentRow = i;
+
+  document.getElementById('dp-name').textContent = e.name;
+  document.getElementById('dp-sub').textContent = 'Emp. ID: '+e.id+' · '+e.desig;
+  document.getElementById('dp-netpay').textContent = fmt(net);
+
+  document.getElementById('dp-body').innerHTML =
+    '<div class="dp-days-row">'
+      +'<div class="dp-day-block"><div class="dp-day-num">31</div><div class="dp-day-lbl">Payable Days</div></div>'
+      +'<div class="dp-day-block lop"><div class="dp-day-num">'+e.lopDays+'</div><div class="dp-day-lbl">LOP Days</div></div>'
+      +'<div class="dp-day-block"><div class="dp-day-num">'+actualDays+'</div><div class="dp-day-lbl">Actual Days</div></div>'
+    +'</div>'
+
+    +'<div><span class="dp-section-title earn">(+) Earnings</span></div>'
+    +'<div class="dp-line"><span class="comp-name">Basic Pay</span><span class="comp-amt">'+fmt(e.basic)+'</span></div>'
+    +'<div class="dp-line"><span class="comp-name">House Rent Allowance</span><span class="comp-amt">'+fmt(e.hra)+'</span></div>'
+    +'<div class="dp-line"><span class="comp-name">Travelling Allowance</span><span class="comp-amt">'+fmt(e.ta)+'</span></div>'
+    +'<div class="dp-line"><span class="comp-name">Other Allowance</span><span class="comp-amt">'+fmt(e.oa)+'</span></div>'
+    +'<div class="dp-line total-line"><span class="comp-name">Gross Earnings</span><span class="comp-amt text-success">'+fmt(e.gross)+'</span></div>'
+
+    +'<div style="margin-top:0.75rem;"><span class="dp-section-title deduct">(-) Deductions</span>'
+    +'<span style="font-size:0.67rem;color:#a0aec0;margin-left:0.5rem;"><i class="fa fa-pencil-alt" style="font-size:0.6rem;"></i> click pencil to override</span></div>'
+    +'<div class="dp-line"><span class="comp-name">EPF Contribution<span class="comp-sub">Employer: '+fmt(e.epf)+'</span></span><span class="comp-amt">'+fmt(e.epf)+'</span></div>'
+    + renderDeductLine(e, 'tds',  'Income Tax (TDS)',  e.tds)
+    + renderDeductLine(e, 'gtli', 'GTLI Deduction',   e.gtli)
+    + renderDeductLine(e, 'pt',   'Professional Tax',  e.pt)
+    + renderDeductLine(e, 'hi',   'Health Insurance',  e.hi)
+    +'<div class="dp-line total-line" id="dp-total-ded"><span class="comp-name">Total Deductions</span><span class="comp-amt text-danger" id="dp-total-ded-amt">'+fmt(e.epf+tds+gtli+pt+hi)+'</span></div>'
+
+    +'<div style="background:#1a202c;color:#fff;border-radius:8px;padding:0.75rem 1rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:center;" id="dp-net-bar">'
+      +'<span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Net Pay</span>'
+      +'<span style="font-size:1.2rem;font-weight:800;color:#48bb78;font-variant-numeric:tabular-nums;" id="dp-net-inline">'+fmt(net)+'</span>'
+    +'</div>';
+
+  document.getElementById('detailPanel').classList.add('visible');
+  document.getElementById('runLayout').classList.add('panel-open');
+}
+
+function renderDeductLine(e, key, label, autoAmt) {
+  var ov = OVERRIDES[e.id] && OVERRIDES[e.id][key];
+  var dispAmt = ov ? ov.override : autoAmt;
+  var srcTag  = ov && ov.source === 'import' ? ' <span style="font-size:0.6rem;color:#a0aec0;">(CSV)</span>' : '';
+  var amtHtml = ov
+    ? '<span class="auto-strike">'+fmt(autoAmt)+'</span><span class="override-amt">'+fmt(ov.override)+'</span><span class="override-tag ml-1">Override'+srcTag+'</span>'
+      +'<button class="dp-edit-btn ml-1" title="Remove override" onclick="removeOverride(\''+e.id+'\',\''+key+'\')"><i class="fa fa-times"></i></button>'
+    : '<span class="comp-amt" id="dp-amt-'+key+'">'+fmt(autoAmt)+'</span>'
+      +'<button class="dp-edit-btn ml-1" title="Override this amount" onclick="showOverrideInput(\''+e.id+'\',\''+key+'\','+autoAmt+')"><i class="fa fa-pencil-alt"></i></button>';
+  return '<div class="dp-line" id="dp-line-'+key+'">'
+    +'<span class="comp-name">'+label+'</span>'
+    +'<span style="display:flex;align-items:center;gap:0.15rem;flex-wrap:wrap;justify-content:flex-end;">'+amtHtml+'</span>'
+    +'</div>'
+    +'<div class="dp-override-input" id="dp-oi-'+key+'">'
+      +'<span class="oi-label">Override:</span>'
+      +'<span style="font-size:0.72rem;color:#a0aec0;">Auto '+fmt(autoAmt)+' →</span>'
+      +'<span style="font-size:0.75rem;color:#a0aec0;">₹</span>'
+      +'<input type="number" id="dp-oival-'+key+'" min="0" placeholder="0" onkeydown="if(event.key===\'Enter\')saveOverride(\''+e.id+'\',\''+key+'\','+autoAmt+')">'
+      +'<button class="btn btn-xs btn-warning" style="font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="saveOverride(\''+e.id+'\',\''+key+'\','+autoAmt+')">Apply</button>'
+      +'<button class="btn btn-xs btn-light border" style="font-size:0.7rem;padding:2px 6px;" onclick="cancelOverride(\''+key+'\')">×</button>'
+    +'</div>';
+}
+
+function showOverrideInput(empId, key, autoAmt) {
+  var el = document.getElementById('dp-oi-'+key);
+  el.style.display = 'flex';
+  var inp = document.getElementById('dp-oival-'+key);
+  inp.value = autoAmt;
+  inp.select();
+  inp.focus();
+}
+
+function cancelOverride(key) {
+  document.getElementById('dp-oi-'+key).style.display = 'none';
+}
+
+function saveOverride(empId, key, autoAmt) {
+  var val = parseInt(document.getElementById('dp-oival-'+key).value) || 0;
+  if (!OVERRIDES[empId]) OVERRIDES[empId] = {};
+  OVERRIDES[empId][key] = { auto: autoAmt, override: val, source: 'manual' };
+  buildTable();
+  openPanel(currentEmpIdx); // re-render panel
+}
+
+function removeOverride(empId, key) {
+  if (OVERRIDES[empId]) { delete OVERRIDES[empId][key]; if (!Object.keys(OVERRIDES[empId]).length) delete OVERRIDES[empId]; }
+  buildTable();
+  openPanel(currentEmpIdx);
+}
+
+function recalcPanelTotals(e) {
+  var gtli = effVal(e,'gtli'), pt = effVal(e,'pt'), hi = effVal(e,'hi'), tds = effVal(e,'tds');
+  var totalDed = e.epf + tds + gtli + pt + hi;
+  var net = e.gross - totalDed;
+  var totalEl = document.getElementById('dp-total-ded-amt');
+  var netEl   = document.getElementById('dp-net-inline');
+  var hdrEl   = document.getElementById('dp-netpay');
+  if (totalEl) totalEl.textContent = fmt(totalDed);
+  if (netEl)   netEl.textContent   = fmt(net);
+  if (hdrEl)   hdrEl.textContent   = fmt(net);
+}
+
+function closePanel(){
+  document.getElementById('detailPanel').classList.remove('visible');
+  document.getElementById('runLayout').classList.remove('panel-open');
+  if(currentRow >= 0){ document.getElementById('row-'+currentRow).classList.remove('selected'); }
+  currentRow = -1;
+  currentEmpIdx = -1;
+}
+
+
+// ─── Import Overrides (Excel, one row per employee) ─────────────────────
+
+function downloadTemplate() {
+  var labels = ['Employee ID','Employee Name','GTLI Deduction','Professional Tax','Health Insurance','TDS'];
+  var rows = [labels.join(',')];
+  EMPLOYEES.forEach(function(e){
+    rows.push([e.id, '"'+e.name+'"', e.gtli, e.pt, e.hi, e.tds].join(','));
+  });
+  var blob = new Blob([rows.join('\r\n')], { type: 'text/csv' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a'); a.href = url; a.download = 'overrides_july2026.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+var _parsedOverrides = [];
+
+function handleFileUpload(evt) {
+  var file = evt.target.files && evt.target.files[0];
+  if (!file) return;
+  document.getElementById('imp-filename').textContent = file.name;
+  var reader = new FileReader();
+  reader.onload = function(e){ parseUploadedFile(e.target.result); };
+  reader.readAsText(file);
+}
+
+function handleDrop(evt) {
+  evt.preventDefault();
+  evt.currentTarget.classList.remove('drag-over');
+  var file = evt.dataTransfer.files && evt.dataTransfer.files[0];
+  if (!file) return;
+  document.getElementById('imp-filename').textContent = file.name;
+  var reader = new FileReader();
+  reader.onload = function(e){ parseUploadedFile(e.target.result); };
+  reader.readAsText(file);
+}
+
+function parseUploadedFile(raw) {
+  var errEl    = document.getElementById('imp-csv-err');
+  var prevEl   = document.getElementById('imp-csv-preview');
+  var applyBtn = document.getElementById('imp-apply-btn');
+  errEl.style.display = 'none'; prevEl.innerHTML = ''; applyBtn.style.display = 'none';
+  _parsedOverrides = [];
+
+  var lines = raw.replace(/\r/g,'').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  if (!lines.length) { errEl.textContent = 'File is empty.'; errEl.style.display='block'; return; }
+
+  var hdr = lines[0].split(',').map(function(h){ return h.trim().replace(/^"|"$/g,'').toLowerCase(); });
+  function findCol(names) {
+    for (var i=0;i<names.length;i++){ var idx=hdr.indexOf(names[i]); if(idx>=0) return idx; } return -1;
+  }
+  var cId   = findCol(['employee id','employee_id','emp id','emp_id','id']);
+  var cGtli = findCol(['gtli deduction','gtli']);
+  var cPt   = findCol(['professional tax','prof tax','pt']);
+  var cHi   = findCol(['health insurance','health insurance ded','hi']);
+  var cTds  = findCol(['income tax (tds)','income tax','tds']);
+
+  if (cId < 0) { errEl.textContent = 'Column "Employee ID" not found. Please use the downloaded template.'; errEl.style.display='block'; return; }
+
+  var errors = [], overrides = [], changedCount = 0;
+  for (var i = 1; i < lines.length; i++) {
+    var parts = lines[i].split(',').map(function(p){ return p.trim().replace(/^"|"$/g,''); });
+    var empId = parts[cId] || '';
+    var emp = EMPLOYEES.find(function(e){ return e.id === empId; });
+    if (!emp) { if(empId) errors.push('Row '+(i+1)+': ID "'+empId+'" not found'); continue; }
+    var changes = [];
+    function readCell(col, key) {
+      if (col < 0 || col >= parts.length) return;
+      var v = parts[col].replace(/[₹, ]/g,'');
+      if (!v || v === '-') return;
+      var n = parseInt(v); if (isNaN(n)||n<0){ errors.push('Row '+(i+1)+', '+key+': bad value "'+parts[col]+'"'); return; }
+      changes.push({ key: key, auto: emp[key], override: n });
+      if (n !== emp[key]) changedCount++;
+    }
+    readCell(cGtli,'gtli'); readCell(cPt,'pt'); readCell(cHi,'hi'); readCell(cTds,'tds');
+    if (changes.length) overrides.push({ emp: emp, changes: changes });
+  }
+
+  if (errors.length) { errEl.textContent = errors.join(' · '); errEl.style.display='block'; }
+  if (!overrides.length) {
+    errEl.textContent += (errEl.textContent?' · ':'')+'No rows with deduction values found.';
+    errEl.style.display='block'; return;
+  }
+
+  var html = '<div style="font-size:0.75rem;color:#718096;margin-bottom:0.5rem;">'
+    +overrides.length+' employee'+(overrides.length!==1?'s':'')+' &middot; '
+    +'<strong style="color:#c05621;">'+changedCount+' value'+(changedCount!==1?'s':'')+' differ from auto-calculated</strong></div>'
+    +'<div class="csv-preview"><table class="table table-sm" style="margin:0;">'
+    +'<thead><tr><th>Employee</th><th class="text-right">GTLI</th><th class="text-right">Prof. Tax</th><th class="text-right">Health Ins.</th><th class="text-right">TDS</th></tr></thead><tbody>';
+  overrides.forEach(function(row){
+    var e = row.emp;
+    function cell(key){
+      var ch = row.changes.find(function(c){ return c.key===key; });
+      if (!ch) return '<td class="text-right unchanged">'+fmt(e[key])+'</td>';
+      if (ch.override===ch.auto) return '<td class="text-right unchanged">'+fmt(ch.auto)+'</td>';
+      return '<td class="text-right changed"><s style="color:#a0aec0;font-weight:400;">'+fmt(ch.auto)+'</s> → '+fmt(ch.override)+'</td>';
+    }
+    html += '<tr><td style="font-size:0.78rem;font-weight:500;color:#2d3748;">'+e.name
+      +'<br><span style="font-size:0.65rem;color:#a0aec0;">#'+e.id+'</span></td>'
+      +cell('gtli')+cell('pt')+cell('hi')+cell('tds')+'</tr>';
+  });
+  html += '</tbody></table></div>';
+  prevEl.innerHTML = html;
+  _parsedOverrides = overrides;
+  applyBtn.style.display = '';
+}
+
+function applyImportOverrides() {
+  var count = 0;
+  _parsedOverrides.forEach(function(row){
+    row.changes.forEach(function(ch){
+      if (ch.override === ch.auto) return;
+      if (!OVERRIDES[row.emp.id]) OVERRIDES[row.emp.id] = {};
+      OVERRIDES[row.emp.id][ch.key] = { auto: ch.auto, override: ch.override, source: 'import' };
+      count++;
+    });
+  });
+  buildTable();
+  if (typeof $ !== 'undefined') { $('#importOverridesModal').modal('hide'); }
+  showToast(count+' override'+(count!==1?'s':'')+' applied from Excel.');
+}
+
+function showToast(msg) {
+  var t = document.createElement('div'); t.textContent = msg;
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#c05621;color:#fff;padding:10px 18px;border-radius:8px;font-size:0.82rem;font-weight:600;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,0.18);';
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(function(){ document.body.removeChild(t); },500); }, 2500);
+}
+
+if (typeof $ !== 'undefined') {
+  $(document).on('show.bs.modal','#importOverridesModal', function(){
+    document.getElementById('imp-csv-preview').innerHTML = '';
+    document.getElementById('imp-csv-err').style.display = 'none';
+    document.getElementById('imp-apply-btn').style.display = 'none';
+    document.getElementById('imp-file-input').value = '';
+    document.getElementById('imp-filename').textContent = 'No file selected';
+    _parsedOverrides = [];
+  });
+}
+
+buildTable();
+</script>
+
+<!-- Import Overrides Modal -->
+<div class="modal fade" id="importOverridesModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius:12px;border:0;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="border-bottom:1px solid #e8ecf0;padding:1rem 1.5rem;">
+        <div>
+          <h5 class="modal-title font-weight-700" style="font-size:0.95rem;"><i class="fa fa-file-excel mr-2 text-success"></i>Import Deduction Overrides</h5>
+          <div style="font-size:0.75rem;color:#718096;margin-top:0.2rem;">Upload an Excel file (saved as CSV) to override GTLI, PT, Health Insurance, or TDS per employee for this pay run.</div>
+        </div>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body" style="padding:1.1rem 1.5rem;">
+
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:0.85rem 1rem;background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;margin-bottom:1rem;">
+          <div style="flex:1;">
+            <div style="font-size:0.82rem;font-weight:700;color:#276749;margin-bottom:0.2rem;"><i class="fa fa-download mr-1"></i> Step 1 — Download template</div>
+            <div style="font-size:0.75rem;color:#276749;">Pre-filled with all 46 employees and their auto-calculated deductions. Edit values you want to override in Excel, then save as CSV and upload below.</div>
+            <div style="font-size:0.7rem;color:#276749;margin-top:0.35rem;opacity:0.8;">Columns: Employee ID &middot; Employee Name &middot; GTLI Deduction &middot; Professional Tax &middot; Health Insurance &middot; TDS</div>
+          </div>
+          <button class="btn btn-sm btn-success font-weight-700" onclick="downloadTemplate()" style="white-space:nowrap;flex-shrink:0;"><i class="fa fa-file-excel mr-1"></i> Download Template</button>
+        </div>
+
+        <div style="font-size:0.82rem;font-weight:700;color:#2d3748;margin-bottom:0.5rem;"><i class="fa fa-upload mr-1 text-primary"></i> Step 2 &mdash; Upload filled file</div>
+        <div class="drop-zone" id="imp-dropzone"
+          onclick="document.getElementById('imp-file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <input type="file" id="imp-file-input" accept=".csv,.txt" onchange="handleFileUpload(event)">
+          <div class="dz-icon"><i class="fa fa-file-csv"></i></div>
+          <div style="font-size:0.85rem;font-weight:600;color:#4a5568;">Click to browse or drag &amp; drop</div>
+          <div style="font-size:0.72rem;color:#a0aec0;margin-top:0.25rem;">Accepts .csv files — in Excel: File &rarr; Save As &rarr; CSV (Comma delimited)</div>
+          <div style="font-size:0.72rem;color:#2196F3;margin-top:0.35rem;font-weight:600;" id="imp-filename">No file selected</div>
+        </div>
+
+        <div class="csv-err" id="imp-csv-err"></div>
+        <div id="imp-csv-preview" style="margin-top:0.85rem;"></div>
+
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e8ecf0;padding:0.85rem 1.5rem;">
+        <button class="btn btn-light border" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-warning font-weight-700" id="imp-apply-btn" style="display:none;color:#fff;" onclick="applyImportOverrides()"><i class="fa fa-check mr-1"></i> Apply Overrides</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Payroll — Baskaran · DNC Chits HR</title>
+  <link rel="stylesheet" href="../assets/oneui.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <style>
+    .info-row { display:flex; margin-bottom:0.7rem; }
+    .info-row .lbl { min-width:180px; font-size:0.82rem; color:#a0aec0; }
+    .info-row .val { font-size:0.88rem; color:#2d3748; font-weight:500; }
+    .section-heading { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#a0aec0; margin:1.25rem 0 0.75rem; padding-bottom:0.35rem; border-bottom:1px solid #f0f4f8; }
+    .nav-tabs .nav-link { font-size:0.83rem; font-weight:600; color:#718096; border:none; border-bottom:2px solid transparent; padding:0.65rem 1rem; border-radius:0; }
+    .nav-tabs .nav-link.active { color:#2196F3; border-bottom:2px solid #2196F3; background:transparent; }
+    .nav-tabs { border-bottom:2px solid #e8ecf0; }
+    .ctc-card { border-radius:10px; padding:1rem 1.15rem; text-align:center; }
+    .ctc-card .c-num { font-size:1.4rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+    .ctc-card .c-lbl { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.07em; font-weight:700; margin-top:0.3rem; }
+    .comp-table td, .comp-table th { padding:0.5rem 0.85rem; font-size:0.82rem; border-top:1px solid #f0f4f8; vertical-align:middle; }
+    .comp-table thead th { background:#f7fafc; font-size:0.67rem; text-transform:uppercase; letter-spacing:0.07em; color:#a0aec0; font-weight:700; border-top:0; }
+    .comp-table tfoot td { font-weight:700; background:#f7fafc; border-top:2px solid #e8ecf0; }
+    .earn-amt { color:#276749; font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
+    .deduct-amt { color:#9b2c2c; font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
+    .fbp-tag { background:#e9d8fd; color:#553c9a; font-size:0.62rem; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:3px; }
+    .inv-field { border:1px solid #e8ecf0; border-radius:8px; padding:0.6rem 0.9rem; font-size:0.83rem; margin-bottom:0.75rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+    .inv-field .if-lbl { font-size:0.82rem; color:#4a5568; font-weight:500; }
+    .inv-field .if-input { display:flex; align-items:center; gap:0.5rem; }
+    .inv-field .if-input input[type=text] { width:120px; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:0.82rem; color:#2d3748; text-align:right; }
+    .payslip-row { display:flex; align-items:center; justify-content:space-between; padding:0.7rem 1rem; border-bottom:1px solid #f0f4f8; font-size:0.83rem; }
+    .payslip-row:last-child { border-bottom:0; }
+    .payslip-row:hover { background:#f7fafc; cursor:pointer; }
+    .payslip-row.active-slip { background:#ebf4ff; }
+    .slip-month { font-weight:600; color:#2d3748; }
+    .slip-net { font-weight:700; color:#2196F3; font-variant-numeric:tabular-nums; }
+    .slip-status { font-size:0.72rem; padding:2px 8px; border-radius:10px; }
+    .slip-paid { background:#c6f6d5; color:#276749; font-weight:700; }
+    .slip-pending { background:#feebc8; color:#c05621; font-weight:700; }
+    /* Loan progress */
+    .loan-card { border:1px solid #e8ecf0; border-radius:10px; padding:1rem 1.15rem; margin-bottom:0.85rem; }
+    .loan-card .loan-title { font-size:0.88rem; font-weight:700; color:#1a202c; }
+    .loan-card .loan-sub { font-size:0.75rem; color:#718096; margin-top:0.15rem; }
+    .loan-progress { height:8px; border-radius:4px; background:#e2e8f0; overflow:hidden; margin:0.6rem 0; }
+    .loan-progress-bar { height:100%; border-radius:4px; background:#2196F3; transition:width 0.3s; }
+    .loan-progress-bar.done { background:#48bb78; }
+    .loan-stat-row { display:flex; justify-content:space-between; font-size:0.78rem; margin-top:0.3rem; flex-wrap:wrap; gap:0.3rem; }
+    .loan-stat-row .ls-item { }
+    .loan-stat-row .ls-lbl { color:#a0aec0; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; display:block; }
+    .loan-stat-row .ls-val { font-weight:700; color:#2d3748; font-variant-numeric:tabular-nums; }
+    /* Payslip preview */
+    .payslip-preview { background:#f7fafc; border:1px solid #e8ecf0; border-radius:10px; padding:1.25rem; font-size:0.82rem; }
+    .pp-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:2px solid #2196F3; }
+    .pp-company { font-size:1rem; font-weight:800; color:#1a202c; }
+    .pp-emp-name { font-weight:700; font-size:0.85rem; color:#1a202c; }
+    .pp-line { display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px dashed #e8ecf0; font-size:0.8rem; }
+    .pp-line:last-child { border-bottom:0; }
+    .pp-subtotal { display:flex; justify-content:space-between; padding:0.35rem 0; font-weight:700; border-top:1px solid #2d3748; margin-top:0.3rem; font-size:0.82rem; }
+    .pp-netsalary { display:flex; justify-content:space-between; background:#1a202c; color:#fff; padding:0.65rem 0.85rem; border-radius:6px; margin-top:0.75rem; }
+    .pp-netsalary .nn-lbl { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+    .pp-netsalary .nn-amt { font-size:1.1rem; font-weight:800; color:#48bb78; font-variant-numeric:tabular-nums; }
+  </style>
+</head>
+<body class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+<!-- Auth Wall -->
+<div id="auth-wall" style="position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+    <div style="font-size:40px;margin-bottom:14px;">🔐</div>
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">DNC CHITS HR</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Enter password to access this presentation</div>
+    <input type="password" id="auth-input" placeholder="Password"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #334155;background:#0f172a;color:#fff;font-size:15px;margin-bottom:8px;outline:none;box-sizing:border-box;"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="authCheck()" style="width:100%;padding:11px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Continue →</button>
+  </div>
+</div>
+<script>
+(function(){var KEY='crm_auth_ok',DAYS=7;try{var ts=localStorage.getItem(KEY);if(ts&&Date.now()-parseInt(ts)<DAYS*86400000){document.getElementById('auth-wall').style.display='none';return;}}catch(e){}setTimeout(function(){var el=document.getElementById('auth-input');if(el)el.focus();},100);})();
+function authCheck(){var PASS='dnc@2026';var val=document.getElementById('auth-input').value;if(val===PASS){try{localStorage.setItem('crm_auth_ok',Date.now());}catch(e){}document.getElementById('auth-wall').style.display='none';}else{document.getElementById('auth-err').textContent='Incorrect password. Try again.';document.getElementById('auth-input').value='';document.getElementById('auth-input').focus();}}
+</script>
+
+<div id="page-container" class="bg-primary sidebar-o sidebar-dark enable-page-overlay side-scroll side-trans-enabled main-content-boxed">
+
+  <nav id="sidebar" aria-label="Main Navigation">
+    <div class="content-header bg-light">
+      <a class="font-w600 text-dual" href="index.html">
+        <img src="../assets/rosca-digital-sm.png" alt="ROSCA" height="40px" class="mr-2" style="margin-left:-10px;">
+        <span class="smini-hide"><span class="font-w700 font-size-h5 text-dark">DNC CHITS</span></span>
+      </a>
+    </div>
+    <div class="content-side content-side-full">
+      <ul class="nav-main">
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon si si-speedometer"></i><span class="nav-main-link-name">Dashboard</span></a></li>
+        <li class="nav-main-heading">HR Module</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="employee-list.html"><i class="nav-main-link-icon fa fa-id-badge"></i><span class="nav-main-link-name">Employees</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance.html"><i class="nav-main-link-icon fa fa-calendar-check"></i><span class="nav-main-link-name">Attendance</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="leave-tracker.html"><i class="nav-main-link-icon fa fa-umbrella-beach"></i><span class="nav-main-link-name">Leave Tracker</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="shifts.html"><i class="nav-main-link-icon fa fa-clock"></i><span class="nav-main-link-name">Shifts</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="holidays.html"><i class="nav-main-link-icon fa fa-flag"></i><span class="nav-main-link-name">Holidays</span></a></li>
+        <li class="nav-main-heading">Payroll</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-run.html"><i class="nav-main-link-icon fa fa-money-bill-wave"></i><span class="nav-main-link-name">Pay Runs</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link active" href="payroll-employee.html"><i class="nav-main-link-icon fa fa-user-tie"></i><span class="nav-main-link-name">Employee Payroll</span></a></li>
+        <li class="nav-main-item"><a class="nav-main-link" href="salary-components.html"><i class="nav-main-link-icon fa fa-sliders-h"></i><span class="nav-main-link-name">Salary Components</span></a></li>
+        <li class="nav-main-heading">Reports</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="attendance-report.html"><i class="nav-main-link-icon fa fa-chart-bar"></i><span class="nav-main-link-name">Attendance Reports</span></a></li>
+        <li class="nav-main-heading">Integrations</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="payroll-sync.html"><i class="nav-main-link-icon fa fa-sync-alt"></i><span class="nav-main-link-name">Payroll Sync</span></a></li>
+        <li class="nav-main-heading">Configuration</li>
+        <li class="nav-main-item"><a class="nav-main-link" href="#"><i class="nav-main-link-icon fa fa-cog"></i><span class="nav-main-link-name">Settings</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header id="page-header" class="bg-primary-light">
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-lg-none" data-toggle="layout" data-action="sidebar_toggle"><i class="fa fa-fw fa-bars"></i></button>
+        <button type="button" class="btn btn-sm btn-dual mr-2 d-none d-lg-inline-block" data-toggle="layout" data-action="sidebar_mini_toggle"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div style="font-size:0.8rem;color:#a0aec0;">
+          <a href="payroll-run.html" style="color:#2196F3;font-weight:600;text-decoration:none;">Pay Runs</a>
+          <i class="fa fa-angle-right mx-2" style="font-size:0.7rem;"></i>
+          <span style="color:#718096;">Employee Search</span>
+          <i class="fa fa-angle-right mx-2" style="font-size:0.7rem;"></i>
+          <span class="text-dark font-weight-600">Baskaran Ayyakkannu A</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="input-group" style="width:240px;">
+          <input type="text" class="form-control form-control-sm" placeholder="Search employee...">
+          <div class="input-group-append">
+            <button class="btn btn-sm btn-primary"><i class="fa fa-search"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-container">
+    <div class="content">
+
+      <!-- Employee Identity Card -->
+      <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;margin-bottom:1.25rem;">
+        <div style="background:#1a202c;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:50px;height:50px;border-radius:50%;background:#2196F3;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;color:#fff;flex-shrink:0;">BA</div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:#fff;">BASKARAN AYYAKKANNU A</div>
+              <div style="font-size:0.78rem;color:#a0aec0;margin-top:0.15rem;">Emp. ID: 39 &nbsp;·&nbsp; ASST BRANCH HEAD &nbsp;·&nbsp; BUSINESS &amp; COLLECTIONS</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <div style="text-align:right;">
+              <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Annual CTC</div>
+              <div style="font-size:1.15rem;font-weight:800;color:#63b3ed;font-variant-numeric:tabular-nums;">₹4,14,800</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Monthly Gross</div>
+              <div style="font-size:1.15rem;font-weight:800;color:#48bb78;font-variant-numeric:tabular-nums;">₹30,200</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Work Location</div>
+              <div style="font-size:0.9rem;font-weight:700;color:#fff;">AMBATTUR</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="block-content pt-3 px-4 pb-0" style="background:#fff;">
+          <ul class="nav nav-tabs" id="empPayTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab-overview"><i class="fa fa-info-circle mr-1"></i> Overview</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-salary"><i class="fa fa-rupee-sign mr-1"></i> Salary Details</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-investments"><i class="fa fa-file-invoice-dollar mr-1"></i> Investments</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-payslips"><i class="fa fa-file-pdf mr-1"></i> Payslips &amp; Forms</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-loans"><i class="fa fa-hand-holding-usd mr-1"></i> Loans</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-content">
+
+        <!-- ===== OVERVIEW ===== -->
+        <div class="tab-pane fade show active" id="tab-overview">
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div class="section-heading">Basic Information</div>
+                <div class="info-row"><span class="lbl">Employee ID</span><span class="val">39</span></div>
+                <div class="info-row"><span class="lbl">Employee Code</span><span class="val">BA039</span></div>
+                <div class="info-row"><span class="lbl">Full Name</span><span class="val">BASKARAN AYYAKKANNU A</span></div>
+                <div class="info-row"><span class="lbl">Designation</span><span class="val">ASST BRANCH HEAD</span></div>
+                <div class="info-row"><span class="lbl">Department</span><span class="val">BUSINESS &amp; COLLECTIONS</span></div>
+                <div class="info-row"><span class="lbl">Work Location</span><span class="val">AMBATTUR</span></div>
+                <div class="info-row"><span class="lbl">Date of Joining</span><span class="val">22 Nov 2018</span></div>
+                <div class="info-row"><span class="lbl">Pay Frequency</span><span class="val">Monthly</span></div>
+                <div class="info-row"><span class="lbl">Salary Template</span><span class="val">Salary Revise Fixed PF No ESI (2025)</span></div>
+                <div class="section-heading">Personal Information</div>
+                <div class="info-row"><span class="lbl">PAN Number</span><span class="val">AHPPB5420P</span></div>
+                <div class="info-row"><span class="lbl">Tax Regime</span><span class="val">New Regime (FY 2026-27)</span></div>
+                <div class="info-row"><span class="lbl">Date of Birth</span><span class="val" style="color:#a0aec0;">—</span></div>
+                <div class="info-row"><span class="lbl">Gender</span><span class="val" style="color:#a0aec0;">—</span></div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div class="section-heading">Statutory Information</div>
+                <div class="info-row"><span class="lbl">EPF Status</span><span class="val"><span class="badge" style="background:#c6f6d5;color:#276749;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:700;">Enabled</span></span></div>
+                <div class="info-row"><span class="lbl">UAN Number</span><span class="val">101180627567</span></div>
+                <div class="info-row"><span class="lbl">EPF Wage Type</span><span class="val">Restricted PF Wage (Fixed ₹1,800)</span></div>
+                <div class="info-row"><span class="lbl">ESI Status</span><span class="val"><span class="badge" style="background:#f0f0f0;color:#718096;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:700;">Disabled</span> Gross above ₹21,000</span></div>
+                <div class="info-row"><span class="lbl">PT Status</span><span class="val"><span class="badge" style="background:#f0f0f0;color:#718096;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:700;">Disabled</span></span></div>
+                <div class="section-heading">Bank Account</div>
+                <div class="info-row"><span class="lbl">Bank</span><span class="val">—</span></div>
+                <div class="info-row"><span class="lbl">Account Number</span><span class="val" style="color:#a0aec0;">Not configured</span></div>
+                <div class="info-row"><span class="lbl">IFSC Code</span><span class="val" style="color:#a0aec0;">Not configured</span></div>
+                <div class="section-heading">Payment Summary — Jul 2026</div>
+                <div class="row" style="margin:0 -0.35rem;">
+                  <div class="col-6 px-1 mb-2"><div class="ctc-card" style="background:#f0fff4;"><div class="c-num" style="color:#276749;">₹30,200</div><div class="c-lbl" style="color:#276749;">Gross</div></div></div>
+                  <div class="col-6 px-1 mb-2"><div class="ctc-card" style="background:#fff5f5;"><div class="c-num text-danger">₹3,502</div><div class="c-lbl text-danger">Deductions</div></div></div>
+                  <div class="col-6 px-1"><div class="ctc-card" style="background:#ebf8ff;"><div class="c-num text-primary">₹26,698</div><div class="c-lbl" style="color:#2b6cb0;">Net Pay</div></div></div>
+                  <div class="col-6 px-1"><div class="ctc-card" style="background:#f0f4f8;"><div class="c-num" style="color:#553c9a;">₹1,950</div><div class="c-lbl" style="color:#553c9a;">Employer Cost</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SALARY DETAILS ===== -->
+        <div class="tab-pane fade" id="tab-salary">
+          <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3"><div class="ctc-card" style="background:#ebf8ff;"><div class="c-num text-primary">₹4,14,800</div><div class="c-lbl" style="color:#2b6cb0;">Annual CTC</div></div></div>
+            <div class="col-md-3 col-6 mb-3"><div class="ctc-card" style="background:#f0fff4;"><div class="c-num" style="color:#276749;">₹3,62,400</div><div class="c-lbl" style="color:#276749;">Annual Gross</div></div></div>
+            <div class="col-md-3 col-6 mb-3"><div class="ctc-card" style="background:#fff5f5;"><div class="c-num text-danger">₹42,024</div><div class="c-lbl text-danger">Annual Deductions</div></div></div>
+            <div class="col-md-3 col-6 mb-3"><div class="ctc-card" style="background:#f0f4f8;"><div class="c-num" style="color:#553c9a;">₹3,20,376</div><div class="c-lbl" style="color:#553c9a;">Annual Net Pay</div></div></div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;">
+                <div style="padding:0.85rem 1rem;border-bottom:1px solid #f0f4f8;font-size:0.82rem;font-weight:700;color:#2d3748;">Monthly Salary Breakdown</div>
+                <div style="overflow-x:auto;">
+                  <table class="table comp-table" style="margin:0;">
+                    <thead><tr><th>Component</th><th style="width:80px;">Type</th><th class="text-right">Amount</th></tr></thead>
+                    <tbody>
+                      <tr><td>Basic Pay</td><td><span class="badge" style="background:#e6fffa;color:#276749;font-size:0.65rem;padding:1px 5px;font-weight:700;">EARN</span></td><td class="earn-amt">₹15,100</td></tr>
+                      <tr><td>House Rent Allowance</td><td><span class="badge" style="background:#e6fffa;color:#276749;font-size:0.65rem;padding:1px 5px;font-weight:700;">EARN</span></td><td class="earn-amt">₹4,530</td></tr>
+                      <tr><td>Travelling Allowance</td><td><span class="badge" style="background:#e6fffa;color:#276749;font-size:0.65rem;padding:1px 5px;font-weight:700;">EARN</span></td><td class="earn-amt">₹2,000</td></tr>
+                      <tr><td>Other Allowance</td><td><span class="badge" style="background:#e6fffa;color:#276749;font-size:0.65rem;padding:1px 5px;font-weight:700;">EARN</span></td><td class="earn-amt">₹5,720</td></tr>
+                      <tr><td>Conveyance Allowance <span class="fbp-tag">FBP</span><div style="font-size:0.7rem;color:#a0aec0;">Max: ₹1,600</div></td><td><span class="badge" style="background:#e9d8fd;color:#553c9a;font-size:0.65rem;padding:1px 5px;font-weight:700;">FBP</span></td><td class="earn-amt">₹1,600</td></tr>
+                      <tr><td>Uniform Washing Allowance <span class="fbp-tag">FBP</span><div style="font-size:0.7rem;color:#a0aec0;">Max: ₹2,000 · Used: ₹1,250</div></td><td><span class="badge" style="background:#e9d8fd;color:#553c9a;font-size:0.65rem;padding:1px 5px;font-weight:700;">FBP</span></td><td class="earn-amt">₹1,250</td></tr>
+                    </tbody>
+                    <tfoot>
+                      <tr><td colspan="2">Monthly Gross</td><td class="earn-amt" style="font-size:0.95rem;">₹30,200</td></tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;">
+                <div style="padding:0.85rem 1rem;border-bottom:1px solid #f0f4f8;font-size:0.82rem;font-weight:700;color:#2d3748;">Monthly Deductions &amp; Employer Benefits</div>
+                <div style="overflow-x:auto;">
+                  <table class="table comp-table" style="margin:0;">
+                    <thead><tr><th>Component</th><th style="width:80px;">Type</th><th class="text-right">Amount</th></tr></thead>
+                    <tbody>
+                      <tr><td>EPF Contribution (12%)<div style="font-size:0.7rem;color:#a0aec0;">Based on ₹15,000 PF wage</div></td><td><span class="badge" style="background:#fed7d7;color:#9b2c2c;font-size:0.65rem;padding:1px 5px;font-weight:700;">DED</span></td><td class="deduct-amt">₹1,800</td></tr>
+                      <tr><td>Professional Tax</td><td><span class="badge" style="background:#fed7d7;color:#9b2c2c;font-size:0.65rem;padding:1px 5px;font-weight:700;">DED</span></td><td class="deduct-amt">₹208</td></tr>
+                      <tr><td>GTLI Deduction</td><td><span class="badge" style="background:#fed7d7;color:#9b2c2c;font-size:0.65rem;padding:1px 5px;font-weight:700;">DED</span></td><td class="deduct-amt">₹174</td></tr>
+                      <tr><td>Health Insurance Ded</td><td><span class="badge" style="background:#fed7d7;color:#9b2c2c;font-size:0.65rem;padding:1px 5px;font-weight:700;">DED</span></td><td class="deduct-amt">₹1,320</td></tr>
+                      <tr><td>Income Tax (TDS)</td><td><span class="badge" style="background:#fed7d7;color:#9b2c2c;font-size:0.65rem;padding:1px 5px;font-weight:700;">DED</span></td><td class="deduct-amt">₹0</td></tr>
+                    </tbody>
+                    <tfoot>
+                      <tr><td colspan="2">Total Deductions</td><td class="deduct-amt" style="font-size:0.95rem;">₹3,502</td></tr>
+                    </tfoot>
+                  </table>
+                  <div style="padding:0.75rem 0.85rem;background:#f7fafc;border-top:1px solid #e8ecf0;">
+                    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:#a0aec0;font-weight:700;margin-bottom:0.5rem;">Employer Benefits (not deducted from employee)</div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#718096;margin-bottom:0.3rem;"><span>EPF Employer Contribution</span><span style="font-weight:600;color:#2b6cb0;font-variant-numeric:tabular-nums;">₹1,800</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#718096;margin-bottom:0.3rem;"><span>EDLI (0.5%)</span><span style="font-weight:600;color:#2b6cb0;font-variant-numeric:tabular-nums;">₹75</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#718096;"><span>EPF Admin Charges (0.5%)</span><span style="font-weight:600;color:#2b6cb0;font-variant-numeric:tabular-nums;">₹75</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== INVESTMENTS ===== -->
+        <div class="tab-pane fade" id="tab-investments">
+          <div class="row">
+            <div class="col-md-8 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-file-invoice-dollar text-primary mr-2"></i>Investment Declaration — FY 2026-27</div>
+                  <div style="display:flex;gap:0.5rem;">
+                    <span style="font-size:0.72rem;background:#c6f6d5;color:#276749;font-weight:700;padding:2px 8px;border-radius:10px;">New Regime</span>
+                    <button class="btn btn-sm btn-light border"><i class="fa fa-edit mr-1"></i> Edit</button>
+                  </div>
+                </div>
+
+                <div class="section-heading">Housing</div>
+                <div class="inv-field">
+                  <span class="if-lbl">Is employee staying in a rented house?</span>
+                  <span style="font-size:0.82rem;font-weight:600;color:#276749;"><i class="fa fa-check-circle mr-1"></i> Yes</span>
+                </div>
+                <div class="inv-field">
+                  <span class="if-lbl">Rent paid per month</span>
+                  <div class="if-input"><input type="text" value="6,500"><span style="font-size:0.75rem;color:#a0aec0;">/month</span></div>
+                </div>
+                <div class="inv-field">
+                  <span class="if-lbl">Is there a home loan?</span>
+                  <span style="font-size:0.82rem;font-weight:600;color:#718096;"><i class="fa fa-times-circle mr-1"></i> No</span>
+                </div>
+
+                <div class="section-heading">Section 80C Investments (Max ₹1,50,000)</div>
+                <div class="inv-field">
+                  <span class="if-lbl">Life Insurance Premium</span>
+                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                </div>
+                <div class="inv-field">
+                  <span class="if-lbl">PPF Contribution</span>
+                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                </div>
+                <div class="inv-field">
+                  <span class="if-lbl">NSC/ELSS/Mutual Funds</span>
+                  <div class="if-input"><input type="text" value="0"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                </div>
+                <div class="inv-field" style="background:#f7fafc;">
+                  <span class="if-lbl font-weight-700">EPF Employee Contribution (Auto)</span>
+                  <span style="font-size:0.82rem;font-weight:700;color:#2196F3;font-variant-numeric:tabular-nums;">₹21,600 / year</span>
+                </div>
+                <div class="inv-field" style="background:#f7fafc;">
+                  <span class="if-lbl font-weight-700">Total 80C (Max ₹1,50,000)</span>
+                  <span style="font-size:0.82rem;font-weight:700;color:#276749;font-variant-numeric:tabular-nums;">₹21,600 / year</span>
+                </div>
+
+                <div class="section-heading">Section 80D — Health Insurance (Max ₹1,00,000)</div>
+                <div class="inv-field">
+                  <span class="if-lbl">Health Insurance Premium Paid</span>
+                  <div class="if-input"><input type="text" value="15,840"><span style="font-size:0.75rem;color:#a0aec0;">/year</span></div>
+                </div>
+
+                <div class="section-heading">Other Declarations</div>
+                <div class="inv-field">
+                  <span class="if-lbl">Rental income from other property?</span>
+                  <span style="font-size:0.82rem;font-weight:600;color:#718096;"><i class="fa fa-times-circle mr-1"></i> No</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+                <div class="section-heading">TDS Worksheet — May 2026</div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">Annual Gross</span><span class="val">₹3,62,400</span></div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">Std. Deduction</span><span class="val text-danger">- ₹75,000</span></div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">HRA Exemption</span><span class="val text-danger">- ₹0</span></div>
+                <div style="border-top:1px solid #e8ecf0;margin:0.5rem 0;"></div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">Income Chargeable</span><span class="val font-weight-700">₹2,87,400</span></div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">Tax (New Regime)</span><span class="val"><span style="background:#c6f6d5;color:#276749;font-size:0.72rem;font-weight:700;padding:2px 6px;border-radius:4px;">₹0</span> <span style="font-size:0.72rem;color:#a0aec0;">Below ₹4L threshold</span></span></div>
+                <div style="border-top:1px solid #e8ecf0;margin:0.5rem 0;"></div>
+                <div class="info-row"><span class="lbl" style="min-width:160px;">Monthly TDS</span><span class="val font-weight-700 text-primary">₹0</span></div>
+              </div>
+
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div class="section-heading">Tax Regime Comparison</div>
+                <div style="font-size:0.78rem;color:#718096;line-height:1.6;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;"><span>Taxable income</span><span style="font-weight:700;color:#1a202c;">₹2,87,400</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;padding:0.25rem 0.5rem;background:#f0fff4;border-radius:4px;"><span style="font-weight:600;color:#276749;">New Regime</span><span style="font-weight:700;color:#276749;">₹0 tax</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:0.25rem 0.5rem;background:#f7fafc;border-radius:4px;"><span>Old Regime</span><span style="font-weight:700;">₹1,874 tax</span></div>
+                  <div style="font-size:0.7rem;color:#a0aec0;margin-top:0.6rem;"><i class="fa fa-info-circle mr-1"></i> New Regime is optimal for this employee</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== PAYSLIPS ===== -->
+        <div class="tab-pane fade" id="tab-payslips">
+          <div class="row">
+            <div class="col-md-4 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;overflow:hidden;">
+                <div style="padding:0.85rem 1rem;border-bottom:1px solid #f0f4f8;font-size:0.82rem;font-weight:700;color:#2d3748;">FY 2026-27</div>
+                <div class="payslip-row active-slip" onclick="setSlip(this, 'may26')">
+                  <div><div class="slip-month">May 2026</div><div style="font-size:0.72rem;color:#a0aec0;">31 paid days &nbsp;·&nbsp; LOP: 0</div></div>
+                  <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="slip-net">₹26,698</span>
+                    <span class="slip-status slip-paid">Paid</span>
+                  </div>
+                </div>
+                <div class="payslip-row" onclick="setSlip(this, 'apr26')">
+                  <div><div class="slip-month">April 2026</div><div style="font-size:0.72rem;color:#a0aec0;">30 paid days &nbsp;·&nbsp; LOP: 0</div></div>
+                  <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="slip-net">₹26,698</span>
+                    <span class="slip-status slip-paid">Paid</span>
+                  </div>
+                </div>
+                <div class="payslip-row" onclick="setSlip(this, 'mar26')">
+                  <div><div class="slip-month">March 2026</div><div style="font-size:0.72rem;color:#a0aec0;">31 paid days &nbsp;·&nbsp; LOP: 0</div></div>
+                  <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="slip-net">₹26,698</span>
+                    <span class="slip-status slip-paid">Paid</span>
+                  </div>
+                </div>
+                <div class="payslip-row" onclick="setSlip(this, 'feb26')">
+                  <div><div class="slip-month">February 2026</div><div style="font-size:0.72rem;color:#a0aec0;">28 paid days &nbsp;·&nbsp; LOP: 0</div></div>
+                  <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="slip-net">₹26,698</span>
+                    <span class="slip-status slip-paid">Paid</span>
+                  </div>
+                </div>
+                <div class="payslip-row" onclick="setSlip(this, 'jan26')">
+                  <div><div class="slip-month">January 2026</div><div style="font-size:0.72rem;color:#a0aec0;">31 paid days &nbsp;·&nbsp; LOP: 0</div></div>
+                  <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="slip-net">₹26,698</span>
+                    <span class="slip-status slip-paid">Paid</span>
+                  </div>
+                </div>
+                <div style="padding:0.6rem 1rem;border-top:1px solid #f0f4f8;font-size:0.78rem;color:#2196F3;text-align:center;cursor:pointer;">
+                  <i class="fa fa-chevron-down mr-1"></i> Show FY 2025-26
+                </div>
+              </div>
+            </div>
+            <div class="col-md-8 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-file-pdf text-danger mr-2"></i>Payslip — May 2026</div>
+                  <button class="btn btn-sm btn-outline-danger"><i class="fa fa-download mr-1"></i> Download PDF</button>
+                </div>
+                <div class="payslip-preview">
+                  <div class="pp-header">
+                    <div>
+                      <div class="pp-company">DNC CHITS PVT. LTD.</div>
+                      <div style="font-size:0.73rem;color:#718096;">AMBATTUR BRANCH</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-size:0.78rem;font-weight:700;color:#2196F3;">SALARY SLIP</div>
+                      <div style="font-size:0.72rem;color:#718096;">May 2026</div>
+                    </div>
+                  </div>
+                  <div class="row mb-2" style="font-size:0.75rem;">
+                    <div class="col-6"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">Employee Name</span><span class="pp-emp-name">BASKARAN AYYAKKANNU A</span></div>
+                    <div class="col-6"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">Employee ID</span><span class="pp-emp-name">39</span></div>
+                    <div class="col-6 mt-1"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">Designation</span><span>ASST BRANCH HEAD</span></div>
+                    <div class="col-6 mt-1"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">Department</span><span>BUSINESS &amp; COLL.</span></div>
+                    <div class="col-6 mt-1"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">Paid Days</span><span>31</span></div>
+                    <div class="col-6 mt-1"><span class="lbl" style="min-width:100px;display:inline-block;color:#a0aec0;">LOP Days</span><span>0</span></div>
+                  </div>
+                  <div class="row" style="font-size:0.8rem;">
+                    <div class="col-6">
+                      <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#276749;margin-bottom:0.4rem;">Earnings</div>
+                      <div class="pp-line"><span>Basic Pay</span><span>₹15,100</span></div>
+                      <div class="pp-line"><span>HRA</span><span>₹4,530</span></div>
+                      <div class="pp-line"><span>Travelling Allowance</span><span>₹2,000</span></div>
+                      <div class="pp-line"><span>Conveyance (FBP)</span><span>₹1,600</span></div>
+                      <div class="pp-line"><span>Uniform Washing (FBP)</span><span>₹1,250</span></div>
+                      <div class="pp-line"><span>Other Allowance</span><span>₹5,720</span></div>
+                      <div class="pp-subtotal"><span>Gross Earnings</span><span>₹30,200</span></div>
+                    </div>
+                    <div class="col-6">
+                      <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9b2c2c;margin-bottom:0.4rem;">Deductions</div>
+                      <div class="pp-line"><span>EPF Contribution</span><span>₹1,800</span></div>
+                      <div class="pp-line"><span>GTLI Deduction</span><span>₹174</span></div>
+                      <div class="pp-line"><span>Professional Tax</span><span>₹208</span></div>
+                      <div class="pp-line"><span>Health Insurance</span><span>₹1,320</span></div>
+                      <div class="pp-line"><span>Income Tax (TDS)</span><span>₹0</span></div>
+                      <div class="pp-subtotal"><span>Total Deductions</span><span>₹3,502</span></div>
+                      <div style="margin-top:0.4rem;font-size:0.7rem;color:#718096;">
+                        <div class="pp-line"><span>EPF Employer</span><span>₹1,800</span></div>
+                        <div class="pp-line"><span>EDLI</span><span>₹75</span></div>
+                        <div class="pp-line"><span>EPF Admin</span><span>₹75</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pp-netsalary">
+                    <span class="nn-lbl">Net Take-Home Pay</span>
+                    <span class="nn-amt">₹26,698</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== LOANS ===== -->
+        <div class="tab-pane fade" id="tab-loans">
+          <div class="row">
+            <div class="col-md-8 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;"><i class="fa fa-hand-holding-usd text-primary mr-2"></i>Active Loans</div>
+                  <button class="btn btn-sm btn-primary"><i class="fa fa-plus mr-1"></i> New Loan</button>
+                </div>
+
+                <div class="loan-card" style="border-color:#bee3f8;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                      <div class="loan-title">LOAN-00384 &nbsp;<span style="background:#bee3f8;color:#2a69ac;font-size:0.7rem;font-weight:700;padding:1px 6px;border-radius:4px;">Advance Salary</span></div>
+                      <div class="loan-sub">Disbursed: —  ·  0% interest  ·  8 instalments remaining</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Outstanding</div>
+                      <div style="font-size:1.1rem;font-weight:800;color:#e53e3e;font-variant-numeric:tabular-nums;">₹30,000</div>
+                    </div>
+                  </div>
+                  <div class="loan-progress">
+                    <div class="loan-progress-bar" style="width:0%;"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#a0aec0;margin-bottom:0.5rem;">
+                    <span>0% repaid</span><span>₹30,000 remaining</span>
+                  </div>
+                  <div class="loan-stat-row">
+                    <div class="ls-item"><span class="ls-lbl">Principal</span><span class="ls-val">₹30,000</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Repaid</span><span class="ls-val">₹0</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Instalment</span><span class="ls-val">₹3,750 / mo</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Next Due</span><span class="ls-val">05 Aug 2026</span></div>
+                    <div class="ls-item"><span class="ls-lbl">Remaining</span><span class="ls-val">8 months</span></div>
+                  </div>
+                </div>
+
+                <div class="loan-card" style="border-color:#c6f6d5;opacity:0.7;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                      <div class="loan-title">LOAN-00285 &nbsp;<span style="background:#f0f0f0;color:#718096;font-size:0.7rem;font-weight:700;padding:1px 6px;border-radius:4px;">Closed</span></div>
+                      <div class="loan-sub">Personal Loan  ·  0% interest  ·  Closed Jan 2026</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#a0aec0;">Total Paid</div>
+                      <div style="font-size:1.1rem;font-weight:800;color:#276749;font-variant-numeric:tabular-nums;">₹20,000</div>
+                    </div>
+                  </div>
+                  <div class="loan-progress">
+                    <div class="loan-progress-bar done" style="width:100%;"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#a0aec0;">
+                    <span>100% repaid</span><span>Fully closed</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+              <div class="block" style="border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:0;padding:1.25rem 1.5rem;">
+                <div class="section-heading">Loan Summary</div>
+                <div class="info-row"><span class="lbl">Total Active Loans</span><span class="val">1</span></div>
+                <div class="info-row"><span class="lbl">Outstanding Balance</span><span class="val text-danger font-weight-700">₹30,000</span></div>
+                <div class="info-row"><span class="lbl">Next Deduction</span><span class="val">₹3,750 &nbsp;(Aug 2026)</span></div>
+                <div class="info-row"><span class="lbl">Total Closed Loans</span><span class="val">1</span></div>
+                <div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:0.65rem 0.85rem;font-size:0.78rem;color:#742a2a;margin-top:0.75rem;">
+                  <i class="fa fa-info-circle mr-1"></i>
+                  ₹3,750 will be deducted from August 2026 salary automatically.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/oneui.core.min.js"></script>
+<script src="../assets/oneui.app.min.js"></script>
+<script>
+function setSlip(row, id) {
+  document.querySelectorAll('.payslip-row').forEach(function(r){ r.classList.remove('active-slip'); });
+  row.classList.add('active-slip');
+  // In a real app this would load the relevant payslip — in the prototype it just highlights the row
+}
+</script>
+</body>
+</html>
